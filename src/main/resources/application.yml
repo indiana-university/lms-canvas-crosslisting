@@ -1,6 +1,6 @@
 spring:
   application:
-    name: microservices-template
+    name: lms-lti-crosslist
   profiles:
     active: redis
   session:
@@ -23,4 +23,4 @@ spring:
   profiles: redis
   session:
     store-type: redis
-    redis.namespace: microservices-template-${app.version}:session
+    redis.namespace: lms-lti-crosslist-${app.version}:session

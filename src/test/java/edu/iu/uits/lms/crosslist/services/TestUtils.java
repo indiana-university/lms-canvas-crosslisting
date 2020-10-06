@@ -1,4 +1,4 @@
-package edu.iu.uits.lms.microservicestemplate.services;
+package edu.iu.uits.lms.crosslist.services;
 
 public class TestUtils {
     public static String defaultUseragent() {

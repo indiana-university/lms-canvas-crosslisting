@@ -2,7 +2,7 @@ namespace: default
 bootstrapSecret: "properties-2020-09-04"
 
 image:
-  repository: localhost:5000/microservices-template
+  repository: localhost:5000/lms-lti-crosslist
   pullPolicy: Never
   tag: unstable
 

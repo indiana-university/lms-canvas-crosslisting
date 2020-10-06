@@ -10,5 +10,5 @@ env:
 ingress:
   enabled: true
   hosts:
-    - host: "microservices-template.apps.iu.edu"
+    - host: "lms-lti-crosslist.apps.iu.edu"
       paths: []
