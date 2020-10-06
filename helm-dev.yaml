@@ -1,0 +1,23 @@
+namespace: default
+bootstrapSecret: "properties-2020-09-04"
+
+image:
+  repository: localhost:5000/microservices-template
+  pullPolicy: Never
+  tag: unstable
+
+replicaCount: 1
+
+env:
+  JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -Dlogging.level.edu.iu.uits.lms=DEBUG"
+  APP_ENV: dev
+
+service:
+  type: NodePort
+  extraPorts:
+    - port: 5005
+      targetPort: 5005
+      protocol: TCP
+      name: remote-debug
+
+activeProfiles: "none"

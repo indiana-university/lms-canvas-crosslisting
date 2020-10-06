@@ -1,0 +1,30 @@
+nameOverride: microservices-template
+
+namespace: ua-vpit--enterprise-systems--lms
+
+image:
+  repository: registry.docker.iu.edu/lms/microservices-template
+  tag: unstable
+  pullPolicy: Always
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: "0"
+    memory: "0"
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+env:
+  JAVA_TOOL_OPTIONS: "-Dhttp.proxyHost=156.56.18.228 -Dhttp.proxyPort=8080 -Dhttps.proxyHost=156.56.18.228 -Dhttps.proxyPort=8443 -Dhttp.nonProxyHosts='localhost|127.0.0.1|*.iu.edu|*.iupui.edu|*.indiana.edu' -Dlogging.level.edu.iu.uits.lms=DEBUG"
+
+imagePullSecrets:
+  - name: registry-prod
+
+activeProfiles: "redis"
+
+service:
+  type: ClusterIP
+  port: 8080

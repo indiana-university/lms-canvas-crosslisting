@@ -1,0 +1,14 @@
+
+bootstrapSecret: "properties-2020-09-04"
+
+image:
+  tag: stable
+
+env:
+  APP_ENV: prd
+
+ingress:
+  enabled: true
+  hosts:
+    - host: "microservices-template.apps.iu.edu"
+      paths: []

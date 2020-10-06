@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: microservices-template
+  profiles:
+    active: redis
+  session:
+    store-type: none
+#  output:
+#    ansi:
+#      enabled: ALWAYS
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.tokenprovider.url}/.well-known/jwks.json
+quizproctor:
+  version: @app.version@
+  env: ${app.env}
+
+---
+
+spring:
+  profiles: redis
+  session:
+    store-type: redis
+    redis.namespace: microservices-template-${app.version}:session

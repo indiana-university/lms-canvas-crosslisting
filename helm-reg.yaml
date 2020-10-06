@@ -1,0 +1,14 @@
+
+bootstrapSecret: "properties-2020-09-04"
+
+image:
+  tag: unstable-reg
+
+env:
+  APP_ENV: reg
+
+ingress:
+  enabled: true
+  hosts:
+    - host: "microservices-template-reg.apps-test.iu.edu"
+      paths: []

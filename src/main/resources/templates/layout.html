@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title>microservices-template - Home</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link media="all" rel="stylesheet" type="text/css" th:href="@{/app/jsrivet/rivet-bundle.min.css}" />
+    <link media="all" rel="stylesheet" type="text/css" th:href="@{/app/css/microservices-template.css}"/>
+</head>
+<body>
+
+<div layout:fragment="content" class="rvt-container" role="main">
+    Page content goes here
+    <!--
+        add something like this to the child page to complete the page layout
+
+        <div class="rvt-grid">
+            <div class="rvt-grid__item">
+                <span>Grid item</span>
+            </div>
+        </div>
+
+        See https://rivet.uits.iu.edu/components/layout/grid/ for options, depending on what's needed.
+    -->
+
+</div>
+
+
+
+<footer th:unless="${hideFooter}" class="rvt-ts-12 rvt-container rvt-m-top-lg">
+    <div id="footer" th:text="${@serverInfo}"></div>
+</footer>
+
+<script type="text/javascript" th:src="@{/app/jsrivet/rivet-bundle.min.js}"></script>
+<script type="text/javascript" th:src="@{/app/webjars/jquery/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/app/js/microservices-template.js}"></script>
+
+<th:block layout:fragment="script">
+    <!--
+        // load in individual pages javascript
+    -->
+</th:block>
+</body>
+</html>
