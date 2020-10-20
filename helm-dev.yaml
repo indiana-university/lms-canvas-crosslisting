@@ -1,5 +1,5 @@
 namespace: default
-bootstrapSecret: "properties-2020-09-04"
+bootstrapSecret: "properties-2020-10-12"
 
 image:
   repository: localhost:5000/lms-lti-crosslist

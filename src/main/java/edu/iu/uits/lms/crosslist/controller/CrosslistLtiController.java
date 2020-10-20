@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static canvas.helpers.CanvasConstants.ADMIN_ROLE;
+
 @Controller
 @RequestMapping({"/lti"})
 @Slf4j
@@ -31,7 +33,9 @@ public class CrosslistLtiController extends LtiController {
     @Override
     protected String getLaunchUrl(Map<String, String> launchParams) {
         String courseId = launchParams.get(CUSTOM_CANVAS_COURSE_ID);
-        return "/app/index/" + courseId;
+//        return "/app/index/" + courseId;
+        return "/app/loading/" + courseId;
+
     }
 
     @Override
@@ -95,24 +99,12 @@ public class CrosslistLtiController extends LtiController {
      */
     @Override
     protected String returnEquivalentAuthority(List<String> userRoles, List<String> instructorRoles) {
-        for (String instructorRole : instructorRoles) {
-            if (userRoles.contains(instructorRole)) {
-                return LTIConstants.INSTRUCTOR_AUTHORITY;
-            }
+        //Check for admins first
+        if (userRoles.contains(ADMIN_ROLE)) {
+            return LTIConstants.ADMIN_AUTHORITY;
         }
 
-        if (userRoles.contains(CanvasConstants.TA_ROLE)) {
-            return LTIConstants.TA_AUTHORITY;
-        }
-
-        if (userRoles.contains(CanvasConstants.DESIGNER_ROLE)) {
-            return LTIConstants.DESIGNER_AUTHORITY;
-        }
-
-        if (userRoles.contains(CanvasConstants.OBSERVER_ROLE)) {
-            return LTIConstants.OBSERVER_AUTHORITY;
-        }
-
-        return LTIConstants.STUDENT_AUTHORITY;
+        //Then do normal stuff
+        return super.returnEquivalentAuthority(userRoles, instructorRoles);
     }
 }

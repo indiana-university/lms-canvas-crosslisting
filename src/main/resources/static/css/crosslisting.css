@@ -1,0 +1,52 @@
+/* Loading page stuff */
+#load {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 25%;
+    height: 25%;
+    white-space: nowrap;
+}
+
+#loading {
+    display: none;
+}
+
+/* Toggle Color override */
+
+.toggleoverride {
+    color: #000000;
+}
+
+/* Highlights */
+
+.sectionHighlight {
+    animation: fadeIt 3s ease-in;
+}
+
+@keyframes fadeIt {
+    0%    { background-color: #a2b4be; }
+    100%  { background-color: #fafafa; }
+}
+
+/* sets the size of rivet icons */
+.rvt-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Color overrides */
+
+.buttonColorOverride {
+    background-color: #ffffff;
+}
+
+/* Other stuff */
+
+.impersonationBar {
+    background-color: #ffeecd;
+    border-bottom: 0.125rem solid #dddddd;
+}

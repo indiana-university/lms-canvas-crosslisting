@@ -16,7 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/app")
+@RequestMapping("/app2")
 @Slf4j
 public class ToolController extends LtiAuthenticationTokenAwareController {
 
