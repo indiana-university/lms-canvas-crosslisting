@@ -18,7 +18,7 @@
         <docker_repository_name>lms-lti-crosslist</docker_repository_name>
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
-        <lms-canvas-client.version>4.0.12-SNAPSHOT</lms-canvas-client.version>
+        <lms-canvas-client.version>4.0.11-SNAPSHOT</lms-canvas-client.version>
         <lms-iuonly-client.version>4.0.0-SNAPSHOT</lms-iuonly-client.version>
     </properties>
 

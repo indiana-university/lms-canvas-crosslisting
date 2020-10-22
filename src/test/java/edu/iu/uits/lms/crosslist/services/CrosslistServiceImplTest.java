@@ -4,7 +4,7 @@ import canvas.client.generated.api.CoursesApi;
 import canvas.client.generated.model.CanvasTerm;
 import canvas.client.generated.model.Course;
 import canvas.client.generated.model.Section;
-import edu.iu.uits.lms.crosslist.controller.SectionUIDisplay;
+import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;

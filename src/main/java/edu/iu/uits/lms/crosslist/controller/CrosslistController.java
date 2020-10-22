@@ -9,6 +9,10 @@ import canvas.client.generated.model.Section;
 import canvas.client.generated.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
+import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
+import edu.iu.uits.lms.crosslist.model.SectionWrapper;
+import edu.iu.uits.lms.crosslist.model.SubmissionStatus;
 import edu.iu.uits.lms.crosslist.security.CrosslistAuthenticationToken;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.lti.LTIConstants;
@@ -17,7 +21,6 @@ import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
 import iuonly.client.generated.api.FeatureAccessApi;
 import iuonly.client.generated.api.SudsApi;
 import iuonly.client.generated.model.SudsCourse;
-import iuonly.helpers.FeatureAccessConstants;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequestMapping("/app")
 public class CrosslistController extends LtiAuthenticationTokenAwareController {
+
+    private static final String FEATURE_MULTITERM_CROSSLISTING = "multiterm.crosslisting";
 
     @Autowired
     @Qualifier("CrosslistCacheManager")
@@ -121,7 +126,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         model.addAttribute("courseId", currentCourse.getId());
         model.addAttribute("activeTerm", currentCourse.getTerm());
         model.addAttribute("selectableTerms", selectableTerms);
-        model.addAttribute("multiTermEnabled", featureAccessApi.isFeatureEnabledForAccount(FeatureAccessConstants.FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId()));
+        model.addAttribute("multiTermEnabled", featureAccessApi.isFeatureEnabledForAccount(FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId()));
 
         // setting this so doEditConfirmation can use this later and we don't need to look it up again
         token.setData("selectableTerms", selectableTerms);
@@ -202,7 +207,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         // this list will be used for the options in the dropdown
         List<CanvasTerm> selectableTerms = new ArrayList<>();
 
-        if (featureAccessApi.isFeatureEnabledForAccount(FeatureAccessConstants.FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId())) {
+        if (featureAccessApi.isFeatureEnabledForAccount(FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId())) {
             // fill in the selectableTerms list and filter out terms that will be displayed on the screen
             for (Course course : courses) {
                 String courseTermId = course.getEnrollmentTermId();
@@ -475,7 +480,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
 
             log.debug("Crosslisting " + sectionUi.getSectionId() + " into course " + courseId);
 
-            Section section = sectionsApi.crossList(sectionUi.sectionId, courseId);
+            Section section = sectionsApi.crossList(sectionUi.getSectionId(), courseId);
             if (section != null) {
                 log.debug("Crosslisted Section: " + section);
                 hasSuccesses = true;
@@ -487,7 +492,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         for (SectionUIDisplay sectionUi : sectionWrapper.getRemoveList()) {
             log.debug("Decrosslisting " + sectionUi.getSectionId() + " from course " + courseId);
 
-            Section section = sectionsApi.decrossList(sectionUi.sectionId);
+            Section section = sectionsApi.decrossList(sectionUi.getSectionId());
             if (section != null) {
                 log.debug("Decrosslisted Section: " + section);
                 hasSuccesses = true;
@@ -541,7 +546,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         Course currentCourse = getValidatedCourse(token);
         Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
-        boolean featureEnabled = featureAccessApi.isFeatureEnabledForAccount(FeatureAccessConstants.FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId());
+        boolean featureEnabled = featureAccessApi.isFeatureEnabledForAccount(FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId());
         if (featureEnabled) {
             ImpersonationModel impersonationModel = (ImpersonationModel)token.getData().get(CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY);
 

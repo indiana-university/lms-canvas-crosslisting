@@ -7,14 +7,12 @@ import canvas.client.generated.model.Section;
 import canvas.helpers.CanvasDateFormatUtil;
 import canvas.helpers.TermHelper;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
-import edu.iu.uits.lms.crosslist.controller.SectionUIDisplay;
+import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;

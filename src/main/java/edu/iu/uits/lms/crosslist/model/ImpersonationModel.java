@@ -1,4 +1,4 @@
-package edu.iu.uits.lms.crosslist.controller;
+package edu.iu.uits.lms.crosslist.model;
 
 import lombok.Data;
 
