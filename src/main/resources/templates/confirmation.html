@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="utf-8"/>
+    <title>Confirmation - Cross-listing Assistant</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="rvt-grid">
+        <div class="rvt-grid__item">
+            <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
+            <form id="confirmation_form" action="confirmation.html" th:action="@{|/app/${courseId}/confirm|}" method="post">
+                <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
+                <div class="rvt-alert rvt-alert--info rvt-m-bottom-md rvt-m-top-md" role="alertdialog" aria-labelledby="information-alert-title">
+                    <h1 class="rvt-alert__title" id="information-alert-title">Cross-listing Information</h1>
+                    <p id="review" class="rvt-alert__message">
+                        Review the summary on this page to confirm that the <span class="rvt-text-bold">Final List of Cross-listed Sections</span>
+                        is correct. If you are satisfied, click <span class="rvt-text-bold">Submit</span> to complete the request. To add or remove courses,
+                        click <span class="rvt-text-bold">Edit</span> to return to the previous screen.
+                    </p>
+                    <p id="note" class="rvt-alert__message">
+                        <span class="rvt-text-bold">Note</span>: Cross-listing and de-cross-listing should occur before students submit assignments or
+                        receive grades (and ideally before the affected courses are published). If you cross-list or
+                        de-crosslist a section after the term begins, student work and grades will remain in the course
+                        with which the section was originally associated and will no longer be visible to you.
+                    </p>
+                </div>
+                <div th:if="${missingEtextSections}" class="rvt-alert rvt-alert--danger rvt-m-bottom-md rvt-m-top-md" role="alertdialog" aria-labelledby="error-alert-title">
+                    <h1 class="rvt-alert__title" id="error-alert-title">Cross-listing Error</h1>
+                    <p id="error-review" class="rvt-alert__message">
+                        The following section(s) could not be cross-listed because their eText order(s) do not match the
+                        order for the primary section in this site.
+                        <ul>
+                           <div th:each="section : ${missingEtextSections}">
+                             <li th:text="${section}">course_code1</li>
+                           </div>
+                        </ul>
+                    </p>
+                </div>
+
+                <div class="rvt-box">
+                    <div class="rvt-box__body">
+                        <div class="rvt-grid">
+                            <div class="rvt-grid__item-lg">
+                                <h2 class="rvt-ts-26">Final List of Cross-listed Sections</h2>
+                                <p>
+                                <ul class="rvt-plain-list summaryList" id="summaryListFinal">
+                                    <li id="summaryNone" th:unless="${#lists.size(summaryListSections) > 0}">None</li>
+                                    <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${summaryListSections}"
+                                        th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
+                                        <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
+                                        <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                    </li>
+                                </ul>
+                                </p>
+                            </div>
+                            <div class="rvt-grid__item-lg">
+                                <h2 class="rvt-ts-26">Summary of Actions</h2>
+                                <p>
+                                <h3 class="rvt-text-bold">Added</h3>
+                                <ul class="rvt-plain-list summaryList" id="summaryListAdded">
+                                    <li id="addNone" th:unless="${#lists.size(addListSections) > 0}">None</li>
+                                    <li th:id="'add_' + ${section.sectionId}" th:each="section : ${addListSections}"
+                                        th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
+                                        <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
+                                        <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                    </li>
+                                </ul>
+                                </p>
+                                <p>
+                                <h3 class="rvt-text-bold">Removed</h3>
+                                <ul class="rvt-plain-list summaryList" id="summaryListRemoved">
+                                    <li id="removeNone" th:unless="${#lists.size(removeListSections) > 0}">None</li>
+                                    <li th:id="'remove_' + ${section.sectionId}" th:each="section : ${removeListSections}"
+                                        th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
+                                        <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
+                                        <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                    </li>
+                                </ul>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rvt-alert rvt-alert--warning rvt-m-top-sm" role="alertdialog" aria-labelledby="warning-alert-title">
+                    <h1 class="rvt-alert__title" id="warning-alert-title">Review Changes</h1>
+                    <p class="rvt-alert__message">Make sure you understand how the changes will affect grades, assignments, and other areas of your site. Information is provided on this page.</p>
+                </div>
+                <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-vertical-center">
+                    <div id="loading" class="rvt-loader" aria-label="Content loading"></div>
+                    <button id="cancel-button" class="rvt-button rvt-button--secondary" name="action"
+                            th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_CANCEL}">Cancel</button>
+                    <button id="edit-button" class="rvt-button rvt-button--secondary" name="action"
+                            th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_EDIT}">Edit</button>
+                    <button id="submit-button" th:if="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button" name="action"
+                            th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}" disabled="disabled" aria-disabled="true">Submit</button>
+                    <button id="submit-button" th:unless="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button" name="action"
+                            th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

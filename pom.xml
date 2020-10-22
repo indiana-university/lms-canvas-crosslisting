@@ -9,7 +9,7 @@
     <parent>
         <artifactId>lms2Wow</artifactId>
         <groupId>edu.iu.uits.lms</groupId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
         <relativePath />
     </parent>
 
@@ -17,9 +17,20 @@
         <app.version>${project.version}</app.version>
         <docker_repository_name>lms-lti-crosslist</docker_repository_name>
         <docker_tag>stable</docker_tag>
+        <helm_service_name>lms-lti-crosslist</helm_service_name>
+        <lms-canvas-client.version>4.0.11-SNAPSHOT</lms-canvas-client.version>
+        <lms-iuonly-client.version>4.0.0-SNAPSHOT</lms-iuonly-client.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -43,6 +54,10 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity5</artifactId>
+        </dependency>
+        <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
         </dependency>
@@ -63,7 +78,12 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-client</artifactId>
-            <version>4.0.9</version>
+            <version>${lms-canvas-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.iu.uits.lms</groupId>
+            <artifactId>lms-iuonly-client</artifactId>
+            <version>${lms-iuonly-client.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
@@ -233,6 +253,20 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>helm-deploy</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="utf-8" />
+    <title>Cross-listing Assistant - Loading</title>
+    <meta http-equiv="refresh" th:content="|0; url=@{|/app/${courseId}/main|}|" />
+</head>
+<body>
+<div layout:fragment="content">
+    <div id="load" class="rvt-flex rvt-justify-center">
+        <div class="rvt-loader rvt-loader--lg" aria-label="Content loading"></div><span class="rvt-ts-md rvt-m-left-sm">Loading...</span>
+    </div>
+</div>
+</body>
+</html>

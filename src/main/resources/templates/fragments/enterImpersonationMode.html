@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en-US" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title></title>
+</head>
+<body>
+
+<div th:fragment="enterImpersonationMode">
+    <div class="rvt-flex rvt-justify-space-between">
+        <h1 class="rvt-ts-32">Cross-listing Assistant</h1>
+        <!-- Add logic to this next block if it should display, adminMode and not impersonating yet -->
+        <div class="rvt-flex rvt-items-center" th:if="${impersonationModel.username == null}" sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
+            <button type="button" class="rvt-button rvt-button--secondary rvt-m-left-sm" data-modal-trigger="impersonateModal">Impersonate User</button>
+        </div>
+    </div>
+
+    <!-- possibly add some admin mode logic to the modal, too, to prevent users from "hacking" their way into it -->
+    <!-- not sure if this not being rendered will make the js explode -->
+    <div class="rvt-modal"
+         id="impersonateModal"
+         role="dialog"
+         aria-labelledby="impersonateModalTitle"
+         aria-hidden="true"
+         tabindex=-1
+         data-modal-dialog="true"
+         sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
+        <div class="rvt-modal__inner">
+            <header class="rvt-modal__header">
+                <h1 class="rvt-modal__title" id="impersonateModalTitle">Impersonate User</h1>
+            </header>
+            <form th:object="${impersonationModel}" th:action="@{|/app/${courseId}/impersonate|}" method="post">
+                <div class="rvt-modal__body">
+                    <label for="impersonateDropdown">Impersonate:</label>
+                    <select id="impersonateDropdown" class="rvt-width-sm rvt-m-bottom-sm" th:field="*{username}">
+                        <option value="">Select user...</option>
+                        <option th:each="instructor : ${instructors}" th:value="${instructor.loginId}" th:text="${instructor.loginId}">instructor</option>
+                    </select>
+                    <span class="rvt-ts-14 rvt-text-bold rvt-m-top-sm">Display options:</span>
+                    <fieldset>
+                        <legend class="sr-only">Impersonation checkbox options</legend>
+                        <ul class="rvt-plain-list">
+                            <li>
+                                <input type="checkbox" id="alreadyCrosslisted" name="includeCrosslistedSections" value="true"
+                                       th:checked="${impersonationModel.includeCrosslistedSections}">
+                                <label for="alreadyCrosslisted">Include already cross-listed sections</label>
+                            </li>
+                            <li>
+                                <input type="checkbox" id="nonSis" name="includeNonSisSections" value="true"
+                                       th:checked="${impersonationModel.includeNonSisSections}">
+                                <label for="nonSis">Include non-SIS sections</label>
+                            </li>
+                            <li>
+                                <input type="checkbox" id="sisSectionsInParentWithCrosslistSections"
+                                       name="includeSisSectionsInParentWithCrosslistSections" value="true"
+                                       th:checked="${impersonationModel.includeSisSectionsInParentWithCrosslistSections}">
+                                <label for="sisSectionsInParentWithCrosslistSections">Include SIS sections in parent courses containing crosslisted sections</label>
+                            </li>
+                        </ul>
+                    </fieldset>
+                </div>
+                <div class="rvt-modal__controls">
+                    <button id="modal-cancel" type="button" class="rvt-button rvt-button--secondary" data-modal-close="impersonateModal">Cancel</button>
+                    <button id="modal-submit" class="rvt-button" disabled="disabled" aria-disabled="true"
+                            name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_IMPERSONATE}">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
