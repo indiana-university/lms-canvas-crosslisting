@@ -1,5 +1,5 @@
 
-bootstrapSecret: "properties-2020-09-04"
+bootstrapSecret: "properties-2020-10-12"
 
 image:
   tag: stable
