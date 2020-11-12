@@ -1,6 +1,5 @@
 package edu.iu.uits.lms.crosslist.controller;
 
-import canvas.helpers.CanvasConstants;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.LtiController;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
@@ -15,7 +14,6 @@ import org.tsugi.basiclti.BasicLTIConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +31,6 @@ public class CrosslistLtiController extends LtiController {
     @Override
     protected String getLaunchUrl(Map<String, String> launchParams) {
         String courseId = launchParams.get(CUSTOM_CANVAS_COURSE_ID);
-//        return "/app/index/" + courseId;
         return "/app/loading/" + courseId;
 
     }
@@ -62,16 +59,8 @@ public class CrosslistLtiController extends LtiController {
         log.debug("LTI equivalent authority: " + authority);
 
         String userId = launchParams.get(CUSTOM_CANVAS_USER_LOGIN_ID);
-        String userEmail = launchParams.get(BasicLTIConstants.LIS_PERSON_CONTACT_EMAIL_PRIMARY);
-        String userSisId = launchParams.get(BasicLTIConstants.LIS_PERSON_SOURCEDID);
         String systemId = launchParams.get(BasicLTIConstants.TOOL_CONSUMER_INSTANCE_GUID);
         String courseId = launchParams.get(CUSTOM_CANVAS_COURSE_ID);
-        String courseTitle = launchParams.get(BasicLTIConstants.CONTEXT_TITLE);
-
-        HttpSession session = request.getSession();
-//        session.setAttribute(Constants.COURSE_TITLE_KEY, courseTitle);
-//        session.setAttribute(Constants.USER_EMAIL_KEY, userEmail);
-//        session.setAttribute(Constants.USER_SIS_ID_KEY, userSisId);
 
         LtiAuthenticationToken token = new LtiAuthenticationToken(userId,
                 courseId, systemId, AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, authority), getToolContext());
@@ -80,7 +69,7 @@ public class CrosslistLtiController extends LtiController {
 
     @Override
     protected String getToolContext() {
-        return "lms_lti_quizproctor";
+        return "lms_lti_crosslist";
     }
 
     @Override

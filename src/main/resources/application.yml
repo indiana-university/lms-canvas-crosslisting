@@ -13,7 +13,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${oauth.tokenprovider.url}/.well-known/jwks.json
-quizproctor:
+lms-lti-crosslist:
   version: @app.version@
   env: ${app.env}
 
