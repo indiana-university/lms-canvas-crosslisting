@@ -15,7 +15,7 @@ public class SecurityConfig {
 
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER - 4)
-    public static class QuizProctorWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+    public static class CrosslistWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -47,7 +47,7 @@ public class SecurityConfig {
 
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER - 3)
-    public static class QuizProctorRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public static class CrosslistRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
@@ -66,7 +66,7 @@ public class SecurityConfig {
 
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER - 2)
-    public static class QuizProctorCatchAllSecurityConfig extends WebSecurityConfigurerAdapter {
+    public static class CrosslistCatchAllSecurityConfig extends WebSecurityConfigurerAdapter {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
