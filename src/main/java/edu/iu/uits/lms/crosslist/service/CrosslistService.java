@@ -5,7 +5,6 @@ import canvas.client.generated.model.CanvasTerm;
 import canvas.client.generated.model.Course;
 import canvas.client.generated.model.Section;
 import canvas.helpers.CanvasDateFormatUtil;
-import canvas.helpers.TermHelper;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import lombok.Data;
@@ -235,25 +234,8 @@ public class CrosslistService {
       return sectionsMap;
    }
 
-   // set this here since it will be used in multiple places
-   private Comparator<CanvasTerm> termStartDateComparator = (ct1, ct2) -> {
-      if (TermHelper.getStartDate(ct1) == null && TermHelper.getStartDate(ct2) == null) {
-         return 0;
-      } else if (TermHelper.getStartDate(ct1) == null && TermHelper.getStartDate(ct2) != null) {
-         return 1;
-      } else if (TermHelper.getStartDate(ct1) != null && TermHelper.getStartDate(ct2) == null) {
-         return -1;
-      } else if (TermHelper.getStartDate(ct1).before(TermHelper.getStartDate(ct2))) {
-         return 1;
-      } else if (TermHelper.getStartDate(ct1).after(TermHelper.getStartDate(ct2))) {
-         return -1;
-      } else {
-         return 0;
-      }
-   };
-
    public Comparator<CanvasTerm> getTermStartDateComparator() {
-      return termStartDateComparator;
+      return new CanvasTermComparator();
    }
 
    // Don't change this cache key unless you also change how evict works in the CrosslistController
