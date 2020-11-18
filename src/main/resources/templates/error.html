@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<body>
+<div layout:fragment="content">
+    <div class="rvt-container" role="main">
+        <h1 class="rvt-ts-26">An application error has occured</h1>
+        <div th:if="${message != null and #strings.length(message) > 0}">
+            <p id="errorMessage" th:text="${message}">Error message</p>
+        </div>
+        <div th:unless="${message != null and #strings.length(message) > 0}">
+            <p id="errorMessage">An error has occured. It is possible that your session with the crosslisting tool has timed out. To access the tool, reload this page or relaunch the tool from Canvas.</p>
+        </div>
+        <div class="rvt-collapsible rvt-collapsible--panel rvt-m-top-xs">
+            <h3 class="rvt-collapsible__title">
+                <button id="stackTrace-label" data-collapsible="stackTrace" aria-expanded="false">
+                    <svg role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                        <path fill="currentColor" d="M5.5,15a1,1,0,0,1-.77-1.64L9.2,8,4.73,2.64A1,1,0,0,1,6.27,1.36L11.13,7.2a1.25,1.25,0,0,1,0,1.61L6.27,14.64A1,1,0,0,1,5.5,15ZM9.6,8.48h0Zm0-1h0Z"></path>
+                    </svg>
+                    <span>Stack trace</span>
+                </button>
+            </h3>
+            <div class="rvt-collapsible__content rvt-p-top-sm" id="stackTrace" aria-hidden="true" aria-labelledby="stackTrace-label">
+                <pre th:text="${error}"> ERROR! </pre>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script type="text/javascript" th:src="@{/app/jsrivet/rivet-collapsible.min.js}"></script>
+    <script type="text/javascript">Collapsible.init();</script>
+</th:block>
+</body>
+</html>

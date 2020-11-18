@@ -28,6 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,10 +81,13 @@ public class AppLaunchSecurityTest {
       SecurityContextHolder.getContext().setAuthentication(token);
 
       //This is a secured endpoint and should not not allow access without authn
-      mvc.perform(get("/app/1234/main")
+      ResultActions mockMvcAction = mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isForbidden());
+            .contentType(MediaType.APPLICATION_JSON));
+
+      mockMvcAction.andExpect(status().isOk());
+      mockMvcAction.andExpect(MockMvcResultMatchers.view().name ("error"));
+      mockMvcAction.andExpect(MockMvcResultMatchers.model().attributeExists("error"));
    }
 
    @Test
