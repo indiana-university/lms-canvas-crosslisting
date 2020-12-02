@@ -1,5 +1,9 @@
 
-bootstrapSecret: "properties-2020-10-12"
+projectedSecret:
+  - secret:
+      name: "properties-2020-11-30"
+  - secret:
+      name: "lms-security-properties-20201014"
 
 image:
   tag: stable
