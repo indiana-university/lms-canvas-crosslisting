@@ -3,11 +3,6 @@ package edu.iu.uits.lms.crosslist.security;
 public interface CrosslistAuthenticationToken {
 
     /**
-     * Ley used to get the course specific session
-     */
-    String COURSE_SESSION_KEY = "crosslist_course_session";
-
-    /**
      * Key used to get the course out of the data map
      */
     String COURSE_KEY = "course";

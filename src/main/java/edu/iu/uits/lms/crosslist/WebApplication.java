@@ -5,8 +5,9 @@ import edu.iu.uits.lms.common.samesite.EnableCookieFilter;
 import edu.iu.uits.lms.common.server.GitRepositoryState;
 import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.common.server.ServerUtils;
-import edu.iu.uits.lms.lti.config.EnableLtiClient;
+import edu.iu.uits.lms.common.session.EnableCourseSessionService;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
+import edu.iu.uits.lms.lti.config.EnableLtiClient;
 import edu.iu.uits.lms.redis.config.EnableRedisConfiguration;
 import iuonly.config.EnableIuOnlyClient;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import java.util.Date;
 @EnableCanvasClient
 @EnableIuOnlyClient
 @EnableConfigurationProperties(GitRepositoryState.class)
+@EnableCourseSessionService(sessionKey = "crosslist_course_session")
 public class WebApplication {
 
     @Autowired
