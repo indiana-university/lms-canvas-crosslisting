@@ -85,7 +85,7 @@ public class AppLaunchSecurityTest {
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON));
 
-      mockMvcAction.andExpect(status().isOk());
+      mockMvcAction.andExpect(status().isInternalServerError());
       mockMvcAction.andExpect(MockMvcResultMatchers.view().name ("error"));
       mockMvcAction.andExpect(MockMvcResultMatchers.model().attributeExists("error"));
    }
