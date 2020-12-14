@@ -88,7 +88,7 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>common-configuration</artifactId>
-            <version>4.0.11-SNAPSHOT</version>
+            <version>4.0.11</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
