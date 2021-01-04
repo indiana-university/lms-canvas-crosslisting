@@ -9,7 +9,7 @@
     <parent>
         <artifactId>lms2Wow</artifactId>
         <groupId>edu.iu.uits.lms</groupId>
-        <version>4.0.7</version>
+        <version>4.0.9</version>
         <relativePath />
     </parent>
 
@@ -18,8 +18,8 @@
         <docker_repository_name>lms-lti-crosslist</docker_repository_name>
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
-        <lms-canvas-client.version>4.0.15</lms-canvas-client.version>
-        <lms-iuonly-client.version>4.0.0</lms-iuonly-client.version>
+        <lms-canvas-client.version>4.0.17</lms-canvas-client.version>
+        <lms-iuonly-client.version>4.0.2</lms-iuonly-client.version>
     </properties>
 
     <dependencies>
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>common-configuration</artifactId>
-            <version>4.0.9</version>
+            <version>4.0.11</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
