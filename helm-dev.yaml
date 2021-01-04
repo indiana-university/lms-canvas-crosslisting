@@ -21,5 +21,7 @@ service:
       name: remote-debug
 
 activeProfiles: "none"
+# to test with redis comment out activeProfiles above (will inherit from helm-common.yaml
+# and comment out @EnableCookieFilter(ignoredRequestPatterns = {"/rest/**"}) from WebApplication.java
 
 developmentMode: true

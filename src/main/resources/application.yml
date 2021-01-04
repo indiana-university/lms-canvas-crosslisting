@@ -17,6 +17,14 @@ lms-lti-crosslist:
   version: @app.version@
   env: ${app.env}
 
+server:
+  error:
+    whitelabel:
+      enabled: false
+  servlet:
+    session:
+      timeout: 30m
+
 ---
 
 spring:
