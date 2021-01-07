@@ -595,6 +595,10 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
             // convert to a map for easier lookup later
             Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
+            // add fake canvas term for unavailable list in the UI
+            CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
+            termMap.put(alienSectionBlockedFakeCanvasTerm.getId(), alienSectionBlockedFakeCanvasTerm);
+
             // rebuild the json feed into the Map
             for (SectionUIDisplay sectionUI : sectionList) {
                 List<SectionUIDisplay> uiSection = new ArrayList<>();
