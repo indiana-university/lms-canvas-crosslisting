@@ -19,7 +19,7 @@
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
         <lms-canvas-client.version>4.0.17</lms-canvas-client.version>
-        <lms-iuonly-client.version>4.0.2</lms-iuonly-client.version>
+        <lms-iuonly-client.version>4.0.3</lms-iuonly-client.version>
     </properties>
 
     <dependencies>
