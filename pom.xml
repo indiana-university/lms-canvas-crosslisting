@@ -24,7 +24,7 @@
         <jquery.version>3.5.1</jquery.version>
         <lms-canvas-client.version>4.0.20</lms-canvas-client.version>
         <lms-iuonly-client.version>4.0.4</lms-iuonly-client.version>
-        <lms-lti-web.version>4.0.18</lms-lti-web.version>
+        <lms-lti-web.version>4.0.19-SNAPSHOT</lms-lti-web.version>
         <lms-rivet.version>4.1.7.2_2</lms-rivet.version>
         <nimbus-jose-jwt.version>9.4.2</nimbus-jose-jwt.version>
         <redis-config.version>4.0.4</redis-config.version>
