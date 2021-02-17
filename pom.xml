@@ -9,28 +9,32 @@
     <parent>
         <artifactId>lms2Wow</artifactId>
         <groupId>edu.iu.uits.lms</groupId>
-        <version>4.0.10</version>
+        <version>4.0.11</version>
         <relativePath />
     </parent>
 
     <properties>
         <app.version>${project.version}</app.version>
-        <common-configuration.version>4.0.12</common-configuration.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-io.version>2.7</commons-io.version>
+        <commons-io.version>2.8.0</commons-io.version>
         <docker_repository_name>lms-lti-crosslist</docker_repository_name>
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
         <jquery.version>3.5.1</jquery.version>
-        <lms-canvas-client.version>4.0.20</lms-canvas-client.version>
-        <lms-iuonly-client.version>4.0.4</lms-iuonly-client.version>
-        <lms-lti-web.version>4.0.19-SNAPSHOT</lms-lti-web.version>
-        <lms-rivet.version>4.1.7.2_2</lms-rivet.version>
-        <nimbus-jose-jwt.version>9.4.2</nimbus-jose-jwt.version>
-        <redis-config.version>4.0.4</redis-config.version>
-        <spring-security-oauth2-autoconfigure.version>2.3.8.RELEASE</spring-security-oauth2-autoconfigure.version>
+        <lms-bom.version>4.0.0</lms-bom.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>edu.iu.uits.lms</groupId>
+                <artifactId>lms-bom</artifactId>
+                <version>${lms-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>javax.cache</groupId>
@@ -77,27 +81,26 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>${spring-security-oauth2-autoconfigure.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-lti-web</artifactId>
-            <version>${lms-lti-web.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-client</artifactId>
-            <version>${lms-canvas-client.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-iuonly-client</artifactId>
-            <version>${lms-iuonly-client.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>common-configuration</artifactId>
-            <version>${common-configuration.version}</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
@@ -111,7 +114,6 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-rivet</artifactId>
-            <version>${lms-rivet.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -120,12 +122,6 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>redis-config</artifactId>
-            <version>${redis-config.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>${nimbus-jose-jwt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

@@ -1,18 +1,23 @@
 package edu.iu.uits.lms.crosslist.service;
 
+import canvas.client.generated.api.AccountsApi;
 import canvas.client.generated.api.CoursesApi;
+import canvas.client.generated.model.Account;
 import canvas.client.generated.model.CanvasTerm;
 import canvas.client.generated.model.Course;
 import canvas.client.generated.model.Section;
 import canvas.helpers.CanvasDateFormatUtil;
+import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
+import iuonly.client.generated.api.FeatureAccessApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,6 +36,15 @@ public class CrosslistService {
 
    @Autowired
    private CoursesApi coursesApi = null;
+
+   @Autowired
+   private CourseSessionService courseSessionService = null;
+
+   @Autowired
+   private FeatureAccessApi featureAccessApi = null;
+
+   @Autowired
+   private AccountsApi accountsApi = null;
 
    // self reference so can use the cache for getCourseSections() from within this service
    @Autowired
@@ -249,6 +263,20 @@ public class CrosslistService {
          return sectionName;
       }
       return MessageFormat.format("{0} ({1})", sectionName, courseCode);
+   }
+
+   public boolean checkForFeature(HttpSession session, Course currentCourse, String feature) {
+      Boolean fromSession = courseSessionService.getAttributeFromSession(session, currentCourse.getId(), feature, Boolean.class);
+      if (fromSession == null) {
+         List<Account> parentAccounts = accountsApi.getParentAccounts(currentCourse.getAccountId());
+         List<String> parentAccountIds = parentAccounts.stream().map(Account::getId).collect(Collectors.toList());
+         final Boolean featureEnabledForAccount = featureAccessApi.isFeatureEnabledForAccount(feature, currentCourse.getAccountId(), parentAccountIds);
+         courseSessionService.addAttributeToSession(session, currentCourse.getId(), feature, featureEnabledForAccount.booleanValue());
+         return featureEnabledForAccount;
+      } else {
+         return fromSession;
+      }
+
    }
 
    /**
