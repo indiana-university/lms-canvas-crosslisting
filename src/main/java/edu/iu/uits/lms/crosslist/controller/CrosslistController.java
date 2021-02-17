@@ -133,7 +133,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         model.addAttribute("courseId", currentCourse.getId());
         model.addAttribute("activeTerm", currentCourse.getTerm());
         model.addAttribute("selectableTerms", selectableTerms);
-        model.addAttribute("multiTermEnabled", featureAccessApi.isFeatureEnabledForAccount(FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId()));
+        model.addAttribute("multiTermEnabled", crosslistService.checkForFeature(session, currentCourse, FEATURE_MULTITERM_CROSSLISTING));
 
         // setting this so doEditConfirmation can use this later and we don't need to look it up again
 //        token.setData("selectableTerms", selectableTerms);
@@ -216,7 +216,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         // this list will be used for the options in the dropdown
         List<CanvasTerm> selectableTerms = new ArrayList<>();
 
-        if (featureAccessApi.isFeatureEnabledForAccount(FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId())) {
+        if (crosslistService.checkForFeature(session, currentCourse, FEATURE_MULTITERM_CROSSLISTING)) {
             // fill in the selectableTerms list and filter out terms that will be displayed on the screen
             for (Course course : courses) {
                 String courseTermId = course.getEnrollmentTermId();
@@ -563,7 +563,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         Course currentCourse = getValidatedCourse(token, session);
         Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
-        boolean featureEnabled = featureAccessApi.isFeatureEnabledForAccount(FEATURE_MULTITERM_CROSSLISTING, currentCourse.getAccountId());
+        boolean featureEnabled = crosslistService.checkForFeature(session, currentCourse, FEATURE_MULTITERM_CROSSLISTING);
         if (featureEnabled) {
             ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
                   CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
