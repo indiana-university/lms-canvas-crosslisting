@@ -635,10 +635,10 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
                     final String impersonationUsername = impersonationModel.getUsername();
                     final String courseCode = course.getCourseCode();
 
-                    // As the instructor (NOT using the tool's impersonination)
+                    // As the instructor (NOT using the tool's impersonation)
                     if ((impersonationUsername == null && section.getSisCourseId() != null && section.getSisSectionId() != null)
                             ||
-                    // using the tool's impersonination
+                    // using the tool's impersonation
                         (impersonationUsername != null && courseCode != null)) {
                         uiSection.add(new SectionUIDisplay(termId, section.getId(),
                               crosslistService.buildSectionDisplayName(section.getName(), courseCode, impersonationModel.getUsername() != null),
