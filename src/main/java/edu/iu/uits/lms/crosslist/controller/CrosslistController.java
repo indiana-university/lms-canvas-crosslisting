@@ -632,8 +632,14 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
                 List<Section> listOfSections = coursesApi.getCourseSections(course.getId());
 
                 for (Section section : listOfSections) {
-                    if (section.getSisCourseId()!=null) {
-                        String courseCode = course.getCourseCode();
+                    final String impersonationUsername = impersonationModel.getUsername();
+                    final String courseCode = course.getCourseCode();
+
+                    // As the instructor (NOT using the tool's impersonation)
+                    if ((impersonationUsername == null && section.getSisCourseId() != null && section.getSisSectionId() != null)
+                            ||
+                    // using the tool's impersonation
+                        (impersonationUsername != null && courseCode != null)) {
                         uiSection.add(new SectionUIDisplay(termId, section.getId(),
                               crosslistService.buildSectionDisplayName(section.getName(), courseCode, impersonationModel.getUsername() != null),
                               false, false, false));
