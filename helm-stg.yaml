@@ -1,5 +1,7 @@
 
-bootstrapSecret: "properties-2020-09-04"
+projectedSecret:
+  - secret:
+      name: "properties-2020-11-30"
 
 image:
   tag: unstable-stg
@@ -10,5 +12,5 @@ env:
 ingress:
   enabled: true
   hosts:
-    - host: "microservices-template-stg.apps-test.iu.edu"
+    - host: "lms-lti-crosslist-stg.apps-test.iu.edu"
       paths: []

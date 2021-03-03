@@ -1,5 +1,9 @@
 
-bootstrapSecret: "properties-2020-09-04"
+projectedSecret:
+  - secret:
+      name: "properties-2020-11-30"
+  - secret:
+      name: "lms-security-properties-20201014"
 
 image:
   tag: stable
@@ -10,5 +14,5 @@ env:
 ingress:
   enabled: true
   hosts:
-    - host: "microservices-template.apps.iu.edu"
+    - host: "lms-lti-crosslist.apps.iu.edu"
       paths: []

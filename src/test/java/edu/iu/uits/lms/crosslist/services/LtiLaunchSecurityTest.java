@@ -1,7 +1,7 @@
-package edu.iu.uits.lms.microservicestemplate.services;
+package edu.iu.uits.lms.crosslist.services;
 
-import edu.iu.uits.lms.microservicestemplate.config.ToolConfig;
-import edu.iu.uits.lms.microservicestemplate.controller.MicroservicesTemplateLtiController;
+import edu.iu.uits.lms.crosslist.config.ToolConfig;
+import edu.iu.uits.lms.crosslist.controller.CrosslistLtiController;
 import lti.client.generated.api.LtiAuthApi;
 import lti.client.generated.api.LtiPropsApi;
 import lti.client.generated.model.LmsLtiAuthz;
@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(MicroservicesTemplateLtiController.class)
+@WebMvcTest(CrosslistLtiController.class)
 @Import(ToolConfig.class)
 @ActiveProfiles("none")
 public class LtiLaunchSecurityTest {

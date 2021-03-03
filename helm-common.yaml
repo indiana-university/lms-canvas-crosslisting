@@ -1,9 +1,9 @@
-nameOverride: microservices-template
+nameOverride: lms-lti-crosslist
 
 namespace: ua-vpit--enterprise-systems--lms
 
 image:
-  repository: registry.docker.iu.edu/lms/microservices-template
+  repository: registry.docker.iu.edu/lms/lms-lti-crosslist
   tag: unstable
   pullPolicy: Always
 

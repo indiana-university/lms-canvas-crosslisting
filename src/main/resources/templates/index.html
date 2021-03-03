@@ -1,13 +1,101 @@
-<!DOCTYPE HTML>
-<html lang="en-US"
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+      layout:decorate="~{layout}"
+      lang="en-US">
 <head>
-    <title>microservices-template - Main Menu</title>
+    <meta charset="utf-8"/>
+    <title th:text="${pageTitle}">Cross-listing Assistant</title>
 </head>
+
 <body>
-    <div layout:fragment="content">
-        Hello, world!
+<div layout:fragment="content">
+    <div class="rvt-grid">
+        <div class="rvt-grid__item">
+            <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
+            <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-bottom-md" th:classappend="${submissionStatus.statusClass}" role="alertdialog">
+                <p class="rvt-alert__message" th:utext="${submissionStatus.statusMessage}">status message goes here</p>
+                <button type="button" class="rvt-alert__dismiss" data-alert-close>
+                    <span class="v-hide">Dismiss this alert</span>
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                        <path fill="currentColor" d="M9.41,8l5.29-5.29a1,1,0,0,0-1.41-1.41L8,6.59,2.71,1.29A1,1,0,0,0,1.29,2.71L6.59,8,1.29,13.29a1,1,0,1,0,1.41,1.41L8,9.41l5.29,5.29a1,1,0,0,0,1.41-1.41Z"/>
+                    </svg>
+                </button>
+            </div>
+            <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
+            <p id="instructions" class="rvt-ts-18">
+                Use this tool to cross-list or de-cross-list sections with this course. Only officially provisioned sections
+                are available for cross-listing. For assistance, contact the
+                <a href="https://kb.iu.edu/d/abxl" target="_blank">UITS Support Center</a>.
+            </p>
+
+            <form id="main" action="index.html" th:action="@{|/app/${courseId}/continue|}" method="post">
+                <div class="rvt-box">
+                    <div class="rvt-box__body">
+                        <div class="rvt-grid">
+                            <div class="rvt-grid__item-4-md-up">
+                                <h2 class="rvt-ts-26">Cross-listed Sections</h2>
+                                <p>
+                                <ul class="rvt-plain-list summaryList">
+                                    <!-- if there's nothing to display here, the following line is the default -->
+                                    <li id="summaryNone" th:if="${checkedSectionCount == 0}">None</li>
+                                    <div class="content-one" th:if="${!sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
+                                        <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:if="${section.currentlyChecked}"
+                                            th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
+                                            <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
+                                            <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                        </li>
+                                    </div>
+                                </ul>
+                                </p>
+                            </div>
+                            <div class="rvt-grid__item-8-md-up bp_checkboxes">
+                                <h2 class="rvt-ts-26">Available Sections</h2>
+                                <p id="selectSections">Select the sections you wish to add (cross-list) and uncheck the sections you wish to remove (de-cross-list).</p>
+                                <div id="dataDiv">
+                                    <div th:insert="fragments/termData :: termData"></div>
+                                </div>
+                                <div id="loading">
+                                    <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
+                                </div>
+                                <div class="rvt-p-top-sm" th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections &&
+                                                                   hasAlienBlocked != null && hasAlienBlocked}">
+                                    <h2 class="rvt-ts-26">Unavailable Sections</h2>
+                                    <p id="unavailableSections">The section(s) below cannot be crosslisted until the crosslisted sections in their parent course(s) have been removed.</p>
+                                    <div id="dataDiv2">
+                                        <div th:insert="fragments/termData :: termDataUnavailable"></div>
+                                    </div>
+                                </div>
+                                <div th:if="${multiTermEnabled}">
+                                    <p id="addTerms">Add a term to choose additional sections:</p>
+                                    <select id="addTerm" class="rvt-width-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadTerm/|}">
+                                        <option>- Select a Term -</option>
+                                        <option th:each="term : ${selectableTerms}" th:value="${term.id}" th:text="${term.name}">TERMNAME ####</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="etext-message" th:if="${etextMessage}" class="rvt-alert rvt-alert--warning rvt-m-top-sm" role="alertdialog" aria-labelledby="etext-message-title">
+                    <h1 id="etext-message-title" class="rvt-alert__title">IU eText Reminder</h1>
+                    <p id="etext-message-text" th:text="${etextMessage}" class="rvt-alert__message" />
+                </div>
+
+                <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-vertical-center">
+                    <button id="reset-button" class="rvt-button rvt-button--secondary" type="reset" th:unless="${editMode}">Reset</button>
+                    <button id="reset-button" class="rvt-button rvt-button--secondary" type="submit" name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_CANCEL}"
+                            th:if="${editMode}">Reset</button>
+                    <button id="continue-button" class="rvt-button" type="submit" th:unless="${editMode}" disabled="disabled" aria-disabled="true">Continue</button>
+                    <button id="continue-button" class="rvt-button" type="submit" th:if="${editMode}">Continue</button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
+<th:block layout:fragment="script">
+
+</th:block>
 </body>
 </html>

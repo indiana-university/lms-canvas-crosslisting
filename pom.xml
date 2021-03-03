@@ -1,25 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>microservices-template</artifactId>
+    <artifactId>lms-lti-crosslist</artifactId>
     <packaging>jar</packaging>
-    <name>microservices-template</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <name>lms-lti-crosslist</name>
+    <version>4.0.1</version>
 
     <parent>
         <artifactId>lms2Wow</artifactId>
         <groupId>edu.iu.uits.lms</groupId>
-        <version>4.0.6</version>
+        <version>4.0.11</version>
         <relativePath />
     </parent>
 
     <properties>
         <app.version>${project.version}</app.version>
-        <docker_repository_name>microservices-template</docker_repository_name>
+        <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-io.version>2.8.0</commons-io.version>
+        <docker_repository_name>lms-lti-crosslist</docker_repository_name>
         <docker_tag>stable</docker_tag>
+        <helm_service_name>lms-lti-crosslist</helm_service_name>
+        <jquery.version>3.5.1</jquery.version>
+        <lms-bom.version>4.0.1</lms-bom.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>edu.iu.uits.lms</groupId>
+                <artifactId>lms-bom</artifactId>
+                <version>${lms-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -43,6 +67,10 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity5</artifactId>
+        </dependency>
+        <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
         </dependency>
@@ -53,22 +81,26 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.3.1.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-lti-web</artifactId>
-            <version>4.0.9</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-client</artifactId>
-            <version>4.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.iu.uits.lms</groupId>
+            <artifactId>lms-iuonly-client</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>common-configuration</artifactId>
-            <version>4.0.8</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
@@ -77,12 +109,11 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
-            <version>3.4.1</version>
+            <version>${jquery.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-rivet</artifactId>
-            <version>4.1.7.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -91,29 +122,23 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>redis-config</artifactId>
-            <version>4.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>8.19</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
+            <version>${commons-collections4.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.7</version>
+            <version>${commons-io.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
 
     <build>
-        <finalName>microservices-template</finalName>
+        <finalName>lms-lti-crosslist</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -153,7 +178,7 @@
                         <param>postgresql9</param>
                     </dialects>
                     <packages>
-                        <param>edu.iu.uits.lms.microservices-template</param>
+                        <param>edu.iu.uits.lms.crosslist</param>
                     </packages>
 <!--                    <persistenceXml>src/main/webapp/META-INF/canvasnotifier-persistence.xml</persistenceXml>-->
                 </configuration>
@@ -233,6 +258,20 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>helm-deploy</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

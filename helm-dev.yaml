@@ -1,8 +1,8 @@
 namespace: default
-bootstrapSecret: "properties-2020-09-04"
+bootstrapSecret: "properties-2020-11-30"
 
 image:
-  repository: localhost:5000/microservices-template
+  repository: localhost:5000/lms-lti-crosslist
   pullPolicy: Never
   tag: unstable
 
@@ -21,3 +21,7 @@ service:
       name: remote-debug
 
 activeProfiles: "none"
+# to test with redis comment out activeProfiles above (will inherit from helm-common.yaml
+# and comment out @EnableCookieFilter(ignoredRequestPatterns = {"/rest/**"}) from WebApplication.java
+
+developmentMode: true
