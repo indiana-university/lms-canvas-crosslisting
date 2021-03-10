@@ -7,19 +7,18 @@
 <body>
 <div th:fragment="termData">
     <h3 th:text="${activeTerm.name}">(Active Term Name)</h3>
-    <ul class="sectionsList rvt-plain-list">
-        <p th:if="${#lists.isEmpty(activeCourseSections)}">None available</p>
-        <div th:unless="${#lists.isEmpty(activeCourseSections)}">
-            <li th:id="'row_' + ${section.sectionId}" th:each="section : ${activeCourseSections}" th:class="${section.getAppropriateCssClass()}"
-                th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
-                <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
-                <label th:for="${section.sectionId}" class="rvt-m-right-sm">
-                    <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                    <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
-                </label>
-            </li>
-        </div>
+    <p th:if="${#lists.isEmpty(activeCourseSections)}">None available</p>
+    <ul th:unless="${#lists.isEmpty(activeCourseSections)}" class="sectionsList rvt-plain-list">
+        <li th:id="'row_' + ${section.sectionId}" th:each="section : ${activeCourseSections}" th:class="${section.getAppropriateCssClass()}"
+            th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
+            <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
+            <label th:for="${section.sectionId}" class="rvt-m-right-sm">
+                <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
+                <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+            </label>
+        </li>
     </ul>
+    
     <div th:if="${multiTermEnabled}">
         <!-- loop through the map to get the semester name and loop through the list of sections -->
         <div th:unless="${sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">

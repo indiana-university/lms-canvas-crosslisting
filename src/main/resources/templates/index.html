@@ -36,17 +36,15 @@
                             <div class="rvt-grid__item-4-md-up">
                                 <h2 class="rvt-ts-26">Cross-listed Sections</h2>
                                 <p>
-                                <ul class="rvt-plain-list summaryList">
                                     <!-- if there's nothing to display here, the following line is the default -->
-                                    <li id="summaryNone" th:if="${checkedSectionCount == 0}">None</li>
-                                    <div class="content-one" th:if="${!sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
+                                    <p id="summaryNone" th:if="${checkedSectionCount == 0}">None</p>
+                                    <ul class="rvt-plain-list summaryList" th:if="${!sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
                                         <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:if="${section.currentlyChecked}"
                                             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
                                             <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
                                             <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
                                         </li>
-                                    </div>
-                                </ul>
+                                    </ul>
                                 </p>
                             </div>
                             <div class="rvt-grid__item-8-md-up bp_checkboxes">
@@ -67,7 +65,7 @@
                                     </div>
                                 </div>
                                 <div th:if="${multiTermEnabled}">
-                                    <p id="addTerms">Add a term to choose additional sections:</p>
+                                    <label for="addTerm" id="addTerms">Add a term to choose additional sections:</label>
                                     <select id="addTerm" class="rvt-width-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadTerm/|}">
                                         <option>- Select a Term -</option>
                                         <option th:each="term : ${selectableTerms}" th:value="${term.id}" th:text="${term.name}">TERMNAME ####</option>
