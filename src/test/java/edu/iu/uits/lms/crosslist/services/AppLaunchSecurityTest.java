@@ -7,6 +7,7 @@ import canvas.client.generated.model.Course;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
@@ -31,6 +32,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,7 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ToolConfig.class)
 @ActiveProfiles("none")
 public class AppLaunchSecurityTest {
-
    @Autowired
    private MockMvc mvc;
 
@@ -78,15 +82,18 @@ public class AppLaunchSecurityTest {
             AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
             "unit_test");
 
+      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
+
       SecurityContextHolder.getContext().setAuthentication(token);
 
       //This is a secured endpoint and should not not allow access without authn
       ResultActions mockMvcAction = mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON)
+            .sessionAttr(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList));
 
       mockMvcAction.andExpect(status().isInternalServerError());
-      mockMvcAction.andExpect(MockMvcResultMatchers.view().name ("ltiglobalerror"));
+      mockMvcAction.andExpect(MockMvcResultMatchers.view().name ("error"));
       mockMvcAction.andExpect(MockMvcResultMatchers.model().attributeExists("error"));
    }
 
@@ -96,6 +103,8 @@ public class AppLaunchSecurityTest {
             "1234", "systemId",
             AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, LTIConstants.INSTRUCTOR_AUTHORITY),
               "unit_test");
+
+      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
@@ -114,7 +123,8 @@ public class AppLaunchSecurityTest {
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .sessionAttr(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList))
             .andExpect(status().isOk());
    }
 
@@ -133,12 +143,16 @@ public class AppLaunchSecurityTest {
             "1234", "systemId",
             AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
             "unit_test");
+
+      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
+
       SecurityContextHolder.getContext().setAuthentication(token);
 
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/asdf/foobar")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .sessionAttr(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList))
             .andExpect(status().isNotFound());
    }
 }
