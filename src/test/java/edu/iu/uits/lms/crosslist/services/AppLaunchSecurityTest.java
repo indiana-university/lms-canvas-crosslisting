@@ -4,6 +4,7 @@ import canvas.client.generated.api.CoursesApi;
 import canvas.client.generated.api.TermsApi;
 import canvas.client.generated.model.CanvasTerm;
 import canvas.client.generated.model.Course;
+import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.lti.LTIConstants;
@@ -32,10 +33,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,6 +58,9 @@ public class AppLaunchSecurityTest {
 
    @MockBean
    private CrosslistService crosslistService;
+
+   @MockBean
+   private CourseSessionService courseSessionService;
 
    @MockBean
    private CoursesApi coursesApi;
@@ -120,11 +128,12 @@ public class AppLaunchSecurityTest {
 
       Mockito.when(coursesApi.getCourse("1234")).thenReturn(course);
 
+      Mockito.when((courseSessionService).getAttributeFromSession(any(HttpSession.class), eq(null), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY), eq(List.class))).thenReturn(tokenList);
+
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON)
-            .sessionAttr(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
    }
 
