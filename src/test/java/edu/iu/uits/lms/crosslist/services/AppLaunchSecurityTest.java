@@ -154,14 +154,14 @@ public class AppLaunchSecurityTest {
             "unit_test");
 
       List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
+      Mockito.when((courseSessionService).getAttributeFromSession(any(HttpSession.class), eq(null), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY), eq(List.class))).thenReturn(tokenList);
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/asdf/foobar")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON)
-            .sessionAttr(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
    }
 }
