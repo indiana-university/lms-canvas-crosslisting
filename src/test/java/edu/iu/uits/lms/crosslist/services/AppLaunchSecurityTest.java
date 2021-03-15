@@ -97,8 +97,7 @@ public class AppLaunchSecurityTest {
       //This is a secured endpoint and should not not allow access without authn
       ResultActions mockMvcAction = mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON)
-            .sessionAttr(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList));
+            .contentType(MediaType.APPLICATION_JSON));
 
       mockMvcAction.andExpect(status().isInternalServerError());
       mockMvcAction.andExpect(MockMvcResultMatchers.view().name ("error"));
