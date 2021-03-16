@@ -71,7 +71,12 @@ $(document).ready(function(){
         var collapsedTermsList = getCollapsedTermsString();
 
         // load the new term data
-        $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList});
+        $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList},
+        function(response, status, xhr) {
+            if (xhr.status == 403) {
+                window.location.replace("error");
+            }
+        });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
         $("#loading").show();
