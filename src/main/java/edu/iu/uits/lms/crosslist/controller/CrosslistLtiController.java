@@ -75,13 +75,11 @@ public class CrosslistLtiController extends LtiController {
         LtiAuthenticationToken token = new LtiAuthenticationToken(userId,
                 courseId, systemId, AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, authority), getToolContext());
 
+        LtiAuthenticationToken sessionToken = courseSessionService.getAttributeFromSession(request.getSession(), courseId, LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY, LtiAuthenticationToken.class);
 
-        List<LtiAuthenticationToken> tokenList = (List<LtiAuthenticationToken>) courseSessionService.getAttributeFromSession(request.getSession(), null, LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, List.class);
-        tokenList = tokenList != null ? tokenList : new ArrayList<LtiAuthenticationToken>();
-
-        tokenList.add(token);
-
-        courseSessionService.addAttributeToSession(request.getSession(), null, LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY, tokenList);
+        if (sessionToken == null) {
+            courseSessionService.addAttributeToSession(request.getSession(), courseId, LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY, token);
+        }
 
         SecurityContextHolder.getContext().setAuthentication(token);
     }

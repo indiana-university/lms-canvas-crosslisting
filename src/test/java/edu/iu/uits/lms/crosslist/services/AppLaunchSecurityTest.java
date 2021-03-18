@@ -111,8 +111,6 @@ public class AppLaunchSecurityTest {
             AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, LTIConstants.INSTRUCTOR_AUTHORITY),
               "unit_test");
 
-      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
-
       SecurityContextHolder.getContext().setAuthentication(token);
 
       CanvasTerm canvasTerm = new CanvasTerm();
@@ -127,7 +125,7 @@ public class AppLaunchSecurityTest {
 
       Mockito.when(coursesApi.getCourse("1234")).thenReturn(course);
 
-      Mockito.when((courseSessionService).getAttributeFromSession(any(HttpSession.class), eq(null), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY), eq(List.class))).thenReturn(tokenList);
+      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(course.getId()), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
 
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/app/1234/main")
@@ -147,13 +145,14 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void randomUrlWithAuth() throws Exception {
+      String courseId = "1234";
+
       LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            "1234", "systemId",
+            courseId, "systemId",
             AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
             "unit_test");
 
-      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
-      Mockito.when((courseSessionService).getAttributeFromSession(any(HttpSession.class), eq(null), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_LIST_KEY), eq(List.class))).thenReturn(tokenList);
+      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(courseId), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
