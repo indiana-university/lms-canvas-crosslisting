@@ -21,7 +21,7 @@
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
         <jquery.version>3.5.1</jquery.version>
-        <lms-bom.version>4.0.1</lms-bom.version>
+        <lms-bom.version>4.0.3</lms-bom.version>
     </properties>
 
     <dependencyManagement>
