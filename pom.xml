@@ -4,7 +4,7 @@
     <artifactId>lms-lti-crosslist</artifactId>
     <packaging>jar</packaging>
     <name>lms-lti-crosslist</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2-SNAPSHOT</version>
 
     <parent>
         <artifactId>lms2Wow</artifactId>
