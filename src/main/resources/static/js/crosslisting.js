@@ -1,3 +1,4 @@
+var summaryNone = "<li id='summaryNone'>None</li>";
 var summary = $('.summaryList').clone(true);
 var checkedValue;
 
@@ -27,8 +28,6 @@ $(document).ready(function(){
                 li.find('input[type=checkbox]').removeAttr('checked');
             }
         });
-        
-        $('#summaryNone').show();
 
         //Disable submit button
         var submitButton = $('#continue-button');
@@ -204,13 +203,13 @@ function checkboxEventRegistration() {
             }
 
             $('.summaryList').append(newLi);
-            $('#summaryNone').hide();
+            $('.summaryList #summaryNone').remove();
 
             li.addClass("currently_checked");
         } else {
             $('.summaryList #summary_'+currentBox.attr('id')).remove();
             if ($('.summaryList li').length == 0) {
-                $('#summaryNone').show();
+                $('.summaryList').append(summaryNone);
             }
 
             li.removeClass("currently_checked");

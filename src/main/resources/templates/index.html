@@ -36,15 +36,17 @@
                             <div class="rvt-grid__item-4-md-up">
                                 <h2 class="rvt-ts-26">Cross-listed Sections</h2>
                                 <p>
+                                <ul class="rvt-plain-list summaryList">
                                     <!-- if there's nothing to display here, the following line is the default -->
-                                    <p id="summaryNone" th:if="${checkedSectionCount == 0}">None</p>
-                                    <ul class="rvt-plain-list summaryList" th:if="${!sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
+                                    <li id="summaryNone" th:if="${checkedSectionCount == 0}">None</li>
+                                    <th:block th:if="${!sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
                                         <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:if="${section.currentlyChecked}"
                                             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
                                             <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
                                             <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
                                         </li>
-                                    </ul>
+                                    </th:block>
+                                </ul>
                                 </p>
                             </div>
                             <div class="rvt-grid__item-8-md-up bp_checkboxes">
