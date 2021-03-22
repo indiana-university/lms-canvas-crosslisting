@@ -71,7 +71,11 @@ $(document).ready(function(){
         var collapsedTermsList = getCollapsedTermsString();
 
         // load the new term data
-        $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList});
+        $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList}, function() {
+            // move focus to the first checkbox in the newly added section
+            var newDiv = $('#' + termId);
+            newDiv.find("input[type='checkbox']:first").focus();
+        });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
         $("#loading").show();
@@ -108,10 +112,6 @@ $(document).ready(function(){
         $("#loading").hide();
         $("#addTerm").attr("disabled", false);
         $("#addTerm").attr("aria-disabled", false);
-        
-        // move focus to the first checkbox in the newly added section
-        var newDiv = $("div.toggler").last();
-        newDiv.find("input[type='checkbox']:first").focus();
 
         // Canvas has a message listener to resize the iframe
         parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
