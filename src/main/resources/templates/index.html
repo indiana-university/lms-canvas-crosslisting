@@ -67,6 +67,7 @@
                                     </div>
                                 </div>
                                 <div th:if="${multiTermEnabled}">
+                                    <h2 class="sr-only">View additional terms</h2>
                                     <label for="addTerm" id="addTerms">Add a term to choose additional sections:</label>
                                     <select id="addTerm" class="rvt-width-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadTerm/|}">
                                         <option>- Select a Term -</option>

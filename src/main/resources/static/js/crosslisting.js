@@ -108,6 +108,10 @@ $(document).ready(function(){
         $("#loading").hide();
         $("#addTerm").attr("disabled", false);
         $("#addTerm").attr("aria-disabled", false);
+        
+        // move focus to the first checkbox in the newly added section
+        var newDiv = $("div.toggler").last();
+        newDiv.find("input[type='checkbox']:first").focus();
 
         // Canvas has a message listener to resize the iframe
         parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
