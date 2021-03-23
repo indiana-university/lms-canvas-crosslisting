@@ -76,6 +76,10 @@ $(document).ready(function(){
             if (xhr.status == 403) {
                 window.location.replace("error");
             }
+            
+            // move focus to the first checkbox in the newly added section
+            var newDiv = $('#' + termId);
+            newDiv.find("input[type='checkbox']:first").focus();
         });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
