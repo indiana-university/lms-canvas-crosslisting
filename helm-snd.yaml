@@ -1,7 +1,7 @@
 
 projectedSecret:
   - secret:
-      name: "properties-2020-11-30"
+      name: "properties-2021-03-18"
 
 image:
   tag: unstable-snd
