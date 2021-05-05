@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title></title>
+    <title>Impersonate User</title>
 </head>
 <body>
 
@@ -27,9 +27,7 @@
          data-modal-dialog="true"
          sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
         <div class="rvt-modal__inner">
-            <header class="rvt-modal__header">
-                <h1 class="rvt-modal__title" id="impersonateModalTitle">Impersonate User</h1>
-            </header>
+            <h1 class="rvt-modal__title rvt-modal__header" id="impersonateModalTitle">Impersonate User</h1>
             <form th:object="${impersonationModel}" th:action="@{|/app/${courseId}/impersonate|}" method="post">
                 <div class="rvt-modal__body">
                     <label for="impersonateDropdown">Impersonate:</label>

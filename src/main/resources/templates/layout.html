@@ -13,7 +13,8 @@
 <body>
 
 <!-- only display this if it's in adminMode and they have entered impersonation mode -->
-<div class="rvt-flex rvt-justify-end rvt-items-baseline rvt-p-all-xs impersonationBar"
+<div role="region" class="rvt-flex rvt-justify-end rvt-items-baseline rvt-p-all-xs impersonationBar"
+     th:attr="aria-label=|Currently impersonating ${impersonationModel.username}|"
      th:if="${impersonationModel != null && impersonationModel.username != null}"
      sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
     <span class="rvt-badge rvt-badge--warning rvt-m-right-sm">

@@ -50,3 +50,13 @@
     background-color: #ffeecd;
     border-bottom: 0.125rem solid #dddddd;
 }
+
+#addTerms {
+    font-weight: inherit;
+    font-size: inherit;
+    margin: 1.0rem 0 1.2rem;
+}
+
+.toggler {
+    margin-bottom: 0.5rem;
+}

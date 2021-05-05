@@ -1,19 +1,26 @@
 package edu.iu.uits.lms.crosslist.controller;
 
+import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
 import edu.iu.uits.lms.lti.controller.LtiController;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tsugi.basiclti.BasicLTIConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +32,9 @@ import static canvas.helpers.CanvasConstants.ADMIN_ROLE;
 @RequestMapping({"/lti"})
 @Slf4j
 public class CrosslistLtiController extends LtiController {
+
+    @Autowired
+    private CourseSessionService courseSessionService = null;
 
     private boolean openLaunchUrlInNewWindow = false;
 
@@ -64,6 +74,13 @@ public class CrosslistLtiController extends LtiController {
 
         LtiAuthenticationToken token = new LtiAuthenticationToken(userId,
                 courseId, systemId, AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, authority), getToolContext());
+
+        LtiAuthenticationToken sessionToken = courseSessionService.getAttributeFromSession(request.getSession(), courseId, LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY, LtiAuthenticationToken.class);
+
+        if (sessionToken == null) {
+            courseSessionService.addAttributeToSession(request.getSession(), courseId, LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY, token);
+        }
+
         SecurityContextHolder.getContext().setAuthentication(token);
     }
 
