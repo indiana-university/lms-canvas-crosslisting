@@ -24,13 +24,15 @@
         <div th:unless="${sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
             <div th:if="${mapInstance.key.name != 'ALIEN_SECTION_BLOCKED'}">
                 <div class="rvt-display-flex toggleGroup rvt-m-top-sm" data-toggle="collapse" th:data-target="|#${mapInstance.key.id}|" th:if="${mapInstance.key.id!=activeTerm.id}">
-                    <button type="button" class="rvt-button rvt-button--plain rvt-button--small toggleoverride">
-                        <svg class="rvt-icon">
-                            <use th:attr="'xlink:href'=@{/app/jsrivet/rvt-icons.svg#rvt-icon-chevron-down}"></use>
-                            <span class="rvt-sr-only">For collapsing term checkboxes</span>
-                        </svg>
-                    </button>
-                    <h3 th:text="${mapInstance.key.name}">FALL 2017</h3>
+                    <h3>
+                        <button type="button" class="rvt-button rvt-button--plain rvt-button--small toggleoverride"
+                                 th:attr="aria-controls=${mapInstance.key.id}" aria-expanded="true">
+                            <svg class="rvt-icon">
+                                <use th:attr="'xlink:href'=@{/app/jsrivet/rvt-icons.svg#rvt-icon-chevron-down}"></use>
+                            </svg>
+                            <span class="rvt-m-left-xs rvt-text-regular" th:text="${mapInstance.key.name}"></span>
+                        </button>
+                    </h3>
                 </div>
                 <div th:id="${mapInstance.key.id}" class="toggler">
                     <ul class="sectionsList rvt-plain-list" th:if="${mapInstance.key.id!=activeTerm.id}">
