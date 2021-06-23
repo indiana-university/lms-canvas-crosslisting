@@ -31,6 +31,7 @@
                                 <use th:attr="'xlink:href'=@{/app/jsrivet/rvt-icons.svg#rvt-icon-chevron-down}"></use>
                             </svg>
                             <span class="rvt-m-left-xs rvt-text-regular" th:text="${mapInstance.key.name}"></span>
+                            <span th:if="${#lists.isEmpty(mapInstance.value)}" class="sr-only">No sections available</span>
                         </button>
                     </h3>
                 </div>
