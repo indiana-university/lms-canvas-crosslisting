@@ -77,9 +77,8 @@ $(document).ready(function(){
                 window.location.replace("error");
             }
             
-            // move focus to the first checkbox in the newly added section
-            var newDiv = $('#' + termId);
-            newDiv.find("input[type='checkbox']:first").focus();
+            // move focus to the newly added section
+            $("button[aria-controls=" + termId + "]").focus();
         });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
@@ -99,16 +98,20 @@ $(document).ready(function(){
 
     // this controls the toggle dropdowns
     $(document).on('click', '.toggleGroup', function() {
+        
+        $(this).parent().find('.toggler:first').slideToggle("slow");
+        
         if ($(this).find("use:first").attr("xlink:href").includes("rvt-icon-chevron-down")) {
+            $(this).find("button:first").attr("aria-expanded","false");
             $(this).find("use:first").attr("xlink:href", function(index, old) {
                 return old.replace("rvt-icon-chevron-down", "rvt-icon-chevron-right");
             });
         } else {
+            $(this).find("button:first").attr("aria-expanded","true");
             $(this).find("use:first").attr("xlink:href", function(index, old) {
                 return old.replace("rvt-icon-chevron-right", "rvt-icon-chevron-down");
             });
         }
-        $(this).parent().find('.toggler:first').slideToggle("slow");
     });
 
     $(document).ajaxComplete(function() {
