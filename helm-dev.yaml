@@ -1,5 +1,5 @@
 namespace: default
-bootstrapSecret: "properties-2021-03-18"
+bootstrapSecret: "properties-2021-06-07"
 
 image:
   repository: localhost:5000/lms-lti-crosslist
@@ -20,8 +20,11 @@ service:
       protocol: TCP
       name: remote-debug
 
-activeProfiles: "none"
+activeProfiles: "dev"
 # to test with redis comment out activeProfiles above (will inherit from helm-common.yaml
 # and comment out @EnableCookieFilter(ignoredRequestPatterns = {"/rest/**"}) from WebApplication.java
 
 developmentMode: true
+
+vault:
+  enabled: false
