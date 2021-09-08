@@ -1,7 +1,7 @@
 
 projectedSecret:
   - secret:
-      name: "properties-2021-03-18"
+      name: "properties-2021-06-07"
 
 image:
   tag: unstable-reg
@@ -14,3 +14,9 @@ ingress:
   hosts:
     - host: "lms-lti-crosslist-reg.apps-test.iu.edu"
       paths: []
+
+activeProfiles: "reg"
+
+serviceAccountName: lms-lti-crosslist-reg
+
+cluster: es-test
