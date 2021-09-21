@@ -1,7 +1,7 @@
 
 projectedSecret:
   - secret:
-      name: "properties-2021-03-18"
+      name: "properties-2021-06-07"
   - secret:
       name: "lms-security-properties-20201014"
 
@@ -16,3 +16,9 @@ ingress:
   hosts:
     - host: "lms-lti-crosslist.apps.iu.edu"
       paths: []
+
+activeProfiles: "redis,prd"
+
+serviceAccountName: lms-lti-crosslist-prd
+
+cluster: es-prod
