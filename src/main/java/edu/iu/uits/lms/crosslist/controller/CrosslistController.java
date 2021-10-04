@@ -277,7 +277,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
               crosslistService.buildSectionsMap(courses, termMap, termStartDateComparator, currentCourse,
                     impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                    impersonationModel.getUsername() != null, true);
+                    impersonationModel.getUsername() != null, false);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
             if (canvasTermKey.getName().equals(crosslistService.ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING)) {
