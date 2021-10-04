@@ -77,11 +77,11 @@ public class CrosslistService {
          // TODO this makes page performance slow, especially with a lot of courses/sections
          List<Section> listOfSections = null;
 
-//         if (useCachedSections) {
+         if (useCachedSections) {
             listOfSections = self.getCourseSections(course.getId());
-//         } else {
-//            listOfSections = this.getCourseSections(course.getId());
-//         }
+         } else {
+            listOfSections = this.getCourseSections(course.getId());
+         }
 
          //Check to see if there are multiple sections, cause we might want to ignore the one that matches the original parent course
          boolean courseHasMultipleSections = listOfSections != null && listOfSections.size() > 1;
