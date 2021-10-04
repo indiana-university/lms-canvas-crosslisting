@@ -130,7 +130,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse1_false_false_true() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(0), false, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(0), false, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -148,7 +148,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse1_false_false_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(0), false, false, false);
+            crosslistService.getTermStartDateComparator(), courseList1.get(0), false, false, false, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -166,7 +166,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse1_true_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(0), true, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(0), true, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -189,7 +189,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse1_false_true() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(0), false, true, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(0), false, true, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -232,7 +232,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse2_false_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(1), false, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(1), false, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -273,7 +273,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse2_true_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(1), true, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(1), true, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -325,7 +325,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse2_false_true() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(1), false, true, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(1), false, true, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -372,7 +372,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse3_false_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(2), false, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(2), false, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -389,7 +389,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse3_true_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(2), true, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(2), true, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -411,7 +411,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse3_false_true() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(2), false, true, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(2), false, true, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -453,7 +453,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse4_false_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(3), false, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(3), false, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -474,7 +474,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse4_true_false() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(3), true, false, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(3), true, false, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -500,7 +500,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void testCourse4_false_true() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
-            crosslistService.getTermStartDateComparator(), courseList1.get(3), false, true, true);
+            crosslistService.getTermStartDateComparator(), courseList1.get(3), false, true, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
@@ -546,7 +546,7 @@ public class CrosslistServiceImplTest {
    @Test
    public void unavailable_true_true_true() {
       Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(unavailableList, termMap,
-              crosslistService.getTermStartDateComparator(), unavailableList.get(0), true, true, true);
+              crosslistService.getTermStartDateComparator(), unavailableList.get(0), true, true, true, true);
 
       Assert.assertNotNull(sectionMap);
       log.debug("sectionMap: ", sectionMap);
