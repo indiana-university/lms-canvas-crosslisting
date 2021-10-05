@@ -642,7 +642,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
             // get the CanvasTerm object for use later for the map
             CanvasTerm termForModel = terms.stream().filter(term -> term.getId().equals(termId)).findFirst().orElse(null);
 
-            // add bujsiness logic's sectinos tot he come in to method json ones
+            // add business logic sections to the come in to method json ones
             rebuiltTermMap.put(termForModel, sections.get(termForModel));
 
             // Make sure the sections are still sorted
