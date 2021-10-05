@@ -56,7 +56,8 @@ public class CrosslistService {
                                                                    Course currentCourse,
                                                                    boolean includeNonSisSections,
                                                                    boolean includeSectionsCrosslistedElsewhere,
-                                                                   boolean impersonationMode) {
+                                                                   boolean impersonationMode,
+                                                                   boolean useCachedSections) {
       // This map will contain the CanvasTerm for the key and a List<SectionUIDisplay> for the value
       // The TreeMap with comparator will add new entries to the map in a sorted order
       Map<CanvasTerm,List<SectionUIDisplay>> sectionsMap = new TreeMap<>(termStartDateComparator);
@@ -74,7 +75,13 @@ public class CrosslistService {
 
          // get the sections to the course
          // TODO this makes page performance slow, especially with a lot of courses/sections
-         List<Section> listOfSections = self.getCourseSections(course.getId());
+         List<Section> listOfSections = null;
+
+         if (useCachedSections) {
+            listOfSections = self.getCourseSections(course.getId());
+         } else {
+            listOfSections = this.getCourseSections(course.getId());
+         }
 
          //Check to see if there are multiple sections, cause we might want to ignore the one that matches the original parent course
          boolean courseHasMultipleSections = listOfSections != null && listOfSections.size() > 1;
@@ -253,7 +260,8 @@ public class CrosslistService {
    }
 
    // Don't change this cache key unless you also change how evict works in the CrosslistController
-   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
+   // TODO - Commented out until a cluster cache solution can be found
+   // @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
       return coursesApi.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
    }
@@ -295,7 +303,7 @@ public class CrosslistService {
       return alienSectionBlockedFakeCanvasTerm;
    }
 
-   @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
+//   @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
    public List<Section> getCourseSections(String courseId) {
       return coursesApi.getCourseSections(courseId);
    }

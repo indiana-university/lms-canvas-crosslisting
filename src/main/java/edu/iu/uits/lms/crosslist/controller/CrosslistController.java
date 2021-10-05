@@ -232,33 +232,35 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
 // =============================================================================
             // thread start
 
-            Runnable termLoadRunnable = () ->
-            {
-                // preload cache for all future terms
-                final long threadId = Thread.currentThread().getId();
+// TODO - Commented out until a cluster cache solution can be found
 
-                final int MAX_BACKGROUND_LOADS = 1;
-                int count = 0;
-                for (CanvasTerm canvasTerm : selectableTerms) {
-                    if (++count <= MAX_BACKGROUND_LOADS &&
-                            termStartDateComparator.compare(canvasTerm, currentTerm) < 1) {
-                        log.debug("***** thread(" + threadId + ") for termId = " + canvasTerm.getId() + " " + canvasTerm.getName());
-                        List<Course> threadUserCourses = crosslistService.getCoursesTaughtBy(currentUserId, false);
-                        threadUserCourses = threadUserCourses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(canvasTerm.getId())).collect(Collectors.toList());
-
-                        for (Course course : threadUserCourses) {
-                            // don't store the return value because we don't care.
-                            // We just want the cache to fill up
-                            crosslistService.getCourseSections(course.getId());
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                log.debug("*** thread(" + threadId + ") work done");
-            };
-
-            new Thread(termLoadRunnable).start();
+//            Runnable termLoadRunnable = () ->
+//            {
+//                // preload cache for all future terms
+//                final long threadId = Thread.currentThread().getId();
+//
+//                final int MAX_BACKGROUND_LOADS = 1;
+//                int count = 0;
+//                for (CanvasTerm canvasTerm : selectableTerms) {
+//                    if (++count <= MAX_BACKGROUND_LOADS &&
+//                            termStartDateComparator.compare(canvasTerm, currentTerm) < 1) {
+//                        log.debug("***** thread(" + threadId + ") for termId = " + canvasTerm.getId() + " " + canvasTerm.getName());
+//                        List<Course> threadUserCourses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+//                        threadUserCourses = threadUserCourses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(canvasTerm.getId())).collect(Collectors.toList());
+//
+//                        for (Course course : threadUserCourses) {
+//                            // don't store the return value because we don't care.
+//                            // We just want the cache to fill up
+//                            crosslistService.getCourseSections(course.getId());
+//                        }
+//                    } else {
+//                        break;
+//                    }
+//                }
+//                log.debug("*** thread(" + threadId + ") work done");
+//            };
+//
+//            new Thread(termLoadRunnable).start();
 
             // thread end
 // =============================================================================
@@ -277,7 +279,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
               crosslistService.buildSectionsMap(courses, termMap, termStartDateComparator, currentCourse,
                     impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                    impersonationModel.getUsername() != null);
+                    impersonationModel.getUsername() != null, false);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
             if (canvasTermKey.getName().equals(crosslistService.ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING)) {
@@ -620,34 +622,28 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
                 }
             }
 
+
             // Look up the new course/section information for the requested term
             List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
             courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(termId)).collect(Collectors.toList());
-            List<SectionUIDisplay> uiSection = new ArrayList<>();
+
+            // get sections and apply the business logic to whether show or not
+            Map<CanvasTerm, List<SectionUIDisplay>> sections = crosslistService.buildSectionsMap(
+                    courses,
+                    termMap,
+                    termStartDateComparator,
+                    currentCourse,
+                    impersonationModel.isIncludeNonSisSections(),
+                    impersonationModel.isIncludeCrosslistedSections(),
+                    impersonationModel.getUsername() != null,
+                    false
+            );
+
             // get the CanvasTerm object for use later for the map
             CanvasTerm termForModel = terms.stream().filter(term -> term.getId().equals(termId)).findFirst().orElse(null);
 
-            // add the new term's sections to the map
-            for (Course course : courses) {
-                List<Section> listOfSections = coursesApi.getCourseSections(course.getId());
-
-                for (Section section : listOfSections) {
-                    final String impersonationUsername = impersonationModel.getUsername();
-                    final String courseCode = course.getCourseCode();
-
-                    // As the instructor (NOT using the tool's impersonation)
-                    if ((impersonationUsername == null && section.getSisCourseId() != null && section.getSisSectionId() != null)
-                            ||
-                    // using the tool's impersonation
-                        (impersonationUsername != null && courseCode != null)) {
-                        uiSection.add(new SectionUIDisplay(termId, section.getId(),
-                              crosslistService.buildSectionDisplayName(section.getName(), courseCode, impersonationModel.getUsername() != null),
-                              false, false, false));
-                    }
-                }
-
-                rebuiltTermMap.put(termForModel, uiSection);
-            }
+            // add business logic sections to the come in to method json ones
+            rebuiltTermMap.put(termForModel, sections.get(termForModel));
 
             // Make sure the sections are still sorted
             Comparator<SectionUIDisplay> nameComparator = Comparator.comparing(SectionUIDisplay::getSectionName, Comparator.nullsFirst(Comparator.naturalOrder()));
