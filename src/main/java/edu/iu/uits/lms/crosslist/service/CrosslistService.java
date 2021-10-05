@@ -303,7 +303,7 @@ public class CrosslistService {
       return alienSectionBlockedFakeCanvasTerm;
    }
 
-   @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
+//   @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
    public List<Section> getCourseSections(String courseId) {
       return coursesApi.getCourseSections(courseId);
    }
