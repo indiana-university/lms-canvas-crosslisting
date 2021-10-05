@@ -260,7 +260,8 @@ public class CrosslistService {
    }
 
    // Don't change this cache key unless you also change how evict works in the CrosslistController
-//   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
+   // TODO - Commented out until a cluster cache solution can be found
+   // @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
       return coursesApi.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
    }
