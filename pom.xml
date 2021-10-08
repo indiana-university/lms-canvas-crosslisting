@@ -21,7 +21,7 @@
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
         <jquery.version>3.5.1</jquery.version>
-        <lms-bom.version>4.0.3</lms-bom.version>
+        <lms-bom.version>4.0.27-SNAPSHOT</lms-bom.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +36,7 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
@@ -43,6 +44,14 @@
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -234,33 +234,33 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
 
 // TODO - Commented out until a cluster cache solution can be found
 
-//            Runnable termLoadRunnable = () ->
-//            {
-//                // preload cache for all future terms
-//                final long threadId = Thread.currentThread().getId();
-//
-//                final int MAX_BACKGROUND_LOADS = 1;
-//                int count = 0;
-//                for (CanvasTerm canvasTerm : selectableTerms) {
-//                    if (++count <= MAX_BACKGROUND_LOADS &&
-//                            termStartDateComparator.compare(canvasTerm, currentTerm) < 1) {
-//                        log.debug("***** thread(" + threadId + ") for termId = " + canvasTerm.getId() + " " + canvasTerm.getName());
-//                        List<Course> threadUserCourses = crosslistService.getCoursesTaughtBy(currentUserId, false);
-//                        threadUserCourses = threadUserCourses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(canvasTerm.getId())).collect(Collectors.toList());
-//
-//                        for (Course course : threadUserCourses) {
-//                            // don't store the return value because we don't care.
-//                            // We just want the cache to fill up
-//                            crosslistService.getCourseSections(course.getId());
-//                        }
-//                    } else {
-//                        break;
-//                    }
-//                }
-//                log.debug("*** thread(" + threadId + ") work done");
-//            };
-//
-//            new Thread(termLoadRunnable).start();
+            Runnable termLoadRunnable = () ->
+            {
+                // preload cache for all future terms
+                final long threadId = Thread.currentThread().getId();
+
+                final int MAX_BACKGROUND_LOADS = 1;
+                int count = 0;
+                for (CanvasTerm canvasTerm : selectableTerms) {
+                    if (++count <= MAX_BACKGROUND_LOADS &&
+                            termStartDateComparator.compare(canvasTerm, currentTerm) < 1) {
+                        log.debug("***** thread(" + threadId + ") for termId = " + canvasTerm.getId() + " " + canvasTerm.getName());
+                        List<Course> threadUserCourses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+                        threadUserCourses = threadUserCourses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(canvasTerm.getId())).collect(Collectors.toList());
+
+                        for (Course course : threadUserCourses) {
+                            // don't store the return value because we don't care.
+                            // We just want the cache to fill up
+                            crosslistService.getCourseSections(course.getId());
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                log.debug("*** thread(" + threadId + ") work done");
+            };
+
+            new Thread(termLoadRunnable).start();
 
             // thread end
 // =============================================================================
@@ -279,7 +279,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
               crosslistService.buildSectionsMap(courses, termMap, termStartDateComparator, currentCourse,
                     impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                    impersonationModel.getUsername() != null, false);
+                    impersonationModel.getUsername() != null, true);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
             if (canvasTermKey.getName().equals(crosslistService.ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING)) {
@@ -636,7 +636,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
                     impersonationModel.isIncludeNonSisSections(),
                     impersonationModel.isIncludeCrosslistedSections(),
                     impersonationModel.getUsername() != null,
-                    false
+                    true
             );
 
             // get the CanvasTerm object for use later for the map

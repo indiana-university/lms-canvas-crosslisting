@@ -15,7 +15,7 @@ ingress:
     - host: "lms-lti-crosslist-stg.apps-test.iu.edu"
       paths: []
 
-activeProfiles: "redis,stg"
+activeProfiles: "redis,stg,redis-cache"
 
 serviceAccountName: lms-lti-crosslist-stg
 

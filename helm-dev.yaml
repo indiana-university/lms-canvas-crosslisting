@@ -20,7 +20,7 @@ service:
       protocol: TCP
       name: remote-debug
 
-activeProfiles: "dev"
+activeProfiles: "dev,ehcache"
 # to test with redis comment out activeProfiles above (will inherit from helm-common.yaml
 # and comment out @EnableCookieFilter(ignoredRequestPatterns = {"/rest/**"}) from WebApplication.java
 

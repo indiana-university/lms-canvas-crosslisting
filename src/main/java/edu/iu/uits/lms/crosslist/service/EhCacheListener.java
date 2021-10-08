@@ -11,7 +11,7 @@ import javax.cache.event.CacheEntryUpdatedListener;
 import java.io.Serializable;
 
 @Slf4j
-public class CacheListener implements CacheEntryCreatedListener<Object, Object>, CacheEntryExpiredListener<Object, Object>,
+public class EhCacheListener implements CacheEntryCreatedListener<Object, Object>, CacheEntryExpiredListener<Object, Object>,
       CacheEntryRemovedListener<Object, Object>, CacheEntryUpdatedListener<Object, Object>, Serializable {
 
    /**
