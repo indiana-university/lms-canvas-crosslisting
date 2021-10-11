@@ -232,8 +232,6 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
 // =============================================================================
             // thread start
 
-// TODO - Commented out until a cluster cache solution can be found
-
             Runnable termLoadRunnable = () ->
             {
                 // preload cache for all future terms
