@@ -2,7 +2,7 @@ spring:
   application:
     name: lms-lti-crosslist
   profiles:
-    active: redis
+    active: redis-session
   session:
     store-type: none
 #  output:
@@ -28,7 +28,7 @@ server:
 ---
 
 spring:
-  profiles: redis
+  profiles: redis-session
   session:
     store-type: redis
     redis.namespace: lms-lti-crosslist-${app.version}:session

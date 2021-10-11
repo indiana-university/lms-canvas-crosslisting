@@ -1,13 +1,14 @@
 package edu.iu.uits.lms.crosslist.config;
 
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
-import edu.iu.uits.lms.crosslist.service.CacheListener;
+import edu.iu.uits.lms.crosslist.service.EhCacheListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import javax.cache.Caching;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
@@ -19,10 +20,11 @@ import javax.cache.expiry.Duration;
 import javax.cache.spi.CachingProvider;
 import java.util.concurrent.TimeUnit;
 
+@Profile("ehcache")
 @Configuration
 @EnableCaching
 @Slf4j
-public class CacheConfig {
+public class EhCacheConfig {
     @Bean(name = "CrosslistCacheManager")
     public CacheManager cacheManager() {
         log.debug("CrosslistCacheManager");
@@ -52,7 +54,7 @@ public class CacheConfig {
 
         CacheEntryListenerConfiguration<Object, Object> listenerConfiguration =
                 new MutableCacheEntryListenerConfiguration<>(
-                        FactoryBuilder.factoryOf(CacheListener.class),
+                        FactoryBuilder.factoryOf(EhCacheListener.class),
                         null,
                         false,
                         false);
