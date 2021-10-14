@@ -43,6 +43,7 @@
                             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${mapInstance.key.id}">
                             <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
                             <label th:for="${section.sectionId}" th:text="${section.sectionName}">SP16-BL-MUS-A112-15891</label>
+                            <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
                         </li>
                     </ul>
                 </div>
