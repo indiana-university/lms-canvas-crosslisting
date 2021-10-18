@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Cross-listing Assistant</title>
     <link th:href="@{/app/jsrivet/rivet-bundle.min.css}" rel="stylesheet" type="text/css" />
+    <link th:href="@{/app/jsrivet/rivet-switch.min.css}" rel="stylesheet" type="text/css" />
     <link th:href="@{/app/css/crosslisting.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -33,8 +34,12 @@
 </footer>
 
 <script type="text/javascript" th:src="@{/app/jsrivet/rivet-bundle.min.js}"></script>
+<script type="text/javascript" th:src="@{/app/jsrivet/rivet-switch.min.js}"></script>
 <script type="text/javascript" th:src="@{/app/webjars/jquery/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/app/js/crosslisting.js}"></script>
+<script type="text/javascript">
+    Switch.init();
+</script>
 
 <th:block layout:fragment="script">
     <!--
