@@ -51,13 +51,11 @@
                             </div>
                             <div class="rvt-grid__item-8-md-up bp_checkboxes">
                                 <h2 class="rvt-ts-26">Available Sections</h2>
-                                <!-- TODO make this only display in the regular, instructor mode -->
-                                <div class="rvt-display-flex rvt-vertical-center rvt-m-bottom-md">
+                                <div th:if="${impersonationModel == null || impersonationModel.username == null}" class="rvt-display-flex rvt-vertical-center rvt-m-bottom-md">
                                     <span class="rvt-m-right-sm" id="include-crosslisted">
                                         Show already cross-listed sections
                                     </span>
-                                    <button th:if="${impersonationModel == null || impersonationModel.username == null}"
-                                            type="button" class="rvt-switch rvt-switch--small" data-switch="crosslisted-switch" role="switch"
+                                    <button type="button" class="rvt-switch rvt-switch--small" data-switch="crosslisted-switch" role="switch"
                                             th:aria-checked="${impersonationModel != null && impersonationModel.includeCrosslistedSections} ? true : false" aria-labelledby="include-crosslisted">
                                         <span class="rvt-switch__on">On</span>
                                         <span class="rvt-switch__off">Off</span>
