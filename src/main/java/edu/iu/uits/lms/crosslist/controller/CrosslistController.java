@@ -18,6 +18,7 @@ import edu.iu.uits.lms.crosslist.security.CrosslistAuthenticationToken;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
+import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
 import iuonly.client.generated.api.FeatureAccessApi;
 import iuonly.client.generated.api.SudsApi;
@@ -753,6 +754,33 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         courseSessionService.removeAttributeFromSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY);
         return main(courseId, model, session);
     }
+
+    @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
+    @Secured({LtiAuthenticationProvider.LTI_USER_ROLE})
+    public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+
+        // Since this method isn't lockked down to admins make sure a person can't impersonate anyone else. If username is null,
+        // in main Controller will set user to actual user
+        impersonationModel.setUsername(null);
+
+        courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
+        return main(courseId, model, session);
+    }
+
+    @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
+    @Secured({LtiAuthenticationProvider.LTI_USER_ROLE})
+    public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+
+        // Since this method isn't lockked down to admins make sure a person can't impersonate anyone else. If username is null,
+        // in main Controller will set user to actual user
+        impersonationModel.setUsername(null);
+
+        courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
+        return main(courseId, model, session);
+    }
+
 
     private List<SectionUIDisplay> removeSectionUiDisplayBySectionName(@NonNull List<SectionUIDisplay> oldList, @NonNull String toRemoveSectionName) {
         List<SectionUIDisplay> newList = new ArrayList<SectionUIDisplay>();

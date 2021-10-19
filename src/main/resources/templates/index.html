@@ -56,7 +56,9 @@
                                     <span class="rvt-m-right-sm" id="include-crosslisted">
                                         Show already cross-listed sections
                                     </span>
-                                    <button type="button" class="rvt-switch rvt-switch--small" data-switch="crosslisted-switch" role="switch" aria-checked="false" aria-labelledby="include-crosslisted">
+                                    <button th:if="${impersonationModel == null || impersonationModel.username == null}"
+                                            type="button" class="rvt-switch rvt-switch--small" data-switch="crosslisted-switch" role="switch"
+                                            th:aria-checked="${impersonationModel != null && impersonationModel.includeCrosslistedSections} ? true : false" aria-labelledby="include-crosslisted">
                                         <span class="rvt-switch__on">On</span>
                                         <span class="rvt-switch__off">Off</span>
                                     </button>
@@ -101,11 +103,39 @@
                     <button id="continue-button" class="rvt-button" type="submit" th:if="${editMode}">Continue</button>
                 </div>
             </form>
+            <form id="show-crosslisted-in-other-sections-form" th:object="${impersonationModel}" th:action="@{|/app/${courseId}/selfimpersonate|}" method="post">
+                <input id="show-crosslisted-in-other-sections-action" type="hidden" name="action" value="impersonate" />
+                <input id="show-crosslisted-in-other-sections-includeCrosslistedSections" type="hidden" name="includeCrosslistedSections" value="true" />
+                <input id="show-crosslisted-in-other-sections-includeSisSectionsInParentWithCrosslistSections" type="hidden" name="includeSisSectionsInParentWithCrosslistSections" value="true" />
+            </form>
         </div>
     </div>
 </div>
 <th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            Switch.init();
 
+            document.addEventListener('switchOn', event => {
+                if (event.detail.name() == 'crosslisted-switch') {
+                    $('#show-crosslisted-in-other-sections-action').attr('action', 'impersonate');
+                    $('#show-crosslisted-in-other-sections-includeCrosslistedSections').attr('value', 'true');
+                    $('#show-crosslisted-in-other-sections-includeSisSectionsInParentWithCrosslistSections').attr('value', 'true');
+                    $('#show-crosslisted-in-other-sections-form').submit();
+                }
+            }, false);
+
+            document.addEventListener('switchOff', event => {
+                if (event.detail.name() == 'crosslisted-switch') {
+                    $('#show-crosslisted-in-other-sections-action').attr('action', 'end_impersonate');
+                    $('#show-crosslisted-in-other-sections-includeCrosslistedSections').attr('value', 'false');
+                    $('#show-crosslisted-in-other-sections-includeSisSectionsInParentWithCrosslistSections').attr('value', 'false');
+                    $('#show-crosslisted-in-other-sections-form').submit();
+                }
+            }, false);
+
+        });
+    </script>
 </th:block>
 </body>
 </html>

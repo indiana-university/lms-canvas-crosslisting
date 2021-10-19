@@ -28,7 +28,7 @@ import java.util.Date;
       "${app.fullFilePath}/security.properties"}, ignoreResourceNotFound = true)
 @Slf4j
 @EnableRedisConfiguration
-@EnableCookieFilter(ignoredRequestPatterns = {"/rest/**"})
+//@EnableCookieFilter(ignoredRequestPatterns = {"/rest/**"})
 @EnableLtiClient
 @EnableCanvasClient
 @EnableIuOnlyClient
