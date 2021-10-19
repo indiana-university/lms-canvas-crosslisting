@@ -760,9 +760,12 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
         LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
-        // Since this method isn't lockked down to admins make sure a person can't impersonate anyone else. If username is null,
+        // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
+
+        impersonationModel.setIncludeCrosslistedSections(true);
+        impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
         return main(courseId, model, session);
@@ -773,9 +776,12 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
         LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
-        // Since this method isn't lockked down to admins make sure a person can't impersonate anyone else. If username is null,
+        // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
+
+        impersonationModel.setIncludeCrosslistedSections(false);
+        impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(false);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
         return main(courseId, model, session);
