@@ -765,6 +765,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         impersonationModel.setUsername(null);
 
         impersonationModel.setIncludeCrosslistedSections(true);
+        impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
@@ -781,6 +782,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         impersonationModel.setUsername(null);
 
         impersonationModel.setIncludeCrosslistedSections(false);
+        impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(false);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);

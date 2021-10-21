@@ -22,7 +22,7 @@
         <helm_service_name>lms-lti-crosslist</helm_service_name>
         <jquery.version>3.5.1</jquery.version>
         <lms-bom.version>4.0.27</lms-bom.version>
-        <lms-rivet.version>4.1.8.3-SNAPSHOT</lms-rivet.version>
+        <lms-rivet.version>4.1.8.3</lms-rivet.version>
     </properties>
 
     <dependencyManagement>
