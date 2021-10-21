@@ -10,4 +10,5 @@ public class ImpersonationModel implements Serializable {
    private boolean includeCrosslistedSections;
    private boolean includeNonSisSections;
    private boolean includeSisSectionsInParentWithCrosslistSections;
+   private boolean selfMode;
 }
