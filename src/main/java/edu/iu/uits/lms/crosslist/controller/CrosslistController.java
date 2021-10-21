@@ -278,7 +278,8 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
               crosslistService.buildSectionsMap(courses, termMap, termStartDateComparator, currentCourse,
                     impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                    impersonationModel.getUsername() != null, true);
+                    impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                      true);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
             if (canvasTermKey.getName().equals(crosslistService.ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING)) {
@@ -634,7 +635,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
                     currentCourse,
                     impersonationModel.isIncludeNonSisSections(),
                     impersonationModel.isIncludeCrosslistedSections(),
-                    impersonationModel.getUsername() != null,
+                    impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                     true
             );
 
@@ -767,6 +768,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         impersonationModel.setIncludeCrosslistedSections(true);
         impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
+        impersonationModel.setSelfMode(true);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
         return main(courseId, model, session);
@@ -784,6 +786,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         impersonationModel.setIncludeCrosslistedSections(false);
         impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(false);
+        impersonationModel.setSelfMode(false);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
         return main(courseId, model, session);
