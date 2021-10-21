@@ -58,13 +58,8 @@
                                 <div id="loading">
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
-                                <div class="rvt-p-top-sm" th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections &&
-                                                                   hasAlienBlocked != null && hasAlienBlocked}">
-                                    <h2 class="rvt-ts-26">Unavailable Sections</h2>
-                                    <p id="unavailableSections">The section(s) below cannot be crosslisted until the crosslisted sections in their parent course(s) have been removed.</p>
-                                    <div id="dataDiv2">
-                                        <div th:insert="fragments/termData :: termDataUnavailable"></div>
-                                    </div>
+                                <div id="unavailable-sections-load" class="rvt-p-top-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
+                                    OLD text
                                 </div>
                                 <div th:if="${multiTermEnabled}">
                                     <h2 class="sr-only">View additional terms</h2>

@@ -90,6 +90,8 @@ $(document).ready(function(){
 
         $("#addTerm").attr("disabled", true);
         $("#addTerm").attr("aria-disabled", true);
+
+        loadUnavailableSections();
     });
 
     $('#cancel-button,#edit-button,#submit-button').on('click', function(){
@@ -260,4 +262,38 @@ function modalButtonToggle() {
             modalSubmit.attr("aria-disabled", false);
         }
     });
+}
+
+function loadUnavailableSections() {
+//    var obj = $(this);
+//    var urlBase = obj.data('urlbase');
+//    var termId = obj.val();
+//    var sectionList = createJSON($('.sectionsList li'));
+//    var jsonSectionList = JSON.stringify(sectionList);
+//
+//    var collapsedTermsList = getCollapsedTermsString();
+//
+//    // load the new term data
+//    $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList},
+//        function(response, status, xhr) {
+//            if (xhr.status == 403) {
+//                window.location.replace("error");
+//            }
+//
+//            // move focus to the newly added section
+//            $("button[aria-controls=" + termId + "]").focus();
+//        });
+
+    var loadDiv = $('#unavailable-sections-load');
+    var urlBase = loadDiv.data('urlbase');
+
+    loadDiv.empty();
+
+    // load the new unavailable sections
+    loadDiv.load(urlBase,
+        function(response, status, xhr) {
+            if (xhr.status == 403) {
+                window.location.replace("error");
+            }
+        });
 }
