@@ -59,7 +59,9 @@
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
                                 <div id="unavailable-sections-load" class="rvt-p-top-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
-                                    OLD text
+                                </div>
+                                <div id="unavailable-loading">
+                                    <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
                                 <div th:if="${multiTermEnabled}">
                                     <h2 class="sr-only">View additional terms</h2>

@@ -666,10 +666,10 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
      * @param model the model!
      * @return returns the fragment for termDataUnavailable
      */
-    @RequestMapping(value = "/{courseId}/loadUnavailableSections/", method = RequestMethod.GET)
-    public String doUnavailableSectionsLoad(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
-        log.info("ZZZZZZ IN unavailable alien term");
-
+    @RequestMapping(value = "/{courseId}/loadUnavailableSections/", method = RequestMethod.POST)
+    public String doUnavailableSectionsLoad(@PathVariable("courseId") String courseId,
+                                            @RequestParam("joinedTerms") String joinedTerms,
+                                            Model model, HttpSession session) {
         LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         Course currentCourse = getValidatedCourse(token, session);
         Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
@@ -687,7 +687,9 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
 
         // Look up the new course/section information
         List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
-        courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null).collect(Collectors.toList());
+
+        List<String> joinedTermsList = Arrays.asList(joinedTerms.split(","));
+        courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && joinedTermsList.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
 
         // get the list of terms in Canvas
         List<CanvasTerm> terms = termsApi.getEnrollmentTerms();
@@ -709,9 +711,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
                 true
         );
 
-        log.info("ZZZZZZ looking for alien term");
         if (sections.containsKey(alienSectionBlockedFakeCanvasTerm)) {
-            log.info("ZZZZZZ found alien term");
             Map<CanvasTerm, List<SectionUIDisplay>> unavailableSectionMap = new HashMap<>();
             unavailableSectionMap.put(alienSectionBlockedFakeCanvasTerm, sections.get(alienSectionBlockedFakeCanvasTerm));
 

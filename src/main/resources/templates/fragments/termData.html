@@ -6,7 +6,7 @@
 </head>
 <body>
 <div th:fragment="termData">
-    <h3 th:text="${activeTerm.name}">(Active Term Name)</h3>
+    <h3 id="active-term" th:data-active-term-id = "${activeTerm.id}" th:text="${activeTerm.name}">(Active Term Name)</h3>
     <p th:if="${#lists.isEmpty(activeCourseSections)}">None available</p>
     <ul th:unless="${#lists.isEmpty(activeCourseSections)}" class="sectionsList rvt-plain-list">
         <li th:id="'row_' + ${section.sectionId}" th:each="section : ${activeCourseSections}" th:class="${section.getAppropriateCssClass()}"

@@ -3,6 +3,8 @@ var summary = $('.summaryList').clone(true);
 var checkedValue;
 
 $(document).ready(function(){
+    loadUnavailableSections($('#active-term').data('active-term-id'));
+
     checkedValue = getCheckboxValues();
 
     checkboxEventRegistration();
@@ -79,6 +81,21 @@ $(document).ready(function(){
             
             // move focus to the newly added section
             $("button[aria-controls=" + termId + "]").focus();
+
+            var displayedTerms = [];
+
+            var activeTerm = $('#active-term');
+            var olderTerms = $('button.toggleoverride');
+
+            displayedTerms.push(activeTerm.data('active-term-id'));
+
+            olderTerms.each(function() {
+                displayedTerms.push($(this).attr('aria-controls'));
+            });
+
+            var joinedTerms = displayedTerms.join();
+
+            loadUnavailableSections(joinedTerms);
         });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
@@ -90,8 +107,6 @@ $(document).ready(function(){
 
         $("#addTerm").attr("disabled", true);
         $("#addTerm").attr("aria-disabled", true);
-
-        loadUnavailableSections();
     });
 
     $('#cancel-button,#edit-button,#submit-button').on('click', function(){
@@ -264,36 +279,25 @@ function modalButtonToggle() {
     });
 }
 
-function loadUnavailableSections() {
-//    var obj = $(this);
-//    var urlBase = obj.data('urlbase');
-//    var termId = obj.val();
-//    var sectionList = createJSON($('.sectionsList li'));
-//    var jsonSectionList = JSON.stringify(sectionList);
-//
-//    var collapsedTermsList = getCollapsedTermsString();
-//
-//    // load the new term data
-//    $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList},
-//        function(response, status, xhr) {
-//            if (xhr.status == 403) {
-//                window.location.replace("error");
-//            }
-//
-//            // move focus to the newly added section
-//            $("button[aria-controls=" + termId + "]").focus();
-//        });
-
+function loadUnavailableSections(joinedTerms) {
     var loadDiv = $('#unavailable-sections-load');
     var urlBase = loadDiv.data('urlbase');
 
     loadDiv.empty();
 
+    $("#unavailable-loading").show();
+
+    // Call Canvas's message listener to resize the iframe since the loading icon
+    // pushes the content down
+    parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+
     // load the new unavailable sections
-    loadDiv.load(urlBase,
+    loadDiv.load(urlBase, {joinedTerms: joinedTerms},
         function(response, status, xhr) {
             if (xhr.status == 403) {
                 window.location.replace("error");
             }
+
+            $("#unavailable-loading").hide();
         });
 }
