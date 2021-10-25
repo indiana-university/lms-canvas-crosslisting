@@ -663,6 +663,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     /**
      *
      * @param courseId CourseId for the current course
+     * @param joinedTerms A comma separated string of term ids
      * @param model the model!
      * @return returns the fragment for termDataUnavailable
      */

@@ -3,7 +3,7 @@ var summary = $('.summaryList').clone(true);
 var checkedValue;
 
 $(document).ready(function(){
-    loadUnavailableSections($('#active-term').data('active-term-id'));
+    loadUnavailableSections();
 
     checkedValue = getCheckboxValues();
 
@@ -78,24 +78,12 @@ $(document).ready(function(){
             if (xhr.status == 403) {
                 window.location.replace("error");
             }
-            
+
+            loadUnavailableSections();
+
             // move focus to the newly added section
             $("button[aria-controls=" + termId + "]").focus();
 
-            var displayedTerms = [];
-
-            var activeTerm = $('#active-term');
-            var olderTerms = $('button.toggleoverride');
-
-            displayedTerms.push(activeTerm.data('active-term-id'));
-
-            olderTerms.each(function() {
-                displayedTerms.push($(this).attr('aria-controls'));
-            });
-
-            var joinedTerms = displayedTerms.join();
-
-            loadUnavailableSections(joinedTerms);
         });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
@@ -279,13 +267,26 @@ function modalButtonToggle() {
     });
 }
 
-function loadUnavailableSections(joinedTerms) {
+function loadUnavailableSections() {
     var loadDiv = $('#unavailable-sections-load');
     var urlBase = loadDiv.data('urlbase');
 
     loadDiv.empty();
 
     $("#unavailable-loading").show();
+
+    var displayedTerms = [];
+
+    var activeTerm = $('#active-term');
+    var olderTerms = $('button.toggleoverride');
+
+    displayedTerms.push(activeTerm.data('active-term-id'));
+
+    olderTerms.each(function() {
+                        displayedTerms.push($(this).attr('aria-controls'));
+    });
+
+   var joinedTerms = displayedTerms.join();
 
     // Call Canvas's message listener to resize the iframe since the loading icon
     // pushes the content down
