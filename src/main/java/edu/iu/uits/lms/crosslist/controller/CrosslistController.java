@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -659,6 +660,69 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         }
 
         return "fragments/termData :: termData";
+    }
+
+    /**
+     *
+     * @param courseId CourseId for the current course
+     * @param joinedTerms A comma separated string of term ids
+     * @param model the model!
+     * @return returns the fragment for termDataUnavailable
+     */
+    @RequestMapping(value = "/{courseId}/loadUnavailableSections/", method = RequestMethod.POST)
+    public String doUnavailableSectionsLoad(@PathVariable("courseId") String courseId,
+                                            @RequestParam("joinedTerms") String joinedTerms,
+                                            Model model, HttpSession session) {
+        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        Course currentCourse = getValidatedCourse(token, session);
+        Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
+
+        ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
+                CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
+
+        if (impersonationModel == null) {
+            impersonationModel = new ImpersonationModel();
+        }
+
+        model.addAttribute("impersonationModel", impersonationModel);
+
+        String currentUserId = impersonationModel.getUsername() == null ? (String)token.getPrincipal(): impersonationModel.getUsername();
+
+        // Look up the new course/section information
+        List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+
+        List<String> joinedTermsList = Arrays.asList(joinedTerms.split(","));
+        courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && joinedTermsList.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
+
+        // get the list of terms in Canvas
+        List<CanvasTerm> terms = termsApi.getEnrollmentTerms();
+
+        // convert to a map for easier lookup later
+        Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
+
+        // add fake canvas term for unavailable list in the UI
+        CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
+
+        Map<CanvasTerm, List<SectionUIDisplay>> sections = crosslistService.buildSectionsMap(
+                courses,
+                termMap,
+                termStartDateComparator,
+                currentCourse,
+                impersonationModel.isIncludeNonSisSections(),
+                impersonationModel.isIncludeCrosslistedSections(),
+                impersonationModel.getUsername() != null,
+                true
+        );
+
+        if (sections.containsKey(alienSectionBlockedFakeCanvasTerm)) {
+            Map<CanvasTerm, List<SectionUIDisplay>> unavailableSectionMap = new HashMap<>();
+            unavailableSectionMap.put(alienSectionBlockedFakeCanvasTerm, sections.get(alienSectionBlockedFakeCanvasTerm));
+
+            model.addAttribute("sectionsMap", unavailableSectionMap);
+            model.addAttribute("hasAlienBlocked", true);
+        }
+
+        return "fragments/termData :: termDataUnavailable";
     }
 
     private SectionWrapper processSections(List<SectionUIDisplay> sectionList) {

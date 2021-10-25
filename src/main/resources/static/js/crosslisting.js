@@ -3,6 +3,8 @@ var summary = $('.summaryList').clone(true);
 var checkedValue;
 
 $(document).ready(function(){
+    loadUnavailableSections();
+
     checkedValue = getCheckboxValues();
 
     checkboxEventRegistration();
@@ -76,9 +78,12 @@ $(document).ready(function(){
             if (xhr.status == 403) {
                 window.location.replace("error");
             }
-            
+
+            loadUnavailableSections();
+
             // move focus to the newly added section
             $("button[aria-controls=" + termId + "]").focus();
+
         });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
@@ -260,4 +265,40 @@ function modalButtonToggle() {
             modalSubmit.attr("aria-disabled", false);
         }
     });
+}
+
+function loadUnavailableSections() {
+    var loadDiv = $('#unavailable-sections-load');
+    var urlBase = loadDiv.data('urlbase');
+
+    loadDiv.empty();
+
+    $("#unavailable-loading").show();
+
+    var displayedTerms = [];
+
+    var activeTerm = $('#active-term');
+    var olderTerms = $('button.toggleoverride');
+
+    displayedTerms.push(activeTerm.data('active-term-id'));
+
+    olderTerms.each(function() {
+                        displayedTerms.push($(this).attr('aria-controls'));
+    });
+
+   var joinedTerms = displayedTerms.join();
+
+    // Call Canvas's message listener to resize the iframe since the loading icon
+    // pushes the content down
+    parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+
+    // load the new unavailable sections
+    loadDiv.load(urlBase, {joinedTerms: joinedTerms},
+        function(response, status, xhr) {
+            if (xhr.status == 403) {
+                window.location.replace("error");
+            }
+
+            $("#unavailable-loading").hide();
+        });
 }

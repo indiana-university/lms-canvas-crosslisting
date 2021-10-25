@@ -11,7 +11,7 @@
     white-space: nowrap;
 }
 
-#loading {
+#loading, #unavailable-loading {
     display: none;
 }
 

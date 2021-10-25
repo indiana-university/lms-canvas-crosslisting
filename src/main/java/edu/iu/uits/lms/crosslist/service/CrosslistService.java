@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpSession;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -296,7 +298,8 @@ public class CrosslistService {
       alienSectionBlockedFakeCanvasTerm.setId(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
       alienSectionBlockedFakeCanvasTerm.setName(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
 
-      Date date = new Date();
+      Date date = Date.from(LocalDate.of(3000, 01, 01)
+              .atStartOfDay(ZoneId.systemDefault()).toInstant());
       SimpleDateFormat canvasDateFormat = new SimpleDateFormat(CanvasDateFormatUtil.CANVAS_DATE_FORMAT);
       alienSectionBlockedFakeCanvasTerm.setStartAt(canvasDateFormat.format(date));
 
