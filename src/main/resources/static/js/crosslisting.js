@@ -10,8 +10,8 @@ $(document).ready(function(){
     checkboxEventRegistration();
     modalButtonToggle();
 
-     // Canvas has a message listener to resize the iframe
-     parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+    // Canvas has a message listener to resize the iframe
+    parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
 
     /* Reset Button */
     $('#reset-button').on('click', function(){
@@ -119,15 +119,19 @@ $(document).ready(function(){
         }
     });
 
-    $(document).ajaxComplete(function() {
-        checkboxEventRegistration();
-        modalButtonToggle();
-        $("#loading").hide();
-        $("#addTerm").attr("disabled", false);
-        $("#addTerm").attr("aria-disabled", false);
+    $(document).ajaxComplete(function(event, xhr, settings) {
+        var unavailableSectionsUrl = $('#unavailable-sections-load').data('urlbase');
 
-        // Canvas has a message listener to resize the iframe
-        parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+        if (settings.url !== unavailableSectionsUrl) {
+           checkboxEventRegistration();
+           modalButtonToggle();
+           $("#loading").hide();
+           $("#addTerm").attr("disabled", false);
+           $("#addTerm").attr("aria-disabled", false);
+
+           // Canvas has a message listener to resize the iframe
+           parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+        }
     });
 });
 
