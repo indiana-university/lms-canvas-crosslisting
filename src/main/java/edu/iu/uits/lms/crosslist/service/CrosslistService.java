@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpSession;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -260,9 +262,9 @@ public class CrosslistService {
    }
 
    // Don't change this cache key unless you also change how evict works in the CrosslistController
-   // TODO - Commented out until a cluster cache solution can be found
-   // @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
+   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
+      log.debug("cache miss for {} - getCoursesTaughtBy({}, {})", CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, IUNetworkId, excludeBlueprint);
       return coursesApi.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
    }
 
@@ -296,15 +298,17 @@ public class CrosslistService {
       alienSectionBlockedFakeCanvasTerm.setId(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
       alienSectionBlockedFakeCanvasTerm.setName(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
 
-      Date date = new Date();
+      Date date = Date.from(LocalDate.of(3000, 01, 01)
+              .atStartOfDay(ZoneId.systemDefault()).toInstant());
       SimpleDateFormat canvasDateFormat = new SimpleDateFormat(CanvasDateFormatUtil.CANVAS_DATE_FORMAT);
       alienSectionBlockedFakeCanvasTerm.setStartAt(canvasDateFormat.format(date));
 
       return alienSectionBlockedFakeCanvasTerm;
    }
 
-//   @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
+   @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
    public List<Section> getCourseSections(String courseId) {
+      log.debug("cache miss for {} - getCourseSections({})", CrosslistConstants.COURSE_SECTIONS_CACHE_NAME, courseId);
       return coursesApi.getCourseSections(courseId);
    }
 

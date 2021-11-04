@@ -4,7 +4,7 @@
     <artifactId>lms-lti-crosslist</artifactId>
     <packaging>jar</packaging>
     <name>lms-lti-crosslist</name>
-    <version>4.0.5</version>
+    <version>4.0.6</version>
 
     <parent>
         <artifactId>lms2Wow</artifactId>
@@ -21,7 +21,8 @@
         <docker_tag>stable</docker_tag>
         <helm_service_name>lms-lti-crosslist</helm_service_name>
         <jquery.version>3.5.1</jquery.version>
-        <lms-bom.version>4.0.3</lms-bom.version>
+        <lms-bom.version>4.0.27</lms-bom.version>
+        <lms-rivet.version>4.1.8.3</lms-rivet.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +37,7 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
@@ -43,6 +45,14 @@
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -118,6 +128,7 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-rivet</artifactId>
+            <version>${lms-rivet.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

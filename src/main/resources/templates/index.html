@@ -24,8 +24,8 @@
             </div>
             <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
             <p id="instructions" class="rvt-ts-18">
-                Use this tool to cross-list or de-cross-list sections with this course. Only officially provisioned sections
-                are available for cross-listing. For assistance, contact the
+                Check the sections you wish to add (cross-list) and uncheck the sections you wish to remove (de-cross-list).
+                Only officially provisioned sections are available for cross-listing. For assistance, contact the
                 <a href="https://kb.iu.edu/d/abxl" target="_blank">UITS Support Center</a>.
             </p>
 
@@ -51,20 +51,26 @@
                             </div>
                             <div class="rvt-grid__item-8-md-up bp_checkboxes">
                                 <h2 class="rvt-ts-26">Available Sections</h2>
-                                <p id="selectSections">Select the sections you wish to add (cross-list) and uncheck the sections you wish to remove (de-cross-list).</p>
+                                <div th:if="${impersonationModel == null || impersonationModel.username == null}" class="rvt-display-flex rvt-vertical-center rvt-m-bottom-md">
+                                    <span class="rvt-m-right-sm" id="include-crosslisted">
+                                        Show already cross-listed sections
+                                    </span>
+                                    <button type="button" class="rvt-switch rvt-switch--small" data-switch="crosslisted-switch" role="switch"
+                                            th:aria-checked="${impersonationModel != null && impersonationModel.includeCrosslistedSections} ? true : false" aria-labelledby="include-crosslisted">
+                                        <span class="rvt-switch__on">On</span>
+                                        <span class="rvt-switch__off">Off</span>
+                                    </button>
+                                </div>
                                 <div id="dataDiv">
                                     <div th:insert="fragments/termData :: termData"></div>
                                 </div>
                                 <div id="loading">
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
-                                <div class="rvt-p-top-sm" th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections &&
-                                                                   hasAlienBlocked != null && hasAlienBlocked}">
-                                    <h2 class="rvt-ts-26">Unavailable Sections</h2>
-                                    <p id="unavailableSections">The section(s) below cannot be crosslisted until the crosslisted sections in their parent course(s) have been removed.</p>
-                                    <div id="dataDiv2">
-                                        <div th:insert="fragments/termData :: termDataUnavailable"></div>
-                                    </div>
+                                <div id="unavailable-sections-load" class="rvt-p-top-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
+                                </div>
+                                <div id="unavailable-loading">
+                                    <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
                                 <div th:if="${multiTermEnabled}">
                                     <h2 class="sr-only">View additional terms</h2>
@@ -92,11 +98,33 @@
                     <button id="continue-button" class="rvt-button" type="submit" th:if="${editMode}">Continue</button>
                 </div>
             </form>
+            <form id="show-crosslisted-in-other-sections-form" th:object="${impersonationModel}" th:action="@{|/app/${courseId}/selfimpersonate|}" method="post">
+                <input id="show-crosslisted-in-other-sections-action" type="hidden" name="action" value="impersonate" />
+            </form>
         </div>
     </div>
 </div>
 <th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            Switch.init();
 
+            document.addEventListener('switchOn', event => {
+                if (event.detail.name() == 'crosslisted-switch') {
+                    $('#show-crosslisted-in-other-sections-action').attr('value', 'impersonate');
+                    $('#show-crosslisted-in-other-sections-form').submit();
+                }
+            }, false);
+
+            document.addEventListener('switchOff', event => {
+                if (event.detail.name() == 'crosslisted-switch') {
+                    $('#show-crosslisted-in-other-sections-action').attr('value', 'end_impersonate');
+                    $('#show-crosslisted-in-other-sections-form').submit();
+                }
+            }, false);
+
+        });
+    </script>
 </th:block>
 </body>
 </html>
