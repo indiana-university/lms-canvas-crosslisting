@@ -54,7 +54,7 @@
 <div th:fragment="termDataUnavailable">
     <div th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections && hasAlienBlocked != null && hasAlienBlocked}">
         <h2 class="rvt-ts-26">Unavailable Sections</h2>
-        <p id="unavailableSections">The section(s) below cannot be crosslisted until the crosslisted sections in their parent course(s) have been removed.</p>
+        <p id="unavailableSections">The section(s) below cannot be cross-listed until the cross-listed sections in their parent course(s) have been removed.</p>
         <div id="dataDiv2">
             <div th:unless="${sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
                 <ul class="sectionsList rvt-plain-list" th:if="${mapInstance.key.id == 'ALIEN_SECTION_BLOCKED'}">
