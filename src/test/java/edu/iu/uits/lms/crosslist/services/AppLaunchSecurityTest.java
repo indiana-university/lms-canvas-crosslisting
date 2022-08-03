@@ -1,21 +1,22 @@
 package edu.iu.uits.lms.crosslist.services;
 
-import canvas.client.generated.api.CoursesApi;
-import canvas.client.generated.api.TermsApi;
-import canvas.client.generated.model.CanvasTerm;
-import canvas.client.generated.model.Course;
+import edu.iu.uits.lms.canvas.config.CanvasClientTestConfig;
+import edu.iu.uits.lms.canvas.model.CanvasTerm;
+import edu.iu.uits.lms.canvas.model.Course;
+import edu.iu.uits.lms.canvas.services.CourseService;
+import edu.iu.uits.lms.canvas.services.TermService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
+import edu.iu.uits.lms.iuonly.services.SudsServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
 import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
 import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
-import iuonly.client.generated.api.FeatureAccessApi;
-import iuonly.client.generated.api.SudsApi;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,8 +28,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -37,17 +36,14 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(CrosslistController.class)
-@Import(ToolConfig.class)
-@ActiveProfiles("none")
+@WebMvcTest(value = CrosslistController.class, properties = {"oauth.tokenprovider.url=http://foo"})
+@Import({ToolConfig.class, CanvasClientTestConfig.class, LtiClientTestConfig.class})
 public class AppLaunchSecurityTest {
    @Autowired
    private MockMvc mvc;
@@ -63,16 +59,16 @@ public class AppLaunchSecurityTest {
    private CourseSessionService courseSessionService;
 
    @MockBean
-   private CoursesApi coursesApi;
+   private CourseService courseService;
 
    @MockBean
-   private TermsApi termsApi;
+   private TermService termService;
 
    @MockBean
-   private FeatureAccessApi featureAccessApi;
+   private FeatureAccessServiceImpl featureAccessService;
 
    @MockBean
-   private SudsApi sudsApi;
+   private SudsServiceImpl sudsService;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {
@@ -123,7 +119,7 @@ public class AppLaunchSecurityTest {
       course.setAccountId("9999");
       course.setSisCourseId("9999");
 
-      Mockito.when(coursesApi.getCourse("1234")).thenReturn(course);
+      Mockito.when(courseService.getCourse("1234")).thenReturn(course);
 
       Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(course.getId()), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
 

@@ -1,8 +1,0 @@
-spring.cloud.vault:
-  config.lifecycle.lease-endpoints: sysleases
-  generic:
-    enabled: false
-  kv:
-    enabled: true
-    backend: ua-vpit/enterprise-systems/lms/kv
-    application-name: lms-lti-crosslist

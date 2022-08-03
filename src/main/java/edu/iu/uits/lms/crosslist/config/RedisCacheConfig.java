@@ -7,6 +7,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -27,7 +28,7 @@ public class RedisCacheConfig {
     private JedisConnectionFactory redisConnectionFactory;
 
     @Bean
-    public RedisCacheConfiguration cacheConfiguration() {
+    public RedisCacheConfiguration crosslistCacheConfiguration() {
         final int courseServiceTtl = 300;
         return RedisCacheConfiguration.defaultCacheConfig()
               .entryTtl(Duration.ofSeconds(courseServiceTtl))
@@ -36,12 +37,13 @@ public class RedisCacheConfig {
     }
 
     @Bean(name = "CrosslistCacheManager")
+    @Primary
     public CacheManager cacheManager() {
         log.debug("cacheManager()");
         log.debug("Redis hostname: {}", redisConnectionFactory.getHostName());
         return RedisCacheManager.builder(redisConnectionFactory)
-              .withCacheConfiguration(CrosslistConstants.COURSE_SECTIONS_CACHE_NAME, cacheConfiguration())
-              .withCacheConfiguration(CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, cacheConfiguration())
+              .withCacheConfiguration(CrosslistConstants.COURSE_SECTIONS_CACHE_NAME, crosslistCacheConfiguration())
+              .withCacheConfiguration(CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, crosslistCacheConfiguration())
               .build();
     }
 }

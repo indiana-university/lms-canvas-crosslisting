@@ -28,7 +28,7 @@
                         <button type="button" class="rvt-button rvt-button--plain rvt-button--small toggleoverride"
                                  th:attr="aria-controls=${mapInstance.key.id}" aria-expanded="true">
                             <svg class="rvt-icon">
-                                <use th:attr="'xlink:href'=@{/app/jsrivet/rvt-icons.svg#rvt-icon-chevron-down}"></use>
+                                <use th:attr="'xlink:href'=@{/app/jsrivet/rivet-icons.svg#rvt-icon-chevron-down}"></use>
                             </svg>
                             <span class="rvt-m-left-xs rvt-text-regular" th:text="${mapInstance.key.name}"></span>
                             <span th:if="${#lists.isEmpty(mapInstance.value)}" class="sr-only">No sections available</span>

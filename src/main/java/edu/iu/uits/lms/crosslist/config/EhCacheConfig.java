@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import javax.cache.Caching;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class EhCacheConfig {
     @Bean(name = "CrosslistCacheManager")
+    @Primary
     public CacheManager cacheManager() {
         log.debug("CrosslistCacheManager");
 

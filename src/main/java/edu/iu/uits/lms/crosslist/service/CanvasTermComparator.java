@@ -1,7 +1,7 @@
 package edu.iu.uits.lms.crosslist.service;
 
-import canvas.client.generated.model.CanvasTerm;
-import canvas.helpers.TermHelper;
+import edu.iu.uits.lms.canvas.helpers.TermHelper;
+import edu.iu.uits.lms.canvas.model.CanvasTerm;
 
 import java.io.Serializable;
 import java.util.Comparator;

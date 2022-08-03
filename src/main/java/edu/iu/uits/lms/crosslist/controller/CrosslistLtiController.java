@@ -13,20 +13,16 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tsugi.basiclti.BasicLTIConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static canvas.helpers.CanvasConstants.ADMIN_ROLE;
+import static edu.iu.uits.lms.canvas.helpers.CanvasConstants.ADMIN_ROLE;
 
 @Controller
 @RequestMapping({"/lti"})
