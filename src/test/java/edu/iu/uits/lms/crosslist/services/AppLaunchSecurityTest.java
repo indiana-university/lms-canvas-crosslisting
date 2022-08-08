@@ -12,10 +12,9 @@ import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SudsServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
-import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
+import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
+import edu.iu.uits.lms.lti.service.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +25,11 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -81,12 +80,9 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void appAuthnWrongContextLaunch() throws Exception {
-      LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            "asdf", "systemId",
-            AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
-            "unit_test");
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","asdf", LTIConstants.BASE_USER_AUTHORITY);
 
-      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
+      List<OidcAuthenticationToken> tokenList = new ArrayList<OidcAuthenticationToken>(Arrays.asList(token));
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
@@ -102,10 +98,7 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void appAuthnLaunch() throws Exception {
-      LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            "1234", "systemId",
-            AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, LTIConstants.INSTRUCTOR_AUTHORITY),
-              "unit_test");
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","1234", LTIConstants.INSTRUCTOR_AUTHORITY);
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
@@ -121,7 +114,7 @@ public class AppLaunchSecurityTest {
 
       Mockito.when(courseService.getCourse("1234")).thenReturn(course);
 
-      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(course.getId()), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
+      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(course.getId()), eq(OidcTokenAwareController.SESSION_TOKEN_KEY), eq(OidcAuthenticationToken.class))).thenReturn(token);
 
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/app/1234/main")
@@ -143,12 +136,9 @@ public class AppLaunchSecurityTest {
    public void randomUrlWithAuth() throws Exception {
       String courseId = "1234";
 
-      LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            courseId, "systemId",
-            AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
-            "unit_test");
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","1234", LTIConstants.BASE_USER_AUTHORITY);
 
-      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(courseId), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
+      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(courseId), eq(OidcTokenAwareController.SESSION_TOKEN_KEY), eq(OidcAuthenticationToken.class))).thenReturn(token);
 
       SecurityContextHolder.getContext().setAuthentication(token);
 

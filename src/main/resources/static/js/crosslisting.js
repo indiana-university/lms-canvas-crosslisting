@@ -275,6 +275,12 @@ function loadUnavailableSections() {
     var loadDiv = $('#unavailable-sections-load');
     var urlBase = loadDiv.data('urlbase');
 
+    var token = $('#_csrf').attr('content');
+    var header = $('#_csrf_header').attr('content');
+    $(document).ajaxSend(function(e,xhr,options) {
+       xhr.setRequestHeader(header, token);
+    });
+
     loadDiv.empty();
 
     $("#unavailable-loading").show();

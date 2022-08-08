@@ -7,6 +7,8 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Cross-listing Assistant</title>
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link th:href="@{/app/jsrivet/rivet-bundle.min.css}" rel="stylesheet" type="text/css" />
     <link th:href="@{/app/jsrivet/rivet-switch.min.css}" rel="stylesheet" type="text/css" />
     <link th:href="@{/app/css/crosslisting.css}" rel="stylesheet" type="text/css" />

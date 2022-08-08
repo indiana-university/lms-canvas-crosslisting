@@ -73,13 +73,13 @@
         <jdk.source>11</jdk.source>
         <jdk.target>11</jdk.target>
         <jquery.version>3.5.1</jquery.version>
-        <lms-canvas-services.version>5.0.8</lms-canvas-services.version>
         <lms-canvas-common-configuration.version>5.0.3</lms-canvas-common-configuration.version>
         <lms-canvas-iu-custom-services.version>5.0.8</lms-canvas-iu-custom-services.version>
-        <lms-canvas-lti-framework.version>5.0.4</lms-canvas-lti-framework.version>
-        <lms-canvas-rivet.version>5.1.8.2_1</lms-canvas-rivet.version>
+        <lms-canvas-lti-framework.version>5.1.9</lms-canvas-lti-framework.version>
         <lms-canvas-redis-config.version>5.0.7</lms-canvas-redis-config.version>
-        <nimbus-jose-jwt.version>8.23</nimbus-jose-jwt.version>
+        <lms-canvas-rivet.version>5.1.8.2_1</lms-canvas-rivet.version>
+        <lms-canvas-services.version>5.0.8</lms-canvas-services.version>
+        <nimbus-jose-jwt.version>9.10.1</nimbus-jose-jwt.version>
         <spring-cloud-starter-vault-config.version>3.0.5</spring-cloud-starter-vault-config.version>
         <spring-security-bom.version>5.5.2</spring-security-bom.version>
         <webjars-locator.version>0.42</webjars-locator.version>
@@ -173,6 +173,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -20,9 +20,8 @@ import edu.iu.uits.lms.iuonly.model.SudsCourse;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SudsServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
-import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
+import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
+import edu.iu.uits.lms.lti.service.OidcTokenUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ import java.util.stream.Collectors;
 @Controller
 @Slf4j
 @RequestMapping("/app")
-public class CrosslistController extends LtiAuthenticationTokenAwareController {
+public class CrosslistController extends OidcTokenAwareController {
 
     private static final String FEATURE_MULTITERM_CROSSLISTING = "multiterm.crosslisting";
 
@@ -98,8 +99,10 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         return "accessDenied";
     }
 
-    private Course getValidatedCourse(LtiAuthenticationToken token, HttpSession session) {
-        String courseId = token.getContext();
+    private Course getValidatedCourse(OidcAuthenticationToken token, HttpSession session) {
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
+        String courseId = oidcTokenUtils.getCourseId();
+
         Course currentCourse = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.COURSE_KEY, Course.class);
 
@@ -118,14 +121,24 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         return currentCourse;
     }
 
-    @RequestMapping("/loading/{courseId}")
-    public String loading(@PathVariable("courseId") String courseId, Model model) {
+    @RequestMapping("/loading")
+    public String loading(Model model, HttpServletRequest request) {
+        OidcAuthenticationToken token = getTokenWithoutContext();
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
+        String courseId = oidcTokenUtils.getCourseId();
+
+        OidcAuthenticationToken sessionToken = courseSessionService.getAttributeFromSession(request.getSession(), courseId, OidcTokenAwareController.SESSION_TOKEN_KEY, OidcAuthenticationToken.class);
+
+        if (sessionToken == null) {
+            courseSessionService.addAttributeToSession(request.getSession(), courseId, OidcTokenAwareController.SESSION_TOKEN_KEY, token);
+        }
+
         model.addAttribute("courseId", courseId);
         model.addAttribute("hideFooter", true);
         return "loading";
     }
 
-    private String showMainPage(LtiAuthenticationToken token, Map<CanvasTerm,List<SectionUIDisplay>> sectionsMap,
+    private String showMainPage(OidcAuthenticationToken token, Map<CanvasTerm,List<SectionUIDisplay>> sectionsMap,
                                 List<CanvasTerm> selectableTerms, Model model, HttpSession session) {
         Course currentCourse = getValidatedCourse(token, session);
 
@@ -165,7 +178,8 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     @RequestMapping("/{courseId}/main")
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
     public String main(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
 
         ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
@@ -175,7 +189,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         }
         model.addAttribute("impersonationModel", impersonationModel);
 
-        String currentUserId = impersonationModel.getUsername() == null ? (String)token.getPrincipal(): impersonationModel.getUsername();
+        String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
         Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
@@ -340,7 +354,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         // Comparator<SectionUIDisplay> nameComparator = Comparator.comparing(SectionUIDisplay::getSectionName, Comparator.nullsFirst(Comparator.naturalOrder()));
         // rebuiltTermMap.values().forEach(sectionUIDisplays -> sectionUIDisplays.sort(nameComparator));
 
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         Course currentCourse = getValidatedCourse(token, session);
         // set the List<SectionUIDisplay> in the token to potentially be used later for submitting
@@ -435,7 +449,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
     public String doEditConfirmation(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
         log.debug("doEdit");
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
@@ -466,7 +480,8 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
     public String doSubmitConfirmation(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
         log.debug("doSubmit");
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
 
         ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
@@ -476,7 +491,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
         }
         model.addAttribute("impersonationModel", impersonationModel);
 
-        String currentUserId = impersonationModel.getUsername() == null ? (String)token.getPrincipal(): impersonationModel.getUsername();
+        String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
         List<SectionUIDisplay> sectionList = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.SECTION_LIST_KEY, List.class);
@@ -562,7 +577,8 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     public String doTermLoad(@PathVariable("courseId") String courseId, @PathVariable("termId") String termId,
                              @RequestParam("sectionList") String sectionListJson, @RequestParam("collapsedTerms") String collapsedTerms,
                              Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
         Course currentCourse = getValidatedCourse(token, session);
         Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
@@ -576,7 +592,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
             }
             model.addAttribute("impersonationModel", impersonationModel);
 
-            String currentUserId = impersonationModel.getUsername() == null ? (String)token.getPrincipal(): impersonationModel.getUsername();
+            String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
             List<SectionUIDisplay> sectionList = null;
             try {
@@ -673,7 +689,8 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     public String doUnavailableSectionsLoad(@PathVariable("courseId") String courseId,
                                             @RequestParam("joinedTerms") String joinedTerms,
                                             Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
         Course currentCourse = getValidatedCourse(token, session);
         Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
@@ -686,7 +703,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
 
         model.addAttribute("impersonationModel", impersonationModel);
 
-        String currentUserId = impersonationModel.getUsername() == null ? (String)token.getPrincipal(): impersonationModel.getUsername();
+        String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
         // Look up the new course/section information
         List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
@@ -807,7 +824,7 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
     @Secured({LTIConstants.ADMIN_AUTHORITY})
     public String beginImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
         return main(courseId, model, session);
     }
@@ -815,15 +832,15 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
     @Secured({LTIConstants.ADMIN_AUTHORITY})
     public String endImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         courseSessionService.removeAttributeFromSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY);
         return main(courseId, model, session);
     }
 
     @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
-    @Secured({LtiAuthenticationProvider.LTI_USER_ROLE})
+    @Secured({LTIConstants.BASE_USER_AUTHORITY})
     public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
@@ -839,9 +856,9 @@ public class CrosslistController extends LtiAuthenticationTokenAwareController {
     }
 
     @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
-    @Secured({LtiAuthenticationProvider.LTI_USER_ROLE})
+    @Secured({LTIConstants.BASE_USER_AUTHORITY})
     public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
-        LtiAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
+        OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
