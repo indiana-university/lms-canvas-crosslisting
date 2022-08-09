@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.Date;
 
 @SpringBootApplication
-@EnableGlobalErrorHandler
+@EnableGlobalErrorHandler(accessDeniedViewName="accessDenied")
 @Slf4j
 @EnableCookieValve
 @EnableRedisConfiguration

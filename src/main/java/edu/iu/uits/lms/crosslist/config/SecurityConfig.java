@@ -28,6 +28,9 @@ public class SecurityConfig {
         @Autowired
         private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
 
+        @Autowired
+        private ToolConfig toolConfig;
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
@@ -40,9 +43,11 @@ public class SecurityConfig {
 
             //Setup the LTI handshake
             Lti13Configurer lti13Configurer = new Lti13Configurer()
-                    .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository));
+                    .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, toolConfig));
 
             http.apply(lti13Configurer);
+
+            http.exceptionHandling().accessDeniedPage("/accessDenied");
 
             //Fallback for everything else
             http.requestMatchers().antMatchers("/**")

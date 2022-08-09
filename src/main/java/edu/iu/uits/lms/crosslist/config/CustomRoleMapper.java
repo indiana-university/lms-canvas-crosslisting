@@ -8,22 +8,26 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
 
-import static edu.iu.uits.lms.canvas.helpers.CanvasConstants.ADMIN_ROLE;
-
 @Slf4j
 public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
-   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository) {
+   private ToolConfig toolConfig;
+
+   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, ToolConfig toolConfig) {
       super(defaultInstructorRoleRepository);
+      this.toolConfig = toolConfig;
    }
 
    @Override
    protected String returnEquivalentAuthority(String[] userRoles, List<String> instructorRoles) {
       List<String> userRoleList = Arrays.asList(userRoles);
+      List<String> adminRoleList = toolConfig.getAdminRoles();
 
-      //Check for admins first
-      if (userRoleList.contains(ADMIN_ROLE)) {
-         return LTIConstants.ADMIN_AUTHORITY;
+      // check for admins first
+      for (String adminRole : adminRoleList) {
+         if (userRoleList.contains(adminRole)) {
+            return LTIConstants.ADMIN_AUTHORITY;
+         }
       }
 
       //Then do normal stuff

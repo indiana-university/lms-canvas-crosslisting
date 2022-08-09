@@ -80,13 +80,13 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void appAuthnWrongContextLaunch() throws Exception {
-      OidcAuthenticationToken token = TestUtils.buildToken("userId","asdf", LTIConstants.BASE_USER_AUTHORITY);
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","asdf", LTIConstants.INSTRUCTOR_AUTHORITY);
 
       List<OidcAuthenticationToken> tokenList = new ArrayList<OidcAuthenticationToken>(Arrays.asList(token));
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
-      //This is a secured endpoint and should not not allow access without authn
+      //This is a secured endpoint and should not allow access without authn
       ResultActions mockMvcAction = mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON));
