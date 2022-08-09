@@ -51,6 +51,11 @@ app:
   fullFilePath: file:/usr/src/app/config
   overridesFileName: overrides.properties
 
+management:
+  endpoint.info.enabled: true
+  endpoints.web.exposure.include: health,info
+  health.redis.enabled: false
+
 ---
 
 spring:
