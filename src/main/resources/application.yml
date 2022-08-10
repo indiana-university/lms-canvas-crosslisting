@@ -36,7 +36,7 @@ spring:
 lms-lti-crosslist:
   version: @app.version@
   env: ${app.env}
-  adminRoles: Administrator
+  adminRoles: Account Admin, Administrator, Dept Admin, SC Supervisors
 
 server:
   error:
