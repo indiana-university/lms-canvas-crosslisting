@@ -1,39 +1,92 @@
 package edu.iu.uits.lms.crosslist.config;
 
+/*-
+ * #%L
+ * lms-lti-crosslist
+ * %%
+ * Copyright (C) 2015 - 2022 Indiana University
+ * %%
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Indiana University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import uk.ac.ox.ctl.lti13.Lti13Configurer;
+
+import static edu.iu.uits.lms.lti.LTIConstants.BASE_USER_ROLE;
+import static edu.iu.uits.lms.lti.LTIConstants.WELL_KNOWN_ALL;
+
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER - 4)
     public static class CrosslistWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
+        @Autowired
+        private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+        @Autowired
+        private ToolConfig toolConfig;
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.authenticationProvider(new LtiAuthenticationProvider());
             http
-                  .requestMatchers().antMatchers("/lti", "/app/**")
-                  .and()
-                  .authorizeRequests()
-                  .antMatchers("/lti").permitAll()
-                  .antMatchers("/app/**").hasRole(LtiAuthenticationProvider.LTI_USER);
+                    .requestMatchers()
+                    .antMatchers(WELL_KNOWN_ALL, "/error", "/app/**")
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers(WELL_KNOWN_ALL, "/error").permitAll()
+                    .antMatchers("/**").hasRole(BASE_USER_ROLE);
 
-            //Need to disable csrf so that we can use POST via REST
-            http.csrf().disable();
+            //Setup the LTI handshake
+            Lti13Configurer lti13Configurer = new Lti13Configurer()
+                    .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, toolConfig));
 
-            //Need to disable the frame options so we can embed this in another tool
-            http.headers().frameOptions().disable();
+            http.apply(lti13Configurer);
 
             http.exceptionHandling().accessDeniedPage("/accessDenied");
+
+            //Fallback for everything else
+            http.requestMatchers().antMatchers("/**")
+                    .and()
+                    .authorizeRequests()
+                    .anyRequest().authenticated();
         }
 
         @Override
@@ -44,7 +97,6 @@ public class SecurityConfig {
 
     }
 
-
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER - 3)
     public static class CrosslistRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
@@ -52,15 +104,15 @@ public class SecurityConfig {
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http.requestMatchers().antMatchers("/rest/**")
-                  .and()
-                  .authorizeRequests()
-                  .antMatchers("/rest/**")
-                  .access("hasAuthority('SCOPE_lms:rest') and hasAuthority('ROLE_LMS_REST_ADMINS')")
-                  .and()
-                  .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                  .and()
-                  .oauth2ResourceServer()
-                  .jwt().jwtAuthenticationConverter(new CustomJwtAuthenticationConverter());
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers("/rest/**")
+                    .access("hasAuthority('SCOPE_lms:rest') and hasAuthority('ROLE_LMS_REST_ADMINS')")
+                    .and()
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                    .oauth2ResourceServer()
+                    .jwt().jwtAuthenticationConverter(new CustomJwtAuthenticationConverter());
         }
     }
 
@@ -71,9 +123,9 @@ public class SecurityConfig {
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http.requestMatchers().antMatchers("/**")
-                  .and()
-                  .authorizeRequests()
-                  .anyRequest().authenticated();
+                    .and()
+                    .authorizeRequests()
+                    .anyRequest().authenticated();
         }
     }
 }

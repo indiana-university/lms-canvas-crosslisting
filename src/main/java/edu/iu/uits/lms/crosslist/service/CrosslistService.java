@@ -1,16 +1,49 @@
 package edu.iu.uits.lms.crosslist.service;
 
-import canvas.client.generated.api.AccountsApi;
-import canvas.client.generated.api.CoursesApi;
-import canvas.client.generated.model.Account;
-import canvas.client.generated.model.CanvasTerm;
-import canvas.client.generated.model.Course;
-import canvas.client.generated.model.Section;
-import canvas.helpers.CanvasDateFormatUtil;
+/*-
+ * #%L
+ * lms-lti-crosslist
+ * %%
+ * Copyright (C) 2015 - 2022 Indiana University
+ * %%
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Indiana University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+
+import edu.iu.uits.lms.canvas.helpers.CanvasDateFormatUtil;
+import edu.iu.uits.lms.canvas.model.Account;
+import edu.iu.uits.lms.canvas.model.CanvasTerm;
+import edu.iu.uits.lms.canvas.model.Course;
+import edu.iu.uits.lms.canvas.model.Section;
+import edu.iu.uits.lms.canvas.services.AccountService;
+import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
-import iuonly.client.generated.api.FeatureAccessApi;
+import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +70,16 @@ public class CrosslistService {
    public final String ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING = "ALIEN_SECTION_BLOCKED";
 
    @Autowired
-   private CoursesApi coursesApi = null;
+   private CourseService courseService = null;
 
    @Autowired
    private CourseSessionService courseSessionService = null;
 
    @Autowired
-   private FeatureAccessApi featureAccessApi = null;
+   private FeatureAccessServiceImpl featureAccessService = null;
 
    @Autowired
-   private AccountsApi accountsApi = null;
+   private AccountService accountService = null;
 
    // self reference so can use the cache for getCourseSections() from within this service
    @Autowired
@@ -93,11 +126,11 @@ public class CrosslistService {
             SectionUIDisplay sectionUIDisplayForCount = new SectionUIDisplay(termMap.get(course.getEnrollmentTermId()).getId(),
                     section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode(), impersonationMode), false, false, false);
 
-            if (section.getSisSectionId() == null) {
+            if (section.getSis_section_id() == null) {
                courseSisNaturalAndAlien.addAdHocSection(sectionUIDisplayForCount);
             }
             else {
-               if (section.getSisSectionId().equals(course.getSisCourseId())) {
+               if (section.getSis_section_id().equals(course.getSisCourseId())) {
                   courseSisNaturalAndAlien.addNaturalSisSection(sectionUIDisplayForCount);
                } else {
                   courseSisNaturalAndAlien.addAlienSisSection(sectionUIDisplayForCount);
@@ -105,8 +138,8 @@ public class CrosslistService {
             }
 
             // Filter out sections crosslisted with other courses and ad hoc sections
-            boolean showNonSisSections = includeNonSisSections && (section.getSisSectionId() == null);
-            boolean showEverythingButCoursesNativeSection = section.getSisSectionId() != null && !section.getSisSectionId().equals(currentCourse.getSisCourseId());
+            boolean showNonSisSections = includeNonSisSections && (section.getSis_section_id() == null);
+            boolean showEverythingButCoursesNativeSection = section.getSis_section_id() != null && !section.getSis_section_id().equals(currentCourse.getSisCourseId());
 
             if (showNonSisSections || showEverythingButCoursesNativeSection) {
 
@@ -117,8 +150,8 @@ public class CrosslistService {
                // If the section is cross-listed, then look up the original parent course's termId
                // This keeps sections in their appropriate term when the page displays
                String termIdForCourseOrSection = course.getEnrollmentTermId();
-               if (section.getNonxlistCourseId() != null) {
-                  Course courseForTerm = coursesApi.getCourse(section.getNonxlistCourseId());
+               if (section.getNonxlist_course_id() != null) {
+                  Course courseForTerm = courseService.getCourse(section.getNonxlist_course_id());
                   //Course might possibly be null here, under some strange and unlikely circumstances
                   if (courseForTerm != null) {
                      termIdForCourseOrSection = courseForTerm.getEnrollmentTermId();
@@ -137,30 +170,30 @@ public class CrosslistService {
                boolean addedSection = false;
 
                String courseCode = course.getCourseCode();
-               if (section.getNonxlistCourseId() != null) {
-                  courseMap.get(section.getNonxlistCourseId());
-                  if (courseMap.containsKey(section.getCourseId())) {
-                     courseCode = courseMap.get(section.getCourseId());
+               if (section.getNonxlist_course_id() != null) {
+                  courseMap.get(section.getNonxlist_course_id());
+                  if (courseMap.containsKey(section.getCourse_id())) {
+                     courseCode = courseMap.get(section.getCourse_id());
                   } else {
-                     Course originalCourse = coursesApi.getCourse(section.getCourseId());
-                     courseMap.put(section.getCourseId(), originalCourse.getCourseCode());
+                     Course originalCourse = courseService.getCourse(section.getCourse_id());
+                     courseMap.put(section.getCourse_id(), originalCourse.getCourseCode());
                      courseCode = originalCourse.getCourseCode();
                   }
                }
 
-               if (section.getSisSectionId() == null) {
+               if (section.getSis_section_id() == null) {
                   //Non-sis courses
-                  if (section.getCourseId().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlistCourseId() == null) {
+                  if (section.getCourse_id().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlist_course_id() == null) {
                      log.debug(section.getName() + ": non-sis, not crosslisted, under current course - SKIP");
-                  } else if (includeSectionsCrosslistedElsewhere && !section.getCourseId().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlistCourseId() != null) {
+                  } else if (includeSectionsCrosslistedElsewhere && !section.getCourse_id().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlist_course_id() != null) {
                      log.debug(section.getName() + ": non-sis, crosslisted elsewhere");
                      uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, true));
                      addedSection = true;
-                  } else if (section.getCourseId().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlistCourseId() != null) {
+                  } else if (section.getCourse_id().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlist_course_id() != null) {
                      log.debug(section.getName() + ": non-sis, already crosslisted to current course");
                      uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), section.getName(), true, true, false));
                      addedSection = true;
-                  } else if (section.getNonxlistCourseId() == null) {
+                  } else if (section.getNonxlist_course_id() == null) {
                      log.debug(section.getName() + ": non-sis, not crosslisted");
                      uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, false));
                      addedSection = true;
@@ -169,18 +202,18 @@ public class CrosslistService {
                   }
                } else {
                   //SIS Courses
-                  if (section.getNonxlistCourseId() == null &&
-                        !(courseHasMultipleSections && section.getSisSectionId().equals(section.getSisCourseId()))) {
+                  if (section.getNonxlist_course_id() == null &&
+                        !(courseHasMultipleSections && section.getSis_section_id().equals(section.getSis_course_id()))) {
                      //Not crosslisted, so should be included, unless it is the default section for this course and there are multiple sections
                      log.debug(section.getName() + ": sis, not crosslisted");
                      uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, false));
                      addedSection = true;
-                  } else if (section.getNonxlistCourseId() != null && section.getCourseId().equals(currentCourse.getId())) {
+                  } else if (section.getNonxlist_course_id() != null && section.getCourse_id().equals(currentCourse.getId())) {
                      log.debug(section.getName() + ": sis, crosslisted to me");
                      //Already crosslisted to this course
                      uiSection.add(new SectionUIDisplay(termIdForCourseOrSection, section.getId(), section.getName(), true, true, false));
                      addedSection = true;
-                  } else if (includeSectionsCrosslistedElsewhere && section.getNonxlistCourseId() != null) {
+                  } else if (includeSectionsCrosslistedElsewhere && section.getNonxlist_course_id() != null) {
                      log.debug(section.getName() + ": sis, crosslisted elsewhere");
                      // Section crosslisted to a DIFFERENT course
                      uiSection.add(new SectionUIDisplay(termIdForCourseOrSection, section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, true));
@@ -265,7 +298,7 @@ public class CrosslistService {
    @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
       log.debug("cache miss for {} - getCoursesTaughtBy({}, {})", CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, IUNetworkId, excludeBlueprint);
-      return coursesApi.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
+      return courseService.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
    }
 
    public String buildSectionDisplayName(String sectionName, String courseCode, boolean impersonationMode) {
@@ -278,9 +311,9 @@ public class CrosslistService {
    public boolean checkForFeature(HttpSession session, Course currentCourse, String feature) {
       Boolean fromSession = courseSessionService.getAttributeFromSession(session, currentCourse.getId(), feature, Boolean.class);
       if (fromSession == null) {
-         List<Account> parentAccounts = accountsApi.getParentAccounts(currentCourse.getAccountId());
+         List<Account> parentAccounts = accountService.getParentAccounts(currentCourse.getAccountId());
          List<String> parentAccountIds = parentAccounts.stream().map(Account::getId).collect(Collectors.toList());
-         final Boolean featureEnabledForAccount = featureAccessApi.isFeatureEnabledForAccount(feature, currentCourse.getAccountId(), parentAccountIds);
+         final Boolean featureEnabledForAccount = featureAccessService.isFeatureEnabledForAccount(feature, currentCourse.getAccountId(), parentAccountIds);
          courseSessionService.addAttributeToSession(session, currentCourse.getId(), feature, featureEnabledForAccount.booleanValue());
          return featureEnabledForAccount;
       } else {
@@ -309,7 +342,7 @@ public class CrosslistService {
    @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
    public List<Section> getCourseSections(String courseId) {
       log.debug("cache miss for {} - getCourseSections({})", CrosslistConstants.COURSE_SECTIONS_CACHE_NAME, courseId);
-      return coursesApi.getCourseSections(courseId);
+      return courseService.getCourseSections(courseId);
    }
 
    @Data

@@ -1,13 +1,33 @@
 spring:
   application:
     name: lms-lti-crosslist
-  profiles:
-    active: redis-session
   session:
     store-type: none
-#  output:
-#    ansi:
-#      enabled: ALWAYS
+  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, classpath:lti-registrations.properties
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        temp:
+          use_jdbc_metadata_defaults: false
+      jadira:
+        usertype:
+          autoRegisterUserTypes: true
+  datasource:
+    url: ${lms.db.url}
+    username: ${lms.db.user}
+    password: ${lms.db.password}
+    type: ${lms.db.poolType}
+  cloud.vault.enabled: false
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
   security:
     oauth2:
       resourceserver:
@@ -16,6 +36,7 @@ spring:
 lms-lti-crosslist:
   version: @app.version@
   env: ${app.env}
+  adminRoles: Account Admin, Administrator, Dept Admin, SC Supervisors
 
 server:
   error:
@@ -25,10 +46,52 @@ server:
     session:
       timeout: 30m
 
+app:
+  env: dev
+  fullFilePath: file:/usr/src/app/config
+  overridesFileName: overrides.properties
+
+management:
+  endpoint.info.enabled: true
+  endpoints.web.exposure.include: health,info
+  health.redis.enabled: false
+
 ---
 
 spring:
-  profiles: redis-session
+  config.activate.on-profile: redis-session
   session:
     store-type: redis
-    redis.namespace: lms-lti-crosslist-${app.version}:session
+    redis.namespace: lms-lti-crosslist-@app.version@:session
+management.health.redis.enabled: true
+
+---
+
+spring:
+  config:
+    activate.on-profile: vault
+    import: vault://
+  cloud.vault:
+    enabled: true
+    config:
+      lifecycle.lease-endpoints: sysleases
+    generic:
+      enabled: false
+    kv:
+      enabled: true
+      backend: ua-vpit/enterprise-systems/lms/kv
+      application-name: lms-lti-crosslist
+
+---
+
+spring:
+  config:
+    activate.on-profile: swagger
+    import: classpath:lti-api-config.properties
+springdoc:
+  swagger-ui:
+    oauth:
+      clientId: ${oauth.tokenprovider.clientId}
+  oAuthFlow:
+    authorizationUrl: ${oauth.tokenprovider.url}/oauth/authorize
+    tokenUrl: ${oauth.tokenprovider.accessTokenUri}

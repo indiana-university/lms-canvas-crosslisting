@@ -1,21 +1,54 @@
 package edu.iu.uits.lms.crosslist.services;
 
-import canvas.client.generated.api.CoursesApi;
-import canvas.client.generated.api.TermsApi;
-import canvas.client.generated.model.CanvasTerm;
-import canvas.client.generated.model.Course;
+/*-
+ * #%L
+ * lms-lti-crosslist
+ * %%
+ * Copyright (C) 2015 - 2022 Indiana University
+ * %%
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Indiana University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+
+import edu.iu.uits.lms.canvas.config.CanvasClientTestConfig;
+import edu.iu.uits.lms.canvas.model.CanvasTerm;
+import edu.iu.uits.lms.canvas.model.Course;
+import edu.iu.uits.lms.canvas.services.CourseService;
+import edu.iu.uits.lms.canvas.services.TermService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
+import edu.iu.uits.lms.iuonly.services.SudsServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
-import edu.iu.uits.lms.lti.controller.LtiAuthenticationTokenAwareController;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationProvider;
-import edu.iu.uits.lms.lti.security.LtiAuthenticationToken;
+import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
-import iuonly.client.generated.api.FeatureAccessApi;
-import iuonly.client.generated.api.SudsApi;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
+import edu.iu.uits.lms.lti.service.TestUtils;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,29 +58,24 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(CrosslistController.class)
-@Import(ToolConfig.class)
-@ActiveProfiles("none")
+@WebMvcTest(value = CrosslistController.class, properties = {"oauth.tokenprovider.url=http://foo"})
+@Import({ToolConfig.class, CanvasClientTestConfig.class, LtiClientTestConfig.class})
 public class AppLaunchSecurityTest {
    @Autowired
    private MockMvc mvc;
@@ -63,16 +91,16 @@ public class AppLaunchSecurityTest {
    private CourseSessionService courseSessionService;
 
    @MockBean
-   private CoursesApi coursesApi;
+   private CourseService courseService;
 
    @MockBean
-   private TermsApi termsApi;
+   private TermService termService;
 
    @MockBean
-   private FeatureAccessApi featureAccessApi;
+   private FeatureAccessServiceImpl featureAccessService;
 
    @MockBean
-   private SudsApi sudsApi;
+   private SudsServiceImpl sudsService;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {
@@ -85,16 +113,13 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void appAuthnWrongContextLaunch() throws Exception {
-      LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            "asdf", "systemId",
-            AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
-            "unit_test");
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","asdf", LTIConstants.INSTRUCTOR_AUTHORITY);
 
-      List<LtiAuthenticationToken> tokenList = new ArrayList<LtiAuthenticationToken>(Arrays.asList(token));
+      List<OidcAuthenticationToken> tokenList = new ArrayList<OidcAuthenticationToken>(Arrays.asList(token));
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
-      //This is a secured endpoint and should not not allow access without authn
+      //This is a secured endpoint and should not allow access without authn
       ResultActions mockMvcAction = mvc.perform(get("/app/1234/main")
             .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
             .contentType(MediaType.APPLICATION_JSON));
@@ -106,10 +131,7 @@ public class AppLaunchSecurityTest {
 
    @Test
    public void appAuthnLaunch() throws Exception {
-      LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            "1234", "systemId",
-            AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, LTIConstants.INSTRUCTOR_AUTHORITY),
-              "unit_test");
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","1234", LTIConstants.INSTRUCTOR_AUTHORITY);
 
       SecurityContextHolder.getContext().setAuthentication(token);
 
@@ -123,9 +145,9 @@ public class AppLaunchSecurityTest {
       course.setAccountId("9999");
       course.setSisCourseId("9999");
 
-      Mockito.when(coursesApi.getCourse("1234")).thenReturn(course);
+      Mockito.when(courseService.getCourse("1234")).thenReturn(course);
 
-      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(course.getId()), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
+      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(course.getId()), eq(OidcTokenAwareController.SESSION_TOKEN_KEY), eq(OidcAuthenticationToken.class))).thenReturn(token);
 
       //This is a secured endpoint and should not not allow access without authn
       mvc.perform(get("/app/1234/main")
@@ -147,12 +169,9 @@ public class AppLaunchSecurityTest {
    public void randomUrlWithAuth() throws Exception {
       String courseId = "1234";
 
-      LtiAuthenticationToken token = new LtiAuthenticationToken("userId",
-            courseId, "systemId",
-            AuthorityUtils.createAuthorityList(LtiAuthenticationProvider.LTI_USER_ROLE, "authority"),
-            "unit_test");
+      OidcAuthenticationToken token = TestUtils.buildToken("userId","1234", LTIConstants.BASE_USER_AUTHORITY);
 
-      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(courseId), eq(LtiAuthenticationTokenAwareController.SESSION_TOKEN_KEY), eq(LtiAuthenticationToken.class))).thenReturn(token);
+      Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(courseId), eq(OidcTokenAwareController.SESSION_TOKEN_KEY), eq(OidcAuthenticationToken.class))).thenReturn(token);
 
       SecurityContextHolder.getContext().setAuthentication(token);
 

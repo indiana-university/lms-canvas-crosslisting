@@ -33,20 +33,37 @@ package edu.iu.uits.lms.crosslist.config;
  * #L%
  */
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import edu.iu.uits.lms.lti.LTIConstants;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
+import edu.iu.uits.lms.lti.service.LmsDefaultGrantedAuthoritiesMapper;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties(prefix = "lms-lti-crosslist")
-@Getter
-@Setter
-public class ToolConfig {
+@Slf4j
+public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
-   private String version;
-   private String env;
-   private List<String> adminRoles;
+   private ToolConfig toolConfig;
+
+   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, ToolConfig toolConfig) {
+      super(defaultInstructorRoleRepository);
+      this.toolConfig = toolConfig;
+   }
+
+   @Override
+   protected String returnEquivalentAuthority(String[] userRoles, List<String> instructorRoles) {
+      List<String> userRoleList = Arrays.asList(userRoles);
+      List<String> adminRoleList = toolConfig.getAdminRoles();
+
+      // check for admins first
+      for (String adminRole : adminRoleList) {
+         if (userRoleList.contains(adminRole)) {
+            return LTIConstants.ADMIN_AUTHORITY;
+         }
+      }
+
+      //Then do normal stuff
+      return super.returnEquivalentAuthority(userRoles, instructorRoles);
+   }
 }
