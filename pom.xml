@@ -15,7 +15,7 @@
 
     <version>5.0.0-SNAPSHOT</version>
     <description>The Cross-listing Assistant in Canvas at Indiana University is a utility for combining enrollments from multiple course sections into a single primary course site, which reduces the administrative overhead of managing a separate version of the course for each section.</description>
-    <url>https://github.com/indiana-university/lms-lti-crosslisting</url>
+    <url>https://github.com/indiana-university/lms-canvas-crosslisting</url>
     <inceptionYear>2015</inceptionYear>
 
     <organization>
@@ -34,7 +34,7 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/indiana-university/lms-lti-crosslisting/issues</url>
+        <url>https://github.com/indiana-university/lms-canvas-crosslisting/issues</url>
     </issueManagement>
 
     <licenses>
@@ -59,9 +59,9 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:https://github.com/indiana-university/lms-lti-crosslisting.git</connection>
-        <developerConnection>scm:git:https://github.com/indiana-university/lms-lti-crosslisting.git</developerConnection>
-        <url>https://github.com/indiana-university/lms-lti-crosslisting</url>
+        <connection>scm:git:https://github.com/indiana-university/lms-canvas-crosslisting.git</connection>
+        <developerConnection>scm:git:https://github.com/indiana-university/lms-canvas-crosslisting.git</developerConnection>
+        <url>https://github.com/indiana-university/lms-canvas-crosslisting</url>
         <tag>HEAD</tag>
     </scm>
 
