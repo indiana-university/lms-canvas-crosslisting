@@ -33,6 +33,12 @@ package edu.iu.uits.lms.crosslist.security;
  * #L%
  */
 
+import edu.iu.uits.lms.canvas.model.CanvasTerm;
+import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
+
+import java.util.List;
+import java.util.Map;
+
 public interface CrosslistAuthenticationToken {
 
     /**
@@ -46,7 +52,7 @@ public interface CrosslistAuthenticationToken {
     String SECTION_LIST_KEY = "section_list";
 
     /**
-     * Key used to get the Map<CanvasTerm,List<SectionUIDisplay>> object out of the data map
+     * Key used to get the {@link Map} collection that contains {@link CanvasTerm} as key and {@link List} of {@link SectionUIDisplay} as value out of the data map
      */
     String SECTION_MAP_KEY = "section_map";
 

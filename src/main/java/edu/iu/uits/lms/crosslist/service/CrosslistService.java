@@ -324,7 +324,7 @@ public class CrosslistService {
 
    /**
     * Gets dummy term for terms crosslisted into a course that aren't their natural course
-    * @return
+    * @return The CanvasTerm
     */
    public CanvasTerm getAlienBlockedCanvasTerm() {
       CanvasTerm alienSectionBlockedFakeCanvasTerm = new CanvasTerm();
