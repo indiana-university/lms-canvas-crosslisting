@@ -603,7 +603,9 @@ public class CrosslistController extends OidcTokenAwareController {
      * @param courseId CourseId for the current course
      * @param termId The id of the term that's being asked to load into the page
      * @param sectionListJson The json of the objects on the page, used to retain the Map
+     * @param collapsedTerms Collapsed terms
      * @param model the model!
+     * @param session The https session
      * @return returns the fragment for termData
      */
     @RequestMapping(value = "/{courseId}/loadTerm/{termId}", method = RequestMethod.POST)
@@ -716,6 +718,7 @@ public class CrosslistController extends OidcTokenAwareController {
      * @param courseId CourseId for the current course
      * @param joinedTerms A comma separated string of term ids
      * @param model the model!
+     * @param session The https session
      * @return returns the fragment for termDataUnavailable
      */
     @RequestMapping(value = "/{courseId}/loadUnavailableSections/", method = RequestMethod.POST)
