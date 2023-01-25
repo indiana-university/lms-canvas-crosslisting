@@ -67,6 +67,8 @@
 
     <properties>
         <app.version>${project.version}</app.version>
+        <denodo-hibernate-dialect.version>8.0.20201021</denodo-hibernate-dialect.version>
+        <denodo-jdbc.version>8.0.2</denodo-jdbc.version>
         <git-commit-id-maven-plugin.version>5.0.0</git-commit-id-maven-plugin.version>
         <hibernate5-ddl-maven-plugin.version>2.3.0</hibernate5-ddl-maven-plugin.version>
         <java.version>11</java.version>
@@ -74,7 +76,7 @@
         <jdk.target>11</jdk.target>
         <jquery.version>3.5.1</jquery.version>
         <lms-canvas-common-configuration.version>5.0.3</lms-canvas-common-configuration.version>
-        <lms-canvas-iu-custom-services.version>5.0.8</lms-canvas-iu-custom-services.version>
+        <lms-canvas-iu-custom-services.version>5.0.14-SNAPSHOT</lms-canvas-iu-custom-services.version>
         <lms-canvas-lti-framework.version>5.1.9</lms-canvas-lti-framework.version>
         <lms-canvas-redis-config.version>5.0.7</lms-canvas-redis-config.version>
         <lms-canvas-rivet.version>5.1.8.2_1</lms-canvas-rivet.version>
@@ -410,6 +412,30 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>denodo</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.denodo.vdp.jdbc</groupId>
+                    <artifactId>denodo-jdbc</artifactId>
+                    <version>${denodo-jdbc.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.denodo.vdp.jdbc</groupId>
+                    <artifactId>denodo-hibernate-dialect</artifactId>
+                    <version>${denodo-hibernate-dialect.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>IUMaven</id>
+                    <name>IUMaven</name>
+                    <url>https://uisapp2.iu.edu/nxs-prd/content/groups/public</url>
+                </repository>
+            </repositories>
         </profile>
     </profiles>
 

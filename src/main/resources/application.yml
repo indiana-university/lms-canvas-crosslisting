@@ -3,7 +3,7 @@ spring:
     name: lms-lti-crosslist
   session:
     store-type: none
-  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, classpath:lti-registrations.properties
+  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:denodo.properties, classpath:lti-registrations.properties
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -23,6 +23,12 @@ spring:
     username: ${lms.db.user}
     password: ${lms.db.password}
     type: ${lms.db.poolType}
+    denodoiulms:
+      driverClassName: ${denodo.db.driverClass}
+      jdbcUrl: ${iulms.denodo.db.url}
+      username: ${denodo.db.user}
+      password: ${denodo.db.password}
+      type: ${lms.db.poolType}
   cloud.vault.enabled: false
   servlet:
     multipart:

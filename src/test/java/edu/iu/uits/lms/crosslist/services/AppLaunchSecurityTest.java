@@ -42,7 +42,7 @@ import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
-import edu.iu.uits.lms.iuonly.services.SudsServiceImpl;
+import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
@@ -100,7 +100,7 @@ public class AppLaunchSecurityTest {
    private FeatureAccessServiceImpl featureAccessService;
 
    @MockBean
-   private SudsServiceImpl sudsService;
+   private SisServiceImpl sisService;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {

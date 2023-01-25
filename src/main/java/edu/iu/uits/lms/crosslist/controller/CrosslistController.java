@@ -49,9 +49,9 @@ import edu.iu.uits.lms.crosslist.model.SectionWrapper;
 import edu.iu.uits.lms.crosslist.model.SubmissionStatus;
 import edu.iu.uits.lms.crosslist.security.CrosslistAuthenticationToken;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
-import edu.iu.uits.lms.iuonly.model.SudsCourse;
+import edu.iu.uits.lms.iuonly.model.SisCourse;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
-import edu.iu.uits.lms.iuonly.services.SudsServiceImpl;
+import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
 import edu.iu.uits.lms.lti.service.OidcTokenUtils;
@@ -122,7 +122,7 @@ public class CrosslistController extends OidcTokenAwareController {
     private CrosslistService crosslistService = null;
 
     @Autowired
-    private SudsServiceImpl sudsService = null;
+    private SisServiceImpl sisService = null;
 
     @Autowired
     private CourseSessionService courseSessionService;
@@ -197,11 +197,11 @@ public class CrosslistController extends OidcTokenAwareController {
 
         model.addAttribute("instructors", courseSessionService.getAttributeFromSession(session, currentCourse.getId(), CrosslistAuthenticationToken.INSTRUCTORS_KEY, List.class));
 
-        SudsCourse sudsCurrentCourse = sudsService.getSudsCourseBySiteId(currentCourse.getSisCourseId());
+        SisCourse sisCurrentCourse = sisService.getSisCourseBySiteId(currentCourse.getSisCourseId());
 
         // display etext ordered warning
-        if (sudsCurrentCourse != null && sudsCurrentCourse.getIuCourseLoadStatus() != null
-                && sudsCurrentCourse.getIuCourseLoadStatus().toUpperCase().equals("Y")) {
+        if (sisCurrentCourse != null && sisCurrentCourse.getIuCourseLoadStatus() != null
+                && sisCurrentCourse.getIuCourseLoadStatus().toUpperCase().equals("Y")) {
             model.addAttribute("etextMessage",  messageSource.getMessage("etext.message", null, Locale.getDefault()));
         }
 
@@ -400,13 +400,13 @@ public class CrosslistController extends OidcTokenAwareController {
         model.addAttribute("courseTitle", currentCourse.getName());
         model.addAttribute("removeListSections", sectionWrapper.getRemoveList());
 
-        SudsCourse sudsCurrentCourse = sudsService.getSudsCourseBySiteId(currentCourse.getSisCourseId());
+        SisCourse sisCurrentCourse = sisService.getSisCourseBySiteId(currentCourse.getSisCourseId());
 
         // if course has etexts, check to see if the crosslisted sections have the same etexts
-        if (sudsCurrentCourse != null && sudsCurrentCourse.getEtextIsbns() != null) {
+        if (sisCurrentCourse != null && sisCurrentCourse.getEtextIsbns() != null) {
             List<String> missingEtextSections = new ArrayList<String>();
 
-            String[] currentCourseEtextIsbns = sudsCurrentCourse.getEtextIsbns().split(",");
+            String[] currentCourseEtextIsbns = sisCurrentCourse.getEtextIsbns().split(",");
 
             for (SectionUIDisplay sectionUIDisplay : sectionWrapper.getAddList()) {
                 String sectionUIDisplaySectionName = sectionUIDisplay.getSectionName();
@@ -419,9 +419,9 @@ public class CrosslistController extends OidcTokenAwareController {
                     sectionUIDisplaySectionName = sectionUIDisplaySectionName.substring(0, indexOfParenthesis).trim();
                 }
 
-                SudsCourse sudsCrosslistCourse = sudsService.getSudsCourseBySiteId(sectionUIDisplaySectionName);
+                SisCourse sisCrosslistCourse = sisService.getSisCourseBySiteId(sectionUIDisplaySectionName);
 
-                if (sudsCrosslistCourse == null || sudsCrosslistCourse.getEtextIsbns() == null) {
+                if (sisCrosslistCourse == null || sisCrosslistCourse.getEtextIsbns() == null) {
                     String sectionName = sectionUIDisplay.getSectionName();
                     missingEtextSections.add(sectionName);
 
@@ -432,7 +432,7 @@ public class CrosslistController extends OidcTokenAwareController {
                     sectionWrapper.setFinalList(removeSectionUiDisplayBySectionName(finalList, sectionName));
                     uncheckSectionUiDisplayBySectionId(sectionUIDisplay.getSectionId(), sectionList);
                 } else {
-                    List<String> crosslistCourseEtextIsbns = Arrays.asList(sudsCrosslistCourse.getEtextIsbns().split(","));
+                    List<String> crosslistCourseEtextIsbns = Arrays.asList(sisCrosslistCourse.getEtextIsbns().split(","));
 
                     for (String currentCourseEtextIsbn : currentCourseEtextIsbns) {
                         boolean exists = crosslistCourseEtextIsbns.contains(currentCourseEtextIsbn);
