@@ -23,12 +23,11 @@ spring:
     username: ${lms.db.user}
     password: ${lms.db.password}
     type: ${lms.db.poolType}
-    denodoiulms:
+    denodo:
       driverClassName: ${denodo.db.driverClass}
-      jdbcUrl: ${iulms.denodo.db.url}
+      jdbcUrl: ${denodo.db.url}
       username: ${denodo.db.user}
       password: ${denodo.db.password}
-      type: ${lms.db.poolType}
   cloud.vault.enabled: false
   servlet:
     multipart:
