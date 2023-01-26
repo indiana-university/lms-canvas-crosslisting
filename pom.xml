@@ -71,16 +71,16 @@
         <denodo-jdbc.version>8.0.2</denodo-jdbc.version>
         <git-commit-id-maven-plugin.version>5.0.0</git-commit-id-maven-plugin.version>
         <hibernate5-ddl-maven-plugin.version>2.3.0</hibernate5-ddl-maven-plugin.version>
-        <java.version>11</java.version>
-        <jdk.source>11</jdk.source>
-        <jdk.target>11</jdk.target>
+        <java.version>17</java.version>
+        <jdk.source>17</jdk.source>
+        <jdk.target>17</jdk.target>
         <jquery.version>3.5.1</jquery.version>
-        <lms-canvas-common-configuration.version>5.0.3</lms-canvas-common-configuration.version>
+        <lms-canvas-common-configuration.version>5.0.10</lms-canvas-common-configuration.version>
         <lms-canvas-iu-custom-services.version>5.0.14-SNAPSHOT</lms-canvas-iu-custom-services.version>
-        <lms-canvas-lti-framework.version>5.1.9</lms-canvas-lti-framework.version>
-        <lms-canvas-redis-config.version>5.0.7</lms-canvas-redis-config.version>
+        <lms-canvas-lti-framework.version>5.1.20</lms-canvas-lti-framework.version>
+        <lms-canvas-redis-config.version>5.0.9</lms-canvas-redis-config.version>
         <lms-canvas-rivet.version>5.1.8.2_1</lms-canvas-rivet.version>
-        <lms-canvas-services.version>5.0.8</lms-canvas-services.version>
+        <lms-canvas-services.version>5.0.12</lms-canvas-services.version>
         <nimbus-jose-jwt.version>9.10.1</nimbus-jose-jwt.version>
         <spring-cloud-starter-vault-config.version>3.0.5</spring-cloud-starter-vault-config.version>
         <spring-security-bom.version>5.5.2</spring-security-bom.version>
@@ -90,7 +90,7 @@
         <plugins.gpg.version>1.6</plugins.gpg.version>
         <plugins.javadoc.version>3.0.1</plugins.javadoc.version>
         <plugins.license.version>2.0.0</plugins.license.version>
-        <plugins.nexus-staging.version>1.6.8</plugins.nexus-staging.version>
+        <plugins.nexus-staging.version>1.6.13</plugins.nexus-staging.version>
         <plugins.release.version>2.5.3</plugins.release.version>
         <plugins.source.version>3.0.1</plugins.source.version>
     </properties>
