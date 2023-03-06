@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.4</version>
+        <version>2.7.8</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -70,42 +70,32 @@
         <denodo-hibernate-dialect.version>8.0.20201021</denodo-hibernate-dialect.version>
         <denodo-jdbc.version>8.0.2</denodo-jdbc.version>
         <git-commit-id-maven-plugin.version>5.0.0</git-commit-id-maven-plugin.version>
-        <hibernate5-ddl-maven-plugin.version>2.3.0</hibernate5-ddl-maven-plugin.version>
+        <hibernate5-ddl-maven-plugin.version>2.5.0</hibernate5-ddl-maven-plugin.version>
         <java.version>17</java.version>
         <jdk.source>17</jdk.source>
         <jdk.target>17</jdk.target>
         <jquery.version>3.5.1</jquery.version>
-        <lms-canvas-common-configuration.version>5.0.11</lms-canvas-common-configuration.version>
-        <lms-canvas-iu-custom-services.version>5.0.15</lms-canvas-iu-custom-services.version>
-        <lms-canvas-lti-framework.version>5.1.22</lms-canvas-lti-framework.version>
-        <lms-canvas-redis-config.version>5.0.9</lms-canvas-redis-config.version>
         <lms-canvas-rivet.version>5.1.8.2_1</lms-canvas-rivet.version>
-        <lms-canvas-services.version>5.0.12</lms-canvas-services.version>
-        <nimbus-jose-jwt.version>9.10.1</nimbus-jose-jwt.version>
-        <spring-cloud-starter-vault-config.version>3.0.5</spring-cloud-starter-vault-config.version>
-        <spring-security-bom.version>5.5.2</spring-security-bom.version>
-        <webjars-locator.version>0.42</webjars-locator.version>
+        <lms-embedded-services.version>5.2.1</lms-embedded-services.version>
+        <lms-team-spring-boot-it12>4.7</lms-team-spring-boot-it12>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
+        <webjars-locator.version>0.46</webjars-locator.version>
 
-        <plugins.compiler.version>3.8.1</plugins.compiler.version>
-        <plugins.gpg.version>1.6</plugins.gpg.version>
-        <plugins.javadoc.version>3.0.1</plugins.javadoc.version>
+        <plugins.compiler.version>3.10.1</plugins.compiler.version>
+        <plugins.gpg.version>3.0.1</plugins.gpg.version>
+        <plugins.javadoc.version>3.5.0</plugins.javadoc.version>
         <plugins.license.version>2.0.0</plugins.license.version>
         <plugins.nexus-staging.version>1.6.13</plugins.nexus-staging.version>
         <plugins.release.version>2.5.3</plugins.release.version>
-        <plugins.source.version>3.0.1</plugins.source.version>
+        <plugins.source.version>3.2.1</plugins.source.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-                <version>${nimbus-jose-jwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-bom</artifactId>
-                <version>${spring-security-bom.version}</version>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -116,36 +106,36 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-common-configuration</artifactId>
-            <version>${lms-canvas-common-configuration.version}</version>
+            <version>${lms-embedded-services.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-iu-custom-services</artifactId>
-            <version>${lms-canvas-iu-custom-services.version}</version>
+            <version>${lms-embedded-services.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-iu-custom-services</artifactId>
-            <version>${lms-canvas-iu-custom-services.version}</version>
+            <version>${lms-embedded-services.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-lti-framework</artifactId>
-            <version>${lms-canvas-lti-framework.version}</version>
+            <version>${lms-embedded-services.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-lti-framework</artifactId>
-            <version>${lms-canvas-lti-framework.version}</version>
+            <version>${lms-embedded-services.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-redis-config</artifactId>
-            <version>${lms-canvas-redis-config.version}</version>
+            <version>${lms-embedded-services.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
@@ -155,12 +145,12 @@
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-services</artifactId>
-            <version>${lms-canvas-services.version}</version>
+            <version>${lms-embedded-services.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
             <artifactId>lms-canvas-services</artifactId>
-            <version>${lms-canvas-services.version}</version>
+            <version>${lms-embedded-services.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -204,7 +194,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-vault-config</artifactId>
-            <version>${spring-cloud-starter-vault-config.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -428,6 +417,28 @@
                     <version>${denodo-hibernate-dialect.version}</version>
                     <scope>runtime</scope>
                 </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>IUMaven</id>
+                    <name>IUMaven</name>
+                    <url>https://uisapp2.iu.edu/nxs-prd/content/groups/public</url>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
+            <id>it12</id>
+            <dependencies>
+                <dependency>
+                    <groupId>edu.iu.uits.lms.audit</groupId>
+                    <artifactId>lms-team-spring-boot-it12</artifactId>
+                    <version>${lms-team-spring-boot-it12}</version>
+                </dependency>
+                <!--                <dependency>-->
+                <!--                    <groupId>edu.iu.es.esi.audit</groupId>-->
+                <!--                    <artifactId>spring-boot-it12</artifactId>-->
+                <!--                    <version>${spring-boot-it12}</version>-->
+                <!--                </dependency>-->
             </dependencies>
             <repositories>
                 <repository>
