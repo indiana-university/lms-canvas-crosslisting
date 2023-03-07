@@ -52,9 +52,10 @@ app:
   overridesFileName: overrides.properties
 
 management:
-  endpoint.info.enabled: true
-  endpoints.web.exposure.include: health,info
+  endpoint.lms.enabled: true
+  endpoints.web.exposure.include: health,lms
   health.redis.enabled: false
+  info.java.enabled: true
 
 ---
 
