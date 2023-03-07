@@ -3,7 +3,7 @@ spring:
     name: lms-lti-crosslist
   session:
     store-type: none
-  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, classpath:lti-registrations.properties
+  config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:denodo.properties, classpath:lti-registrations.properties
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -52,9 +52,10 @@ app:
   overridesFileName: overrides.properties
 
 management:
-  endpoint.info.enabled: true
-  endpoints.web.exposure.include: health,info
+  endpoint.lms.enabled: true
+  endpoints.web.exposure.include: health,lms
   health.redis.enabled: false
+  info.java.enabled: true
 
 ---
 
