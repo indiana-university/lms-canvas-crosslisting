@@ -35,7 +35,11 @@ var summary = $('.summaryList').clone(true);
 var checkedValue;
 
 $(document).ready(function(){
-    loadUnavailableSections();
+    // this section sometimes processes before it actually exists
+    // put it in this waitForElm method to make it wait until it exists in the dom
+    waitForElm('#unavailable-sections-load').then((elm) => {
+        loadUnavailableSections();
+    });
 
     checkedValue = getCheckboxValues();
 
@@ -343,4 +347,25 @@ function loadUnavailableSections() {
 
             $("#unavailable-loading").hide();
         });
+}
+
+// use this to force code to wait for a certain element to be rendered
+function waitForElm(selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                resolve(document.querySelector(selector));
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
 }
