@@ -63,6 +63,7 @@ They can be set in a properties file, or overridden as environment variables.
 | Property             | Default Value               | Description                                               |
 |----------------------|-----------------------------|-----------------------------------------------------------|
 | `canvas.host`        |                             | Hostname of the Canvas instance                           |
+| `canvas.sso.host`    |                             | Hostname of the Canvas OIDC auth domain                   |
 | `canvas.baseUrl`     | https://`${canvas.host}`    | Base URL of the Canvas instance                           |
 | `canvas.baseApiUrl`  | `${canvas.baseUrl}`/api/v1  | Base URL for the Canvas API                               |
 | `canvas.token`       |                             | Token for access to Canvas instance                       |

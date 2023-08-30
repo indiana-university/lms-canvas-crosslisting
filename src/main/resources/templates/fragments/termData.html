@@ -41,14 +41,16 @@
 <div th:fragment="termData">
     <h3 id="active-term" th:data-active-term-id = "${activeTerm.id}" th:text="${activeTerm.name}">(Active Term Name)</h3>
     <p th:if="${#lists.isEmpty(activeCourseSections)}">None available</p>
-    <ul th:unless="${#lists.isEmpty(activeCourseSections)}" class="sectionsList rvt-plain-list">
+    <ul th:unless="${#lists.isEmpty(activeCourseSections)}" class="sectionsList rvt-list-plain">
         <li th:id="'row_' + ${section.sectionId}" th:each="section : ${activeCourseSections}" th:class="${section.getAppropriateCssClass()}"
             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
-            <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
-            <label th:for="${section.sectionId}" class="rvt-m-right-sm">
-                <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
-            </label>
+            <div class="rvt-checkbox">
+                <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
+                <label th:for="${section.sectionId}" class="rvt-m-right-sm">
+                    <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
+                    <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                </label>
+            </div>
         </li>
     </ul>
     
@@ -69,14 +71,16 @@
                     </h3>
                 </div>
                 <div th:id="${mapInstance.key.id}" class="toggler">
-                    <ul class="sectionsList rvt-plain-list" th:if="${mapInstance.key.id!=activeTerm.id}">
+                    <ul class="sectionsList rvt-list-plain" th:if="${mapInstance.key.id!=activeTerm.id}">
                         <li th:if="${#lists.isEmpty(mapInstance.value)}"
                             th:attr="data-sectionId='',data-sectionName='',data-termId=${mapInstance.key.id}">None available</li>
                         <li th:id="'row_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:class="${section.getAppropriateCssClass()}"
                             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${mapInstance.key.id}">
-                            <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
-                            <label th:for="${section.sectionId}" th:text="${section.sectionName}">SP16-BL-MUS-A112-15891</label>
-                            <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                            <div class="rvt-checkbox">
+                                <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
+                                <label th:for="${section.sectionId}" th:text="${section.sectionName}">SP16-BL-MUS-A112-15891</label>
+                                <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -90,7 +94,7 @@
         <p id="unavailableSections">The section(s) below cannot be cross-listed until the cross-listed sections in their parent course(s) have been removed.</p>
         <div id="dataDiv2">
             <div th:unless="${sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
-                <ul class="sectionsList rvt-plain-list" th:if="${mapInstance.key.id == 'ALIEN_SECTION_BLOCKED'}">
+                <ul class="sectionsList rvt-list-plain" th:if="${mapInstance.key.id == 'ALIEN_SECTION_BLOCKED'}">
                     <li th:id="'row_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:class="${section.getAppropriateCssClass()}"
                         th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${mapInstance.key.id}">
                         <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" disabled="disabled" />

@@ -127,11 +127,6 @@ public class CrosslistController extends OidcTokenAwareController {
     @Autowired
     private CourseSessionService courseSessionService;
 
-    @RequestMapping(value = "/accessDenied")
-    public String accessDenied() {
-        return "accessDenied";
-    }
-
     private Course getValidatedCourse(OidcAuthenticationToken token, HttpSession session) {
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
         String courseId = oidcTokenUtils.getCourseId();
@@ -154,7 +149,7 @@ public class CrosslistController extends OidcTokenAwareController {
         return currentCourse;
     }
 
-    @RequestMapping("/loading")
+    @RequestMapping({"/launch", "/loading"})
     public String loading(Model model, HttpServletRequest request) {
         OidcAuthenticationToken token = getTokenWithoutContext();
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);

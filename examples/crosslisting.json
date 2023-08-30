@@ -2,7 +2,7 @@
   "title": "Cross-listing Assistant",
   "description": "For cross-listing and de-cross-listing provisioned sections in Canvas.",
   "oidc_initiation_url": "http://localhost:8080/lti/login_initiation/lms_lti_crosslisting",
-  "target_link_uri": "http://localhost:8080/app/loading",
+  "target_link_uri": "http://localhost:8080/app/launch",
   "extensions": [
     {
       "domain": "localhost",
