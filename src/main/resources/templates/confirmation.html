@@ -74,13 +74,13 @@
                     </p>
                 </div>
 
-                <div class="rvt-box">
-                    <div class="rvt-box__body">
-                        <div class="rvt-grid">
-                            <div class="rvt-grid__item-lg">
+                <div class="rvt-border-all rvt-border-radius rvt-p-all-sm"> <!-- old rvt-box -->
+                    <div class="rvt-container-xl">
+                        <div class="rvt-row">
+                            <div class="rvt-cols">
                                 <h2 class="rvt-ts-26">Final List of Cross-listed Sections</h2>
                                 <p>
-                                <ul class="rvt-plain-list summaryList" id="summaryListFinal">
+                                <ul class="rvt-list-plain summaryList" id="summaryListFinal">
                                     <li id="summaryNone" th:unless="${#lists.size(summaryListSections) > 0}">None</li>
                                     <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${summaryListSections}"
                                         th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
@@ -90,11 +90,11 @@
                                 </ul>
                                 </p>
                             </div>
-                            <div class="rvt-grid__item-lg">
+                            <div class="rvt-cols">
                                 <h2 class="rvt-ts-26">Summary of Actions</h2>
                                 <p>
                                 <h3 class="rvt-text-bold">Added</h3>
-                                <ul class="rvt-plain-list summaryList" id="summaryListAdded">
+                                <ul class="rvt-list-plain summaryList" id="summaryListAdded">
                                     <li id="addNone" th:unless="${#lists.size(addListSections) > 0}">None</li>
                                     <li th:id="'add_' + ${section.sectionId}" th:each="section : ${addListSections}"
                                         th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
@@ -105,7 +105,7 @@
                                 </p>
                                 <p>
                                 <h3 class="rvt-text-bold">Removed</h3>
-                                <ul class="rvt-plain-list summaryList" id="summaryListRemoved">
+                                <ul class="rvt-list-plain summaryList" id="summaryListRemoved">
                                     <li id="removeNone" th:unless="${#lists.size(removeListSections) > 0}">None</li>
                                     <li th:id="'remove_' + ${section.sectionId}" th:each="section : ${removeListSections}"
                                         th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">

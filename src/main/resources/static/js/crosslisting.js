@@ -245,7 +245,7 @@ function checkboxEventRegistration() {
         event.preventDefault();
 
         var currentBox = $(this);
-        var li = currentBox.parent();
+        var li = currentBox.parent().parent();
 
         if (currentBox.is(":checked")) {
             var newLi = $("<li>", {
