@@ -42,8 +42,8 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="rvt-grid">
-        <div class="rvt-grid__item">
+    <div class="rvt-container-xl">
+        <div class="rvt-row">
             <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
             <form id="confirmation_form" action="confirmation.html" th:action="@{|/app/${courseId}/confirm|}" method="post">
                 <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
