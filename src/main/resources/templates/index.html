@@ -106,7 +106,7 @@
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
                                 <div th:if="${multiTermEnabled}">
-                                    <h2 class="sr-only">View additional terms</h2>
+                                    <h2 class="rvt-sr-only">View additional terms</h2>
                                     <label for="addTerm" id="addTerms" class="rvt-label">Add a term to choose additional sections:</label>
                                     <select id="addTerm" class="rvt-select rvt-width-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadTerm/|}">
                                         <option>- Select a Term -</option>
