@@ -70,8 +70,8 @@
                         <option th:each="instructor : ${instructors}" th:value="${instructor.loginId}" th:text="${instructor.loginId}">instructor</option>
                     </select>
                     <span class="rvt-ts-14 rvt-text-bold rvt-m-top-sm">Display options:</span>
-                    <fieldset>
-                        <legend class="sr-only">Impersonation checkbox options</legend>
+                    <fieldset class="rvt-fieldset">
+                        <legend class="rvt-sr-only">Impersonation checkbox options</legend>
                         <ul class="rvt-list-plain">
                             <li>
                                 <div class="rvt-checkbox">
@@ -112,6 +112,5 @@
             </form>
         </div>
     </div>
-<!--</div>-->
 </body>
 </html>
