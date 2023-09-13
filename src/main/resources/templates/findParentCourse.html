@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+  #%L
+  lms-lti-crosslist
+  %%
+  Copyright (C) 2015 - 2023 Indiana University
+  %%
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+  3. Neither the name of the Indiana University nor the names of its contributors
+     may be used to endorse or promote products derived from this software without
+     specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+  OF THE POSSIBILITY OF SUCH DAMAGE.
+  #L%
+  -->
+
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8"/>
+    <title>Find parent course</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="rvt-p-top-sm">
+        <h1 id="tool-title" class="rvt-ts-36">Find parent course</h1>
+    </div>
+
+    <div class="rvt-p-tb-sm">
+        <span>This tool will only return exact matches.</span>
+    </div>
+
+    <fieldset class="rvt-fieldset">
+        <legend class="rvt-text-bold">Find by</legend>
+        <ul class="rvt-list-plain">
+            <li>
+                <div class="rvt-radio">
+                    <input type="radio" name="radio-search" id="sis-radio" value="sis-radio" onclick="radioFunction();"
+                           th:checked="${findParentModel.getRadioSearch() == null || findParentModel.getRadioSearch() == 'sis-radio'}">
+                    <label for="sis-radio">SIS ID</label>
+                </div>
+            </li>
+            <li>
+                <div class="rvt-radio">
+                    <input type="radio" name="radio-search" id="class-number-radio" value="class-number-radio" onclick="radioFunction();"
+                           th:checked="${findParentModel.getRadioSearch() == 'class-number-radio'}">
+                    <label for="class-number-radio">Class number</label>
+                </div>
+            </li>
+            <li>
+                <div class="rvt-radio">
+                    <input type="radio" name="radio-search" id="canvas-radio" value="canvas-radio" onclick="radioFunction();"
+                           th:checked="${findParentModel.getRadioSearch() == 'canvas-radio'}">
+                    <label for="canvas-radio">Canvas course ID</label>
+                </div>
+            </li>
+        </ul>
+    </fieldset>
+
+    <form th:object="${findParentModel}" id="sisForm" action="findParentCourse.html" th:action="@{|/app/lookup-search-sisid|}" method="post">
+        <div class="rvt-p-top-sm rvt-m-bottom-md">
+            <label for="sis-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS ID</label>
+            <div id="sis-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: SP22-BL-FOLK-E295-4441</div>
+            <div class="rvt-input-group">
+                <input class="rvt-text-input rvt-width-xl" type="text" id="sis-search"
+                       aria-describedby="sis-search-description" th:field="*{sisIdSearch}">
+            </div>
+            <div class="rvt-button-group rvt-p-top-sm">
+                <button type="submit" class="rvt-button">
+                    <span>Find</span>
+                </button>
+            </div>
+            <input type="hidden" name="radioSearch" value="sis-radio" />
+        </div>
+    </form>
+
+    <form th:object="${findParentModel}" id="numberForm" class="rvt-display-none" action="findParentCourse.html"
+          th:action="@{|/app/lookup-search-termandclassnumber|}" method="post">
+        <div class="rvt-p-top-sm rvt-m-bottom-md">
+            <label for="select-input-default" class="rvt-label rvt-ts-16 rvt-text-bold">Term</label>
+            <select id="select-input-default" name="termByClassNumber" class="rvt-select rvt-width-xl">
+                <option value="4238">Fall 2023</option>
+                <option value="4235">Summer 2023</option>
+                <option value="4232">Spring 2023</option>
+            </select>
+        </div>
+        <div class="rvt-m-bottom-md">
+            <label for="class-number-search" class="rvt-label rvt-ts-16 rvt-text-bold">Class number</label>
+            <div id="class-number-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: 4441</div>
+            <div class="rvt-input-group">
+                <input class="rvt-text-input rvt-width-xl" type="text" id="class-number-search"
+                       aria-describedby="class-number-search-description" th:field="*{classNumberSearch}">
+            </div>
+            <div class="rvt-button-group rvt-p-top-sm">
+                <button type="submit" class="rvt-button">
+                    <span>Find</span>
+                </button>
+            </div>
+            <input type="hidden" name="radioSearch" value="class-number-radio"  />
+        </div>
+    </form>
+
+    <form th:object="${findParentModel}" id="canvasForm" action="findParentCourse.html" class="rvt-display-none"
+          th:action="@{|/app/lookup-search-canvascourseid|}" method="post">
+        <div class="rvt-p-top-sm rvt-m-bottom-md">
+            <label for="canvas-search" class="rvt-label rvt-ts-16 rvt-text-bold">Canvas course ID</label>
+            <div id="canvas-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: 2167456</div>
+            <div class="rvt-input-group">
+                <input class="rvt-text-input rvt-width-xl" type="text" id="canvas-search"
+                       aria-describedby="canvas-search-description" th:field="*{canvasCourseIdSearch}">
+            </div>
+            <div class="rvt-button-group rvt-p-top-sm">
+                <button type="submit" class="rvt-button">
+                    <span>Find</span>
+                </button>
+            </div>
+            <input type="hidden" name="radioSearch" value="canvas-radio" />
+        </div>
+    </form>
+
+    <div th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md rvt-width-xl" th:classappend="${findParentResult.statusCssClass}">
+        <!-- successfully find something -->
+                <div class="rvt-flex rvt-items-center">
+                    <rvt-icon name="check" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
+                    <h2 th:text="${findParentResult.statusMessage}" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
+                </div>
+                <div th:if="${findParentResult.showCourseInfo}" class="rvt-p-top-sm">
+                    <div>
+                        <a th:if="${findParentResult.url != null}" th:href="${findParentResult.url}"
+                           th:text="${findParentResult.name}" target="_blank">SP22: SURVEY OF HIP HOP: 1234
+                            <span class="rvt-sr-only">Opens in new window</span><rvt-icon name="link-external"></rvt-icon></a>
+                    </div>
+                    <div>
+                        <span th:text="${findParentResult.sisCourseId}" class="rvt-ts-14">SP22-BL-FOLK-E295-1234</span>
+                    </div>
+                </div>
+
+        <!--        <div class="rvt-flex rvt-items-center">-->
+        <!--            <rvt-icon name="check" class="rvt-color-green rvt-bg-green-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
+        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>-->
+        <!--        </div>-->
+        <!--        <div class="rvt-p-top-sm">-->
+        <!--            <div>-->
+        <!--                <a href="https://(canvasUrl)/courses/(courseId)/settings#tab-sections" target="_blank">SP22: SURVEY OF HIP HOP: 1234 <span class="rvt-sr-only">Opens in new window</span><rvt-icon name="link-external"></rvt-icon></a>-->
+        <!--            </div>-->
+        <!--            <div>-->
+        <!--                <span class="rvt-ts-14">SP22-BL-FOLK-E295-1234</span>-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <!-- various unsuccessful messages -->
+        <!--        <div class="rvt-flex rvt-items-center">-->
+        <!--            <rvt-icon name="close" class="rvt-color-orange rvt-bg-orange-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
+        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">No parent course found</h2>-->
+        <!-- TODO - change above message to "This section is not crosslisted" -->
+        <!--        </div>-->
+        <!--        <div class="rvt-flex rvt-items-center">-->
+        <!--            <rvt-icon name="close" class="rvt-color-orange rvt-bg-orange-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
+        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Course not found in Canvas</h2>-->
+        <!--        </div>-->
+        <!--        <div class="rvt-flex rvt-items-center">-->
+        <!--            <rvt-icon name="close" class="rvt-color-orange rvt-bg-orange-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
+        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Course not found in SIS</h2>-->
+        <!--        </div>-->
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        function radioFunction() {
+            if (document.getElementById('sis-radio').checked) {
+                document.getElementById('sisForm').classList.remove("rvt-display-none");
+                document.getElementById('numberForm').classList.add("rvt-display-none");
+                document.getElementById('canvasForm').classList.add("rvt-display-none");
+            } else if (document.getElementById('class-number-radio').checked) {
+                document.getElementById('sisForm').classList.add("rvt-display-none");
+                document.getElementById('numberForm').classList.remove("rvt-display-none");
+                document.getElementById('canvasForm').classList.add("rvt-display-none");
+            } else {
+                document.getElementById('sisForm').classList.add("rvt-display-none");
+                document.getElementById('numberForm').classList.add("rvt-display-none");
+                document.getElementById('canvasForm').classList.remove("rvt-display-none");
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

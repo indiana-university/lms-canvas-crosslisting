@@ -34,6 +34,7 @@ package edu.iu.uits.lms.crosslist.controller;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.iu.uits.lms.canvas.config.CanvasConfiguration;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Section;
@@ -43,6 +44,8 @@ import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import edu.iu.uits.lms.crosslist.model.FindParentModel;
+import edu.iu.uits.lms.crosslist.model.FindParentResult;
 import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.crosslist.model.SectionWrapper;
@@ -126,6 +129,9 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @Autowired
     private CourseSessionService courseSessionService;
+
+    @Autowired
+    private CanvasConfiguration canvasConfiguration;
 
     private Course getValidatedCourse(OidcAuthenticationToken token, HttpSession session) {
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
@@ -904,6 +910,88 @@ public class CrosslistController extends OidcTokenAwareController {
         return main(courseId, model, session);
     }
 
+    @RequestMapping("/lookup-launch")
+    @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
+    public String lookupLaunch(@ModelAttribute FindParentModel findParentModel, Model model, HttpServletRequest request) {
+        OidcAuthenticationToken token = getTokenWithoutContext();
+        OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
+        String courseId = oidcTokenUtils.getCourseId();
+
+        OidcAuthenticationToken sessionToken = courseSessionService.getAttributeFromSession(request.getSession(), courseId, OidcTokenAwareController.SESSION_TOKEN_KEY, OidcAuthenticationToken.class);
+
+        if (sessionToken == null) {
+            courseSessionService.addAttributeToSession(request.getSession(), courseId, OidcTokenAwareController.SESSION_TOKEN_KEY, token);
+        }
+
+//        model.addAttribute("courseId", courseId);
+//        model.addAttribute("hideFooter", true);
+
+//        SubmissionStatus status = new SubmissionStatus();
+//        status.setStatusClass(CrosslistConstants.STATUS_SUCCESS);
+//        status.setStatusMessage("Ta dah!");
+//
+//        model.addAttribute("submissionStatus", status);
+
+        return "findParentCourse";
+    }
+
+    @PostMapping(value = "/lookup-search-sisid")
+    @Secured({LTIConstants.BASE_USER_AUTHORITY})
+    public String lookupSearchBySisId(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
+        log.info("SIS search text = {}", findParentModel.getSisIdSearch());
+
+        FindParentResult findParentResult = new FindParentResult();
+
+        if (findParentModel.getSisIdSearch() != null && ! findParentModel.getSisIdSearch().trim().isEmpty()) {
+            Section section = sectionService.getSection(String.format("sis_section_id:%s", findParentModel.getSisIdSearch()));
+
+            if (section != null) {
+                log.info("Found section = {}", section);
+
+                if (section.getSis_course_id() != null && section.getSis_section_id() != null &&
+                ! section.getSis_course_id().isEmpty() && ! section.getSis_section_id().isEmpty() &&
+                ! section.getSis_course_id().equals(section.getSis_section_id())) {
+                    Course course = courseService.getCourse(section.getCourse_id());
+
+                    if (course != null) {
+                        log.info("section is crosslisted to {} with name {}",
+                                section.getSis_course_id(), course.getName());
+                        log.info("course {}", course);
+
+                        findParentResult.setShowCourseInfo(true);
+                        findParentResult.setStatusMessage("WOOOOO!!!!");
+                        findParentResult.setName(course.getName());
+                        findParentResult.setSisCourseId(course.getSisCourseId());
+                        findParentResult.setUrl(canvasConfiguration.getBaseUrl());
+                        findParentResult.setStatusCssClass(CrosslistConstants.STATUS_SUCCESS);
+                        findParentResult.setStatusIconCssClasses("rvt-color-green rvt-bg-green-100");
+                    }
+                } else {
+                    log.info("Section is NOT crosslisted");
+                }
+            } else {
+                log.info("Couldn't find section = {}", section);
+            }
+        }
+
+        model.addAttribute("findParentResult", findParentResult);
+        return "findParentCourse";
+    }
+
+    @PostMapping(value = "/lookup-search-termandclassnumber")
+    @Secured({LTIConstants.BASE_USER_AUTHORITY})
+    public String lookupSearchByTermAndClassNUmber(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
+        log.info("Term by Class Number = {}", findParentModel.getTermByClassNumber());
+        log.info("Class Number search text = {}", findParentModel.getClassNumberSearch());
+        return "findParentCourse";
+    }
+
+    @PostMapping(value = "/lookup-search-canvascourseid")
+    @Secured({LTIConstants.BASE_USER_AUTHORITY})
+    public String lookupSearchByCourseId(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
+        log.info("Canvas CourseId search text = {}", findParentModel.getCanvasCourseIdSearch());
+        return "findParentCourse";
+    }
 
     private List<SectionUIDisplay> removeSectionUiDisplayBySectionName(@NonNull List<SectionUIDisplay> oldList, @NonNull String toRemoveSectionName) {
         List<SectionUIDisplay> newList = new ArrayList<SectionUIDisplay>();
