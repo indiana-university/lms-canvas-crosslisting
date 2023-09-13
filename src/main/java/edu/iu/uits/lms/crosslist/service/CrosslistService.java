@@ -43,8 +43,11 @@ import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
+import edu.iu.uits.lms.iuonly.model.SisCourse;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
+import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -81,6 +84,9 @@ public class CrosslistService {
 
    @Autowired
    private AccountService accountService = null;
+
+   @Autowired
+   private SisServiceImpl sisService;
 
    // self reference so can use the cache for getCourseSections() from within this service
    @Lazy
@@ -345,6 +351,46 @@ public class CrosslistService {
    public List<Section> getCourseSections(String courseId) {
       log.debug("cache miss for {} - getCourseSections({})", CrosslistConstants.COURSE_SECTIONS_CACHE_NAME, courseId);
       return courseService.getCourseSections(courseId);
+   }
+
+   public boolean canCoursesBeCrosslistedBasedOnEtexts(String sourceSisCourseSiteId, String destinationSisCourseSiteId) {
+      SisCourse sourceSisCourse = sisService.getSisCourseBySiteId(sourceSisCourseSiteId);
+      sourceSisCourse = sourceSisCourse == null ? new SisCourse() : sourceSisCourse;
+
+      SisCourse destinationSisCourse = sisService.getSisCourseBySiteId(destinationSisCourseSiteId);
+      destinationSisCourse = destinationSisCourse == null ? new SisCourse() : destinationSisCourse;
+
+      if (sourceSisCourse.getEtextIsbns() == null && destinationSisCourse.getEtextIsbns() != null) {
+         return false;
+      }
+
+      if (sourceSisCourse.getEtextIsbns() != null && destinationSisCourse.getEtextIsbns() == null) {
+         return false;
+      }
+
+      List<String> sourceCourseEtextIsbns =  sourceSisCourse.getEtextIsbns() == null
+              ? new ArrayList<>() : List.of(sourceSisCourse.getEtextIsbns().split(","));
+
+      List<String> destinationCourseEtextIsbns =  destinationSisCourse.getEtextIsbns() == null
+              ? new ArrayList<>() : List.of(destinationSisCourse.getEtextIsbns().split(","));
+
+      if (sourceCourseEtextIsbns.isEmpty() && destinationCourseEtextIsbns.isEmpty()) {
+         return true;
+      }
+
+      boolean containsAll = true;
+
+      for (String sourceCourseEtextIsbn : sourceCourseEtextIsbns) {
+         containsAll = containsAll && destinationCourseEtextIsbns.contains(sourceCourseEtextIsbn);
+      }
+
+      if (containsAll) {
+         for (String destinationCourseEtextIsbn : destinationCourseEtextIsbns) {
+            containsAll = containsAll && sourceCourseEtextIsbns.contains(destinationCourseEtextIsbn);
+         }
+      }
+
+       return containsAll;
    }
 
    @Data
