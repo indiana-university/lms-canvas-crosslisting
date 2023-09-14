@@ -403,8 +403,6 @@ public class CrosslistController extends OidcTokenAwareController {
 
         // if the current course has etexts, check to see if the wanted crosslisted sections have the same etexts
         List<String> missingEtextSections = new ArrayList<>();
-        List<SectionUIDisplay> addList = sectionWrapper.getAddList();
-        List<SectionUIDisplay> finalList = sectionWrapper.getFinalList();
 
         for (SectionUIDisplay sectionUIDisplay : sectionWrapper.getAddList()) {
             String sectionUIDisplaySectionName = sectionUIDisplay.getSectionName();
@@ -418,8 +416,8 @@ public class CrosslistController extends OidcTokenAwareController {
             }
 
             if (! crosslistService.canCoursesBeCrosslistedBasedOnEtexts(currentCourse.getSisCourseId(), sectionUIDisplaySectionName)) {
-                sectionWrapper.setAddList(removeSectionUiDisplayBySectionName(addList, sectionUIDisplay.getSectionName()));
-                sectionWrapper.setFinalList(removeSectionUiDisplayBySectionName(finalList, sectionUIDisplay.getSectionName()));
+                sectionWrapper.setAddList(removeSectionUiDisplayBySectionName(sectionWrapper.getAddList(), sectionUIDisplay.getSectionName()));
+                sectionWrapper.setFinalList(removeSectionUiDisplayBySectionName(sectionWrapper.getFinalList(), sectionUIDisplay.getSectionName()));
                 uncheckSectionUiDisplayBySectionId(sectionUIDisplay.getSectionId(), sectionList);
 
                 missingEtextSections.add(sectionUIDisplay.getSectionName());

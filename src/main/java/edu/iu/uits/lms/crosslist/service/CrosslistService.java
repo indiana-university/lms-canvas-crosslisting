@@ -59,6 +59,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -368,28 +369,15 @@ public class CrosslistService {
       }
 
       List<String> sourceCourseEtextIsbns =  sourceSisCourse.getEtextIsbns() == null
-              ? new ArrayList<>() : List.of(sourceSisCourse.getEtextIsbns().split(","));
+              ? new ArrayList<>() : new ArrayList<>(List.of(sourceSisCourse.getEtextIsbns().split(",")));
 
       List<String> destinationCourseEtextIsbns =  destinationSisCourse.getEtextIsbns() == null
-              ? new ArrayList<>() : List.of(destinationSisCourse.getEtextIsbns().split(","));
+              ? new ArrayList<>() : new ArrayList<>(List.of(destinationSisCourse.getEtextIsbns().split(",")));
 
-      if (sourceCourseEtextIsbns.isEmpty() && destinationCourseEtextIsbns.isEmpty()) {
-         return true;
-      }
+      Collections.sort(sourceCourseEtextIsbns);
+      Collections.sort(destinationCourseEtextIsbns);
 
-      boolean containsAll = true;
-
-      for (String sourceCourseEtextIsbn : sourceCourseEtextIsbns) {
-         containsAll = containsAll && destinationCourseEtextIsbns.contains(sourceCourseEtextIsbn);
-      }
-
-      if (containsAll) {
-         for (String destinationCourseEtextIsbn : destinationCourseEtextIsbns) {
-            containsAll = containsAll && sourceCourseEtextIsbns.contains(destinationCourseEtextIsbn);
-         }
-      }
-
-       return containsAll;
+      return sourceCourseEtextIsbns.equals(destinationCourseEtextIsbns);
    }
 
    @Data
