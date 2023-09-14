@@ -400,62 +400,33 @@ public class CrosslistController extends OidcTokenAwareController {
         model.addAttribute("courseTitle", currentCourse.getName());
         model.addAttribute("removeListSections", sectionWrapper.getRemoveList());
 
-        SisCourse sisCurrentCourse = sisService.getSisCourseBySiteId(currentCourse.getSisCourseId());
 
-        // if course has etexts, check to see if the crosslisted sections have the same etexts
-        if (sisCurrentCourse != null && sisCurrentCourse.getEtextIsbns() != null) {
-            List<String> missingEtextSections = new ArrayList<String>();
+        // if the current course has etexts, check to see if the wanted crosslisted sections have the same etexts
+        List<String> missingEtextSections = new ArrayList<>();
 
-            String[] currentCourseEtextIsbns = sisCurrentCourse.getEtextIsbns().split(",");
+        for (SectionUIDisplay sectionUIDisplay : sectionWrapper.getAddList()) {
+            String sectionUIDisplaySectionName = sectionUIDisplay.getSectionName();
 
-            for (SectionUIDisplay sectionUIDisplay : sectionWrapper.getAddList()) {
-                String sectionUIDisplaySectionName = sectionUIDisplay.getSectionName();
+            // Needed in case of in impersonation mode the section name will read
+            // FA20-blah-blah-blah-1234 (FA20-blah-blah-blah-1234)
+            int indexOfParenthesis = sectionUIDisplaySectionName.indexOf("(");
 
-                // Needed in case of in impersonation mode the section name will read
-                // FA20-blah-blah-blah-1234 (FA20-blah-blah-blah-1234)
-                int indexOfParenthesis = sectionUIDisplaySectionName.indexOf("(");
-
-                if (indexOfParenthesis != -1) {
-                    sectionUIDisplaySectionName = sectionUIDisplaySectionName.substring(0, indexOfParenthesis).trim();
-                }
-
-                SisCourse sisCrosslistCourse = sisService.getSisCourseBySiteId(sectionUIDisplaySectionName);
-
-                if (sisCrosslistCourse == null || sisCrosslistCourse.getEtextIsbns() == null) {
-                    String sectionName = sectionUIDisplay.getSectionName();
-                    missingEtextSections.add(sectionName);
-
-                    List<SectionUIDisplay> addList = sectionWrapper.getAddList();
-                    List<SectionUIDisplay> finalList = sectionWrapper.getFinalList();
-
-                    sectionWrapper.setAddList(removeSectionUiDisplayBySectionName(addList, sectionName));
-                    sectionWrapper.setFinalList(removeSectionUiDisplayBySectionName(finalList, sectionName));
-                    uncheckSectionUiDisplayBySectionId(sectionUIDisplay.getSectionId(), sectionList);
-                } else {
-                    List<String> crosslistCourseEtextIsbns = Arrays.asList(sisCrosslistCourse.getEtextIsbns().split(","));
-
-                    for (String currentCourseEtextIsbn : currentCourseEtextIsbns) {
-                        boolean exists = crosslistCourseEtextIsbns.contains(currentCourseEtextIsbn);
-
-                        if (! exists) {
-                            String sectionName = sectionUIDisplay.getSectionName();
-                            missingEtextSections.add(sectionName);
-
-                            List<SectionUIDisplay> addList = sectionWrapper.getAddList();
-                            List<SectionUIDisplay> finalList = sectionWrapper.getFinalList();
-
-                            sectionWrapper.setAddList(removeSectionUiDisplayBySectionName(addList, sectionName));
-                            sectionWrapper.setFinalList(removeSectionUiDisplayBySectionName(finalList, sectionName));
-                            uncheckSectionUiDisplayBySectionId(sectionUIDisplay.getSectionId(), sectionList);
-                        }
-                    }
-                }
+            if (indexOfParenthesis != -1) {
+                sectionUIDisplaySectionName = sectionUIDisplaySectionName.substring(0, indexOfParenthesis).trim();
             }
 
-            if (missingEtextSections.size() > 0) {
-                model.addAttribute("missingEtextSections", missingEtextSections);
+            if (! crosslistService.canCoursesBeCrosslistedBasedOnEtexts(currentCourse.getSisCourseId(), sectionUIDisplaySectionName)) {
+                sectionWrapper.setAddList(removeSectionUiDisplayBySectionName(sectionWrapper.getAddList(), sectionUIDisplay.getSectionName()));
+                sectionWrapper.setFinalList(removeSectionUiDisplayBySectionName(sectionWrapper.getFinalList(), sectionUIDisplay.getSectionName()));
+                uncheckSectionUiDisplayBySectionId(sectionUIDisplay.getSectionId(), sectionList);
+
+                missingEtextSections.add(sectionUIDisplay.getSectionName());
             }
-        } // end etexts
+        }
+
+        if (! missingEtextSections.isEmpty()) {
+            model.addAttribute("missingEtextSections", missingEtextSections);
+        }
 
         model.addAttribute("summaryListSections", sectionWrapper.getFinalList());
         model.addAttribute("addListSections", sectionWrapper.getAddList());

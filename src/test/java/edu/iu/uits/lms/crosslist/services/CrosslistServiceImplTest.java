@@ -39,6 +39,8 @@ import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.model.SisCourse;
+import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +66,10 @@ public class CrosslistServiceImplTest {
    @Autowired
    @Mock
    private CourseService courseService = null;
+
+   @Autowired
+   @Mock
+   private SisServiceImpl sisService = null;
 
    @Autowired
    @Mock
@@ -591,6 +597,113 @@ public class CrosslistServiceImplTest {
       Assertions.assertNotNull(unavailableSectionUIDisplays, "results should not be null");
       Assertions.assertEquals(1, unavailableSectionUIDisplays.size());
 
+   }
+
+   @Test
+   public void both_not_siscourses_no_etext_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(null);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(null);
+
+      Assertions.assertTrue(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
+   }
+
+   @Test
+   public void first_not_sis_second_is_sis_courses_with_etext_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      SisCourse sisCourse = new SisCourse();
+      sisCourse.setEtextIsbns("etext1");
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(null);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(sisCourse);
+
+      Assertions.assertFalse(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
+   }
+
+   @Test
+   public void first_sis_with_etext_second_is_not_sis_courses_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      SisCourse sisCourse = new SisCourse();
+      sisCourse.setEtextIsbns("etext1");
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(sisCourse);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(null);
+
+      Assertions.assertFalse(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
+   }
+
+   @Test
+   public void first_sis_course_with_etext_second_sis_course_with_matching_etext_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      SisCourse sisCourse1 = new SisCourse();
+      sisCourse1.setEtextIsbns("etext1");
+
+      SisCourse sisCourse2 = new SisCourse();
+      sisCourse2.setEtextIsbns("etext1");
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(sisCourse1);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(sisCourse2);
+
+      Assertions.assertTrue(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
+   }
+
+   @Test
+   public void first_sis_course_with_etext_second_sis_course_with_different_etext_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      SisCourse sisCourse1 = new SisCourse();
+      sisCourse1.setEtextIsbns("etext1");
+
+      SisCourse sisCourse2 = new SisCourse();
+      sisCourse2.setEtextIsbns("etext2");
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(sisCourse1);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(sisCourse2);
+
+      Assertions.assertFalse(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
+   }
+
+   @Test
+   public void first_sis_course_with_many_etexts_second_sis_course_with_only_one_matching_etext_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      SisCourse sisCourse1 = new SisCourse();
+      sisCourse1.setEtextIsbns("etext1,etext2");
+
+      SisCourse sisCourse2 = new SisCourse();
+      sisCourse2.setEtextIsbns("etext2");
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(sisCourse1);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(sisCourse2);
+
+      Assertions.assertFalse(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
+   }
+
+   @Test
+   public void first_sis_course_with_many_etexts_second_sis_course_with_many_etext_only_one_matching_etext_canCoursesBeCrosslistedBasedOnEtexts() {
+      String sourceSisCourseSiteId1 = "course1";
+      String sourceSisCourseSiteId2 = "course2";
+
+      SisCourse sisCourse1 = new SisCourse();
+      sisCourse1.setEtextIsbns("etext1,etext2");
+
+      SisCourse sisCourse2 = new SisCourse();
+      sisCourse2.setEtextIsbns("etext2,etext3");
+
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId1)).thenReturn(sisCourse1);
+      Mockito.when(sisService.getSisCourseBySiteId(sourceSisCourseSiteId2)).thenReturn(sisCourse2);
+
+      Assertions.assertFalse(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
    }
 
    private Course createCourse(String courseId, String sisCourseId) {
