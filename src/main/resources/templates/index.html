@@ -139,8 +139,6 @@
 <th:block layout:fragment="script">
     <script>
         $(document).ready(function() {
-            Rivet.init();
-
             document.addEventListener('rvtSwitchToggledOn', event => {
                 if (event.srcElement.getAttribute("id") == 'crosslisted-switch') {
                     $('#show-crosslisted-in-other-sections-action').attr('value', 'impersonate');
