@@ -33,6 +33,7 @@ package edu.iu.uits.lms.crosslist.service;
  * #L%
  */
 
+import edu.iu.uits.lms.canvas.config.CanvasConfiguration;
 import edu.iu.uits.lms.canvas.helpers.CanvasDateFormatUtil;
 import edu.iu.uits.lms.canvas.model.Account;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
@@ -40,8 +41,10 @@ import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.services.AccountService;
 import edu.iu.uits.lms.canvas.services.CourseService;
+import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import edu.iu.uits.lms.crosslist.model.FindParentResult;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.iuonly.model.SisCourse;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
@@ -87,6 +90,13 @@ public class CrosslistService {
 
    @Autowired
    private SisServiceImpl sisService;
+
+   @Autowired
+   private SectionService sectionService;
+
+   @Autowired
+   private CanvasConfiguration canvasConfiguration;
+
 
    // self reference so can use the cache for getCourseSections() from within this service
    @Lazy
@@ -378,6 +388,59 @@ public class CrosslistService {
       Collections.sort(destinationCourseEtextIsbns);
 
       return sourceCourseEtextIsbns.equals(destinationCourseEtextIsbns);
+   }
+
+   public FindParentResult processSisLookup(SisCourse sisCourse) {
+      FindParentResult findParentResult = new FindParentResult();
+
+      if (sisCourse == null || sisCourse.getIuSiteId() == null) {
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_SIS_MESSAGE);
+         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         return findParentResult;
+      }
+
+      Section section = sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()));
+
+      if (section == null) {
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_CANVAS_MESSAGE);
+         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         return findParentResult;
+      }
+
+      if (section.getSis_course_id() == null || section.getSis_section_id() == null) {
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_CANVAS_MESSAGE);
+         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         return findParentResult;
+      }
+
+      Course course = courseService.getCourse(section.getCourse_id());
+
+      if (course == null) {
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_CANVAS_MESSAGE);
+         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         return findParentResult;
+      }
+
+      if (section.getSis_course_id().equals(section.getSis_section_id())) {
+         findParentResult.setShowCourseInfo(true);
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_COURSE_NOT_CROSSLISTED_MESSAGE);
+         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         findParentResult.setName(course.getName());
+         findParentResult.setSisCourseId(course.getSisCourseId());
+         findParentResult.setUrl(String.format("%s/courses/%s",
+                 canvasConfiguration.getBaseUrl(), course.getId()));
+         return findParentResult;
+      }
+
+      findParentResult.setShowCourseInfo(true);
+      findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_SUCCESS_FOUND_MESSAGE);
+      findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_SUCCESS_CSS);
+      findParentResult.setName(course.getName());
+      findParentResult.setSisCourseId(course.getSisCourseId());
+      findParentResult.setUrl(String.format("%s/courses/%s",
+              canvasConfiguration.getBaseUrl(), course.getId()));
+
+      return findParentResult;
    }
 
    @Data

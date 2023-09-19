@@ -98,10 +98,11 @@
           th:action="@{|/app/lookup-search-termandclassnumber|}" method="post">
         <div class="rvt-p-top-sm rvt-m-bottom-md">
             <label for="select-input-default" class="rvt-label rvt-ts-16 rvt-text-bold">Term</label>
-            <select id="select-input-default" name="termByClassNumber" class="rvt-select rvt-width-xl">
+            <select id="select-input-default" name="termByClassNumberSearch" class="rvt-select rvt-width-xl">
                 <option value="4238">Fall 2023</option>
                 <option value="4235">Summer 2023</option>
                 <option value="4232">Spring 2023</option>
+                <option value="4222">Spring 2022</option>
             </select>
         </div>
         <div class="rvt-m-bottom-md">
@@ -138,7 +139,7 @@
         </div>
     </form>
 
-    <div th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md rvt-width-xl" th:classappend="${findParentResult.statusCssClass}">
+    <div th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md alertThing">
         <!-- successfully find something -->
                 <div class="rvt-flex rvt-items-center">
                     <rvt-icon name="check" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
@@ -146,9 +147,10 @@
                 </div>
                 <div th:if="${findParentResult.showCourseInfo}" class="rvt-p-top-sm">
                     <div>
-                        <a th:if="${findParentResult.url != null}" th:href="${findParentResult.url}"
-                           th:text="${findParentResult.name}" target="_blank">SP22: SURVEY OF HIP HOP: 1234
-                            <span class="rvt-sr-only">Opens in new window</span><rvt-icon name="link-external"></rvt-icon></a>
+                        <a th:if="${findParentResult.url != null}" th:href="${findParentResult.url}" target="_blank">
+                            <span th:text="${findParentResult.name}">SP22: SURVEY OF HIP HOP: 1234</span>
+                            <span class="rvt-sr-only">Opens in new window</span>
+                            <rvt-icon name="link-external"></rvt-icon></a>
                     </div>
                     <div>
                         <span th:text="${findParentResult.sisCourseId}" class="rvt-ts-14">SP22-BL-FOLK-E295-1234</span>

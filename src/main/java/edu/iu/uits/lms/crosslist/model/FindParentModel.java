@@ -39,7 +39,7 @@ import lombok.Data;
 public class FindParentModel {
     private String radioSearch;
     private String sisIdSearch;
-    private String termByClassNumber;
+    private String termByClassNumberSearch;
     private String classNumberSearch;
     private String canvasCourseIdSearch;
 }

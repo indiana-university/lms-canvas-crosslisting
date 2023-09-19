@@ -33,6 +33,7 @@ package edu.iu.uits.lms.crosslist.model;
  * #L%
  */
 
+import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import lombok.Data;
 
 @Data
@@ -42,6 +43,5 @@ public class FindParentResult {
     private String sisCourseId;
     private boolean showCourseInfo;
     private String statusMessage;
-    private String statusCssClass;
     private String statusIconCssClasses;
 }

@@ -92,3 +92,7 @@
 .toggler {
     margin-bottom: 0.5rem;
 }
+
+.alertThing {
+    width: max-content;
+}
