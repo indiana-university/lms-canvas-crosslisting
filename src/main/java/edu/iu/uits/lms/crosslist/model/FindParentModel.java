@@ -41,5 +41,4 @@ public class FindParentModel {
     private String sisIdSearch;
     private String termByClassNumberSearch;
     private String classNumberSearch;
-    private String canvasCourseIdSearch;
 }

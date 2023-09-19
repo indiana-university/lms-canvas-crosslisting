@@ -33,10 +33,14 @@ package edu.iu.uits.lms.crosslist.services;
  * #L%
  */
 
+import edu.iu.uits.lms.canvas.config.CanvasConfiguration;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.services.CourseService;
+import edu.iu.uits.lms.canvas.services.SectionService;
+import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import edu.iu.uits.lms.crosslist.model.FindParentResult;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.iuonly.model.SisCourse;
@@ -65,7 +69,15 @@ public class CrosslistServiceImplTest {
 
    @Autowired
    @Mock
+   private CanvasConfiguration canvasConfiguration = null;
+
+   @Autowired
+   @Mock
    private CourseService courseService = null;
+
+   @Autowired
+   @Mock
+   private SectionService sectionService = null;
 
    @Autowired
    @Mock
@@ -705,6 +717,178 @@ public class CrosslistServiceImplTest {
 
       Assertions.assertFalse(crosslistService.canCoursesBeCrosslistedBasedOnEtexts(sourceSisCourseSiteId1, sourceSisCourseSiteId2));
    }
+
+   @Test
+   public void nullSisCourse_processSisLookup() {
+      FindParentResult findParentResult = crosslistService.processSisLookup(null);
+
+      Assertions.assertFalse(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+   }
+
+   @Test
+   public void nullIuSiteId_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      Assertions.assertFalse(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+   }
+
+   @Test
+   public void nullSection_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      final String iuSiteId = "TestIuSiteId";
+
+      sisCourse.setIuSiteId(iuSiteId);
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      Assertions.assertFalse(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+   }
+
+   @Test
+   public void nullSectionSisCourseId_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      final String iuSiteId = "TestIuSiteId";
+
+      sisCourse.setIuSiteId(iuSiteId);
+
+      Section section = new Section();
+      section.setSis_section_id("123");
+
+      Mockito.when(sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()))).thenReturn(section);
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      Assertions.assertFalse(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+   }
+
+   @Test
+   public void nullSectionSisSectionId_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      final String iuSiteId = "TestIuSiteId";
+
+      sisCourse.setIuSiteId(iuSiteId);
+
+      Section section = new Section();
+      section.setSis_course_id("123");
+
+      Mockito.when(sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()))).thenReturn(section);
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      Assertions.assertFalse(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+   }
+
+   @Test
+   public void nullCourse_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      final String iuSiteId = "TestIuSiteId";
+
+      sisCourse.setIuSiteId(iuSiteId);
+
+      Section section = new Section();
+      section.setSis_course_id("123");
+      section.setSis_section_id("123");
+
+      Mockito.when(sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()))).thenReturn(section);
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      Assertions.assertFalse(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+   }
+
+   @Test
+   public void notCrosslistedBecauseSectionSisCourseIdEqualsSectionSisSectionId_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      final String iuSiteId = "TestIuSiteId";
+
+      sisCourse.setIuSiteId(iuSiteId);
+
+      Section section = new Section();
+      section.setSis_course_id("123");
+      section.setSis_section_id("123");
+
+      final String baseUrl = "https://testsite.org";
+
+      final String courseName = "Course Name 1";
+      final String sisCourseId = "123";
+
+      Course course = new Course();
+      course.setId("1");
+      course.setName(courseName);
+      course.setSisCourseId(sisCourseId);
+
+      Mockito.when(sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()))).thenReturn(section);
+      Mockito.when(courseService.getCourse(section.getCourse_id())).thenReturn(course);
+      Mockito.when(canvasConfiguration.getBaseUrl()).thenReturn(baseUrl);
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      //          findParentResult.setName(course.getName());
+      //         findParentResult.setSisCourseId(course.getSisCourseId());
+
+      Assertions.assertTrue(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_COURSE_NOT_CROSSLISTED_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(String.format("%s/courses/%s", canvasConfiguration.getBaseUrl(), course.getId()), findParentResult.getUrl());
+      Assertions.assertEquals(courseName, findParentResult.getName());
+      Assertions.assertEquals(sisCourseId, findParentResult.getSisCourseId());
+   }
+
+   @Test
+   public void parentFoundSuccess_processSisLookup() {
+      SisCourse sisCourse = new SisCourse();
+
+      final String iuSiteId = "TestIuSiteId";
+
+      sisCourse.setIuSiteId(iuSiteId);
+
+      Section section = new Section();
+      section.setSis_course_id("123");
+      section.setSis_section_id("456");
+
+      final String baseUrl = "https://testsite.org";
+
+      final String courseName = "Course Name 1";
+      final String sisCourseId = "123";
+
+      Course course = new Course();
+      course.setId("1");
+      course.setName(courseName);
+      course.setSisCourseId(sisCourseId);
+
+      Mockito.when(sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()))).thenReturn(section);
+      Mockito.when(courseService.getCourse(section.getCourse_id())).thenReturn(course);
+      Mockito.when(canvasConfiguration.getBaseUrl()).thenReturn(baseUrl);
+
+      FindParentResult findParentResult = crosslistService.processSisLookup(sisCourse);
+
+      Assertions.assertTrue(findParentResult.isShowCourseInfo());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_SUCCESS_FOUND_MESSAGE, findParentResult.getStatusMessage());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_SUCCESS_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(String.format("%s/courses/%s", canvasConfiguration.getBaseUrl(), course.getId()), findParentResult.getUrl());
+      Assertions.assertEquals(courseName, findParentResult.getName());
+      Assertions.assertEquals(sisCourseId, findParentResult.getSisCourseId());
+   }
+
 
    private Course createCourse(String courseId, String sisCourseId) {
       Course course = new Course();

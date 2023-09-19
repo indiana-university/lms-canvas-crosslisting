@@ -394,7 +394,8 @@ public class CrosslistService {
       FindParentResult findParentResult = new FindParentResult();
 
       if (sisCourse == null || sisCourse.getIuSiteId() == null) {
-         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_SIS_MESSAGE);
+         findParentResult.setShowCourseInfo(false);
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
          return findParentResult;
       }
@@ -402,13 +403,15 @@ public class CrosslistService {
       Section section = sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()));
 
       if (section == null) {
-         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_CANVAS_MESSAGE);
+         findParentResult.setShowCourseInfo(false);
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
          return findParentResult;
       }
 
       if (section.getSis_course_id() == null || section.getSis_section_id() == null) {
-         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_CANVAS_MESSAGE);
+         findParentResult.setShowCourseInfo(false);
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
          return findParentResult;
       }
@@ -416,7 +419,8 @@ public class CrosslistService {
       Course course = courseService.getCourse(section.getCourse_id());
 
       if (course == null) {
-         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_SECTION_NOT_FOUND_IN_CANVAS_MESSAGE);
+         findParentResult.setShowCourseInfo(false);
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
          return findParentResult;
       }

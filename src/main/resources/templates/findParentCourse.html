@@ -55,54 +55,52 @@
         <ul class="rvt-list-plain">
             <li>
                 <div class="rvt-radio">
-                    <input type="radio" name="radio-search" id="sis-radio" value="sis-radio" onclick="radioFunction();"
+                    <input type="radio" name="radio-search" id="sis-radio" value="sis-radio" onclick="crosslisterLookupRadioFunction();"
                            th:checked="${findParentModel.getRadioSearch() == null || findParentModel.getRadioSearch() == 'sis-radio'}">
                     <label for="sis-radio">SIS ID</label>
                 </div>
             </li>
             <li>
                 <div class="rvt-radio">
-                    <input type="radio" name="radio-search" id="class-number-radio" value="class-number-radio" onclick="radioFunction();"
+                    <input type="radio" name="radio-search" id="class-number-radio" value="class-number-radio" onclick="crosslisterLookupRadioFunction();"
                            th:checked="${findParentModel.getRadioSearch() == 'class-number-radio'}">
                     <label for="class-number-radio">Class number</label>
-                </div>
-            </li>
-            <li>
-                <div class="rvt-radio">
-                    <input type="radio" name="radio-search" id="canvas-radio" value="canvas-radio" onclick="radioFunction();"
-                           th:checked="${findParentModel.getRadioSearch() == 'canvas-radio'}">
-                    <label for="canvas-radio">Canvas course ID</label>
                 </div>
             </li>
         </ul>
     </fieldset>
 
-    <form th:object="${findParentModel}" id="sisForm" action="findParentCourse.html" th:action="@{|/app/lookup-search-sisid|}" method="post">
+    <form th:object="${findParentModel}" id="sisIdForm" action="findParentCourse.html" th:action="@{|/app/lookup-search-sisid|}" method="post">
         <div class="rvt-p-top-sm rvt-m-bottom-md">
-            <label for="sis-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS ID</label>
-            <div id="sis-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: SP22-BL-FOLK-E295-4441</div>
+            <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS ID</label>
+            <div id="sisid-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: SP22-BL-FOLK-E295-4441</div>
             <div class="rvt-input-group">
-                <input class="rvt-text-input rvt-width-xl" type="text" id="sis-search"
-                       aria-describedby="sis-search-description" th:field="*{sisIdSearch}">
+                <input class="rvt-text-input rvt-width-xl" type="text" id="sisid-search"
+                       aria-describedby="sisid-search-description" th:field="*{sisIdSearch}">
             </div>
             <div class="rvt-button-group rvt-p-top-sm">
                 <button type="submit" class="rvt-button">
                     <span>Find</span>
+                </button>
+                <button id="reset-button-sisid" type="button" class="rvt-button">
+                    <span>Reset</span>
                 </button>
             </div>
             <input type="hidden" name="radioSearch" value="sis-radio" />
         </div>
     </form>
 
-    <form th:object="${findParentModel}" id="numberForm" class="rvt-display-none" action="findParentCourse.html"
+    <form th:object="${findParentModel}" id="classNumberForm" class="rvt-display-none" action="findParentCourse.html"
           th:action="@{|/app/lookup-search-termandclassnumber|}" method="post">
         <div class="rvt-p-top-sm rvt-m-bottom-md">
             <label for="select-input-default" class="rvt-label rvt-ts-16 rvt-text-bold">Term</label>
+            <!--
+             <option th:each="i : ${#numbers.sequence(0, 100)}" th:value="${i}" th:text="${i}">
+             </option>
+            -->
             <select id="select-input-default" name="termByClassNumberSearch" class="rvt-select rvt-width-xl">
-                <option value="4238">Fall 2023</option>
-                <option value="4235">Summer 2023</option>
-                <option value="4232">Spring 2023</option>
-                <option value="4222">Spring 2022</option>
+                <option th:each="term : ${terms}" th:value="${term.sisTermId}" th:text="${term.name}" >
+                </option>
             </select>
         </div>
         <div class="rvt-m-bottom-md">
@@ -116,31 +114,15 @@
                 <button type="submit" class="rvt-button">
                     <span>Find</span>
                 </button>
+                <button id="reset-button-class-number" type="button" class="rvt-button">
+                    <span>Reset</span>
+                </button>
             </div>
             <input type="hidden" name="radioSearch" value="class-number-radio"  />
         </div>
     </form>
 
-    <form th:object="${findParentModel}" id="canvasForm" action="findParentCourse.html" class="rvt-display-none"
-          th:action="@{|/app/lookup-search-canvascourseid|}" method="post">
-        <div class="rvt-p-top-sm rvt-m-bottom-md">
-            <label for="canvas-search" class="rvt-label rvt-ts-16 rvt-text-bold">Canvas course ID</label>
-            <div id="canvas-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: 2167456</div>
-            <div class="rvt-input-group">
-                <input class="rvt-text-input rvt-width-xl" type="text" id="canvas-search"
-                       aria-describedby="canvas-search-description" th:field="*{canvasCourseIdSearch}">
-            </div>
-            <div class="rvt-button-group rvt-p-top-sm">
-                <button type="submit" class="rvt-button">
-                    <span>Find</span>
-                </button>
-            </div>
-            <input type="hidden" name="radioSearch" value="canvas-radio" />
-        </div>
-    </form>
-
-    <div th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md alertThing">
-        <!-- successfully find something -->
+    <div id="results-message" th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md resultsWidth">
                 <div class="rvt-flex rvt-items-center">
                     <rvt-icon name="check" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
                     <h2 th:text="${findParentResult.statusMessage}" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
@@ -156,53 +138,50 @@
                         <span th:text="${findParentResult.sisCourseId}" class="rvt-ts-14">SP22-BL-FOLK-E295-1234</span>
                     </div>
                 </div>
-
-        <!--        <div class="rvt-flex rvt-items-center">-->
-        <!--            <rvt-icon name="check" class="rvt-color-green rvt-bg-green-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
-        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>-->
-        <!--        </div>-->
-        <!--        <div class="rvt-p-top-sm">-->
-        <!--            <div>-->
-        <!--                <a href="https://(canvasUrl)/courses/(courseId)/settings#tab-sections" target="_blank">SP22: SURVEY OF HIP HOP: 1234 <span class="rvt-sr-only">Opens in new window</span><rvt-icon name="link-external"></rvt-icon></a>-->
-        <!--            </div>-->
-        <!--            <div>-->
-        <!--                <span class="rvt-ts-14">SP22-BL-FOLK-E295-1234</span>-->
-        <!--            </div>-->
-        <!--        </div>-->
-
-        <!-- various unsuccessful messages -->
-        <!--        <div class="rvt-flex rvt-items-center">-->
-        <!--            <rvt-icon name="close" class="rvt-color-orange rvt-bg-orange-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
-        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">No parent course found</h2>-->
-        <!-- TODO - change above message to "This section is not crosslisted" -->
-        <!--        </div>-->
-        <!--        <div class="rvt-flex rvt-items-center">-->
-        <!--            <rvt-icon name="close" class="rvt-color-orange rvt-bg-orange-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
-        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Course not found in Canvas</h2>-->
-        <!--        </div>-->
-        <!--        <div class="rvt-flex rvt-items-center">-->
-        <!--            <rvt-icon name="close" class="rvt-color-orange rvt-bg-orange-100 rvt-border-radius-circle rvt-p-all-xs"></rvt-icon>-->
-        <!--            <h2 class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Course not found in SIS</h2>-->
-        <!--        </div>-->
     </div>
 </div>
 <th:block layout:fragment="script">
     <script type="text/javascript">
-        function radioFunction() {
+        var isCrosslisterLookupInitialLoad = true;
+
+        jQuery(document).ready(function() {
+            crosslisterLookupRadioFunction();
+
+            jQuery("#reset-button-sisid").on( "click", function() {
+                resetCrosslisterLookupForms();
+            });
+
+            jQuery("#reset-button-class-number").on( "click", function() {
+                resetCrosslisterLookupForms();
+            });
+
+            isCrosslisterLookupInitialLoad = false;
+        });
+
+        function crosslisterLookupRadioFunction() {
             if (document.getElementById('sis-radio').checked) {
-                document.getElementById('sisForm').classList.remove("rvt-display-none");
-                document.getElementById('numberForm').classList.add("rvt-display-none");
-                document.getElementById('canvasForm').classList.add("rvt-display-none");
+                document.getElementById('sisIdForm').classList.remove("rvt-display-none");
+                document.getElementById('classNumberForm').classList.add("rvt-display-none");
             } else if (document.getElementById('class-number-radio').checked) {
-                document.getElementById('sisForm').classList.add("rvt-display-none");
-                document.getElementById('numberForm').classList.remove("rvt-display-none");
-                document.getElementById('canvasForm').classList.add("rvt-display-none");
+                document.getElementById('sisIdForm').classList.add("rvt-display-none");
+                document.getElementById('classNumberForm').classList.remove("rvt-display-none");
             } else {
-                document.getElementById('sisForm').classList.add("rvt-display-none");
-                document.getElementById('numberForm').classList.add("rvt-display-none");
-                document.getElementById('canvasForm').classList.remove("rvt-display-none");
+                document.getElementById('sisIdForm').classList.add("rvt-display-none");
+                document.getElementById('classNumberForm').classList.add("rvt-display-none");
+            }
+
+            if (! isCrosslisterLookupInitialLoad) {
+                resetCrosslisterLookupForms();
             }
         }
+
+        function resetCrosslisterLookupForms() {
+            document.getElementById('sisid-search').value = "";
+            document.getElementById('class-number-search').value = "";
+
+            document.getElementById('results-message').classList.add("rvt-display-none");
+        }
+
     </script>
 </th:block>
 </body>
