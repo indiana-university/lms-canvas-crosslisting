@@ -621,6 +621,7 @@ public class CrosslistController extends OidcTokenAwareController {
                 impersonationModel = new ImpersonationModel();
             }
             model.addAttribute("impersonationModel", impersonationModel);
+            model.addAttribute("newestTerm", termId);
 
             String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 

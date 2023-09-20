@@ -102,7 +102,7 @@
                                 <div id="loading">
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
-                                <div id="unavailable-sections-load" class="rvt-p-top-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
+                                <div id="unavailable-sections-load" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
                                 </div>
                                 <div id="unavailable-loading">
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
@@ -141,8 +141,6 @@
 <th:block layout:fragment="script">
     <script>
         $(document).ready(function() {
-            Rivet.init();
-
             document.addEventListener('rvtSwitchToggledOn', event => {
                 if (event.srcElement.getAttribute("id") == 'crosslisted-switch') {
                     $('#show-crosslisted-in-other-sections-action').attr('value', 'impersonate');
