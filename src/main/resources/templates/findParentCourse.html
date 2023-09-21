@@ -70,19 +70,29 @@
         </ul>
     </fieldset>
 
-    <form th:object="${findParentModel}" id="sisIdForm" action="findParentCourse.html" th:action="@{|/app/lookup-search-sisid|}" method="post">
+    <form th:object="${findParentModel}" id="sisIdForm" action="findParentCourse.html"
+          th:action="@{|/app/lookup-search-sisid|}" onsubmit="return validateSisIdForm()" method="post">
         <div class="rvt-p-top-sm rvt-m-bottom-md">
             <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS ID</label>
             <div id="sisid-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: SP22-BL-FOLK-E295-4441</div>
             <div class="rvt-input-group">
                 <input class="rvt-text-input rvt-width-xl" type="text" id="sisid-search"
-                       aria-describedby="sisid-search-description" th:field="*{sisIdSearch}">
+                       aria-describedby="sisid-search-description" th:field="*{sisIdSearch}" />
+            </div>
+            <div id="sisid-validation-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
+                    <span class="rvt-inline-alert__icon">
+                        <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
+                            <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
+                        </svg>
+                    </span>
+                <span class="rvt-inline-alert__message">SIS ID needs to be supplied.</span>
             </div>
             <div class="rvt-button-group rvt-p-top-sm">
                 <button type="submit" class="rvt-button">
                     <span>Find</span>
                 </button>
-                <button id="reset-button-sisid" type="button" class="rvt-button">
+                <button id="reset-button-sisid" type="button" class="rvt-button--secondary">
                     <span>Reset</span>
                 </button>
             </div>
@@ -91,13 +101,9 @@
     </form>
 
     <form th:object="${findParentModel}" id="classNumberForm" class="rvt-display-none" action="findParentCourse.html"
-          th:action="@{|/app/lookup-search-termandclassnumber|}" method="post">
+          th:action="@{|/app/lookup-search-termandclassnumber|}" onsubmit="return validateTermAndClassNumberForm()" method="post">
         <div class="rvt-p-top-sm rvt-m-bottom-md">
             <label for="select-input-default" class="rvt-label rvt-ts-16 rvt-text-bold">Term</label>
-            <!--
-             <option th:each="i : ${#numbers.sequence(0, 100)}" th:value="${i}" th:text="${i}">
-             </option>
-            -->
             <select id="select-input-default" name="termByClassNumberSearch" class="rvt-select rvt-width-xl">
                 <option th:each="term : ${terms}" th:value="${term.sisTermId}" th:text="${term.name}" >
                 </option>
@@ -108,13 +114,22 @@
             <div id="class-number-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: 4441</div>
             <div class="rvt-input-group">
                 <input class="rvt-text-input rvt-width-xl" type="text" id="class-number-search"
-                       aria-describedby="class-number-search-description" th:field="*{classNumberSearch}">
+                       aria-describedby="class-number-search-description" th:field="*{classNumberSearch}" />
+            </div>
+            <div id="term-class-number-validation-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
+                    <span class="rvt-inline-alert__icon">
+                        <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
+                            <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
+                        </svg>
+                    </span>
+                <span class="rvt-inline-alert__message">Class Number needs to be supplied.</span>
             </div>
             <div class="rvt-button-group rvt-p-top-sm">
                 <button type="submit" class="rvt-button">
                     <span>Find</span>
                 </button>
-                <button id="reset-button-class-number" type="button" class="rvt-button">
+                <button id="reset-button-class-number" type="button" class="rvt-button--secondary">
                     <span>Reset</span>
                 </button>
             </div>
@@ -124,7 +139,7 @@
 
     <div id="results-message" th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md resultsWidth">
                 <div class="rvt-flex rvt-items-center">
-                    <rvt-icon name="check" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
+                    <rvt-icon th:name="${findParentResult.statusIconName}" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
                     <h2 th:text="${findParentResult.statusMessage}" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
                 </div>
                 <div th:if="${findParentResult.showCourseInfo}" class="rvt-p-top-sm">
@@ -176,12 +191,57 @@
         }
 
         function resetCrosslisterLookupForms() {
+            var form1ValidationMessage = document.getElementById('sisid-validation-message');
+            var form2ValidationMessage = document.getElementById('term-class-number-validation-message');
+
+            form1ValidationMessage.classList.add('rvt-display-none');
+            form1ValidationMessage.removeAttribute('aria-invalid');
+            form1ValidationMessage.removeAttribute('aria-describedby');
+
+            form2ValidationMessage.classList.add('rvt-display-none');
+            form2ValidationMessage.removeAttribute('aria-invalid');
+            form2ValidationMessage.removeAttribute('aria-describedby');
+
             document.getElementById('sisid-search').value = "";
             document.getElementById('class-number-search').value = "";
 
-            document.getElementById('results-message').classList.add("rvt-display-none");
+            var resultsMessage = document.getElementById('results-message');
+
+            if (resultsMessage != null) {
+                resultsMessage.classList.add("rvt-display-none");
+            }
         }
 
+        function validateSisIdForm() {
+            var inputFieldToSearch = 'sisid-search';
+
+            if (document.getElementById(inputFieldToSearch).value.trim() === '') {
+                var validationMessage = document.getElementById('sisid-validation-message');
+
+                validationMessage.classList.remove('rvt-display-none');
+                validationMessage.setAttribute('aria-invalid', true);
+                validationMessage.setAttribute('aria-describedby', inputFieldToSearch);
+                alert("false");
+                return false;
+            } else {
+                document.getElementById('sisIdForm').submit();
+            }
+        }
+
+       function validateTermAndClassNumberForm() {
+            var inputFieldToSearch = 'class-number-search';
+
+            if (document.getElementById(inputFieldToSearch).value.trim() === '') {
+                var validationMessage = document.getElementById('term-class-number-validation-message');
+
+                validationMessage.classList.remove('rvt-display-none');
+                validationMessage.setAttribute('aria-invalid', true);
+                validationMessage.setAttribute('aria-describedby', inputFieldToSearch);
+                return false;
+            } else {
+                document.getElementById('classNumberForm').submit();
+            }
+        }
     </script>
 </th:block>
 </body>

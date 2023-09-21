@@ -725,6 +725,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
    }
 
    @Test
@@ -736,6 +737,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
    }
 
    @Test
@@ -751,6 +753,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
    }
 
    @Test
@@ -771,6 +774,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
    }
 
    @Test
@@ -791,6 +795,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
    }
 
    @Test
@@ -812,6 +817,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
    }
 
    @Test
@@ -848,6 +854,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertTrue(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_COURSE_NOT_CROSSLISTED_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME, findParentResult.getStatusIconName());
       Assertions.assertEquals(String.format("%s/courses/%s", canvasConfiguration.getBaseUrl(), course.getId()), findParentResult.getUrl());
       Assertions.assertEquals(courseName, findParentResult.getName());
       Assertions.assertEquals(sisCourseId, findParentResult.getSisCourseId());
@@ -884,6 +891,7 @@ public class CrosslistServiceImplTest {
       Assertions.assertTrue(findParentResult.isShowCourseInfo());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_SUCCESS_FOUND_MESSAGE, findParentResult.getStatusMessage());
       Assertions.assertEquals(CrosslistConstants.LOOKUP_SUCCESS_CSS, findParentResult.getStatusIconCssClasses());
+      Assertions.assertEquals(CrosslistConstants.LOOKUP_SUCCESS_ICON_NAME, findParentResult.getStatusIconName());
       Assertions.assertEquals(String.format("%s/courses/%s", canvasConfiguration.getBaseUrl(), course.getId()), findParentResult.getUrl());
       Assertions.assertEquals(courseName, findParentResult.getName());
       Assertions.assertEquals(sisCourseId, findParentResult.getSisCourseId());

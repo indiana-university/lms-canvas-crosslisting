@@ -44,4 +44,5 @@ public class FindParentResult {
     private boolean showCourseInfo;
     private String statusMessage;
     private String statusIconCssClasses;
+    private String statusIconName;
 }

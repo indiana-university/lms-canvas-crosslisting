@@ -34,6 +34,7 @@ package edu.iu.uits.lms.crosslist.controller;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.iu.uits.lms.canvas.helpers.CanvasDateFormatUtil;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Section;
@@ -81,6 +82,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -882,10 +884,13 @@ public class CrosslistController extends OidcTokenAwareController {
     public String lookupLaunch(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
         getTokenWithoutContext();
 
+        Date nowDate = new Date();
+
         List<CanvasTerm> terms = termService.getEnrollmentTerms()
                 .stream()
                 .filter(term -> term.getSisTermId().compareTo("4218") >= 0 && term.getSisTermId().charAt(0) == '4')
-                .sorted(Comparator.comparing(CanvasTerm::getSisTermId))
+                .filter(term -> CanvasDateFormatUtil.string2DateOnly(term.getStartAt()).compareTo(nowDate) < 0)
+                .sorted(Comparator.comparing(CanvasTerm::getSisTermId).reversed())
                 .toList();
 
         if (courseSessionService.getAttributeFromSession(session, "all", "terms", List.class) == null) {
@@ -905,16 +910,10 @@ public class CrosslistController extends OidcTokenAwareController {
         FindParentResult findParentResult = null;
 
         List<CanvasTerm> terms = courseSessionService.getAttributeFromSession(session, "all",
-              "terms", List.class);
+                "terms", List.class);
 
-        if (findParentModel.getSisIdSearch() == null || findParentModel.getSisIdSearch().trim().isEmpty()) {
-            findParentResult = new FindParentResult();
-            findParentResult.setStatusMessage("SIS ID needs to have a value");
-            findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-        } else {
-            SisCourse sisCourse = sisService.getSisCourseBySiteId(findParentModel.getSisIdSearch().trim());
-            findParentResult = crosslistService.processSisLookup(sisCourse);
-        }
+        SisCourse sisCourse = sisService.getSisCourseBySiteId(findParentModel.getSisIdSearch().trim().toUpperCase());
+        findParentResult = crosslistService.processSisLookup(sisCourse);
 
         model.addAttribute("terms", terms);
 
@@ -935,23 +934,13 @@ public class CrosslistController extends OidcTokenAwareController {
         List<CanvasTerm> terms = courseSessionService.getAttributeFromSession(session, "all",
                 "terms", List.class);
 
-        if (findParentModel.getTermByClassNumberSearch() == null || findParentModel.getTermByClassNumberSearch().trim().isEmpty()) {
-            findParentResult = new FindParentResult();
-            findParentResult.setStatusMessage("Term needs to have a value");
-            findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-        } else if (findParentModel.getClassNumberSearch() == null || findParentModel.getClassNumberSearch().trim().isEmpty()) {
-            findParentResult = new FindParentResult();
-            findParentResult.setStatusMessage("Class Number needs to have a value");
-            findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-        } else {
-            final String strm = findParentModel.getTermByClassNumberSearch().trim();
-            final String classNumber = findParentModel.getClassNumberSearch().trim();
+        final String strm = findParentModel.getTermByClassNumberSearch().trim();
+        final String classNumber = findParentModel.getClassNumberSearch().trim();
 
-            final String iuSiteId = sisService.getIuSiteIdFromStrmAndClassNumber(strm, classNumber);
+        final String iuSiteId = sisService.getIuSiteIdFromStrmAndClassNumber(strm, classNumber);
 
-            SisCourse sisCourse = sisService.getSisCourseBySiteId(iuSiteId);
-            findParentResult = crosslistService.processSisLookup(sisCourse);
-        }
+        SisCourse sisCourse = sisService.getSisCourseBySiteId(iuSiteId);
+        findParentResult = crosslistService.processSisLookup(sisCourse);
 
         model.addAttribute("terms", terms);
 

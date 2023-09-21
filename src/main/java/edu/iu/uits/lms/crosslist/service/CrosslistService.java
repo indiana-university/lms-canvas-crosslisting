@@ -397,22 +397,17 @@ public class CrosslistService {
          findParentResult.setShowCourseInfo(false);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          return findParentResult;
       }
 
       Section section = sectionService.getSection(String.format("sis_section_id:%s", sisCourse.getIuSiteId()));
 
-      if (section == null) {
+      if (section == null || section.getSis_course_id() == null || section.getSis_section_id() == null) {
          findParentResult.setShowCourseInfo(false);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-         return findParentResult;
-      }
-
-      if (section.getSis_course_id() == null || section.getSis_section_id() == null) {
-         findParentResult.setShowCourseInfo(false);
-         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
-         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          return findParentResult;
       }
 
@@ -422,6 +417,7 @@ public class CrosslistService {
          findParentResult.setShowCourseInfo(false);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          return findParentResult;
       }
 
@@ -429,6 +425,7 @@ public class CrosslistService {
          findParentResult.setShowCourseInfo(true);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_COURSE_NOT_CROSSLISTED_MESSAGE);
          findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
+         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          findParentResult.setName(course.getName());
          findParentResult.setSisCourseId(course.getSisCourseId());
          findParentResult.setUrl(String.format("%s/courses/%s",
@@ -439,6 +436,7 @@ public class CrosslistService {
       findParentResult.setShowCourseInfo(true);
       findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_SUCCESS_FOUND_MESSAGE);
       findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_SUCCESS_CSS);
+      findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_SUCCESS_ICON_NAME);
       findParentResult.setName(course.getName());
       findParentResult.setSisCourseId(course.getSisCourseId());
       findParentResult.setUrl(String.format("%s/courses/%s",
