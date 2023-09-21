@@ -43,9 +43,10 @@
 
 <body>
 <div layout:fragment="content">
-    <div class="rvt-container-xl">
+    <div class="rvt-container-xl rvt-m-top-sm">
         <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
-        <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-bottom-md" th:classappend="${submissionStatus.statusClass}" role="alert">
+        <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-bottom-md" th:classappend="${submissionStatus.statusClass}"
+             role="alert" data-rvt-alert="error">
             <p class="rvt-alert__message" th:utext="${submissionStatus.statusMessage}">status message goes here</p>
             <button type="button" class="rvt-alert__dismiss" data-alert-close>
                 <span class="rvt-sr-only">Close</span>
@@ -59,7 +60,8 @@
             <p id="instructions" class="rvt-ts-18">
                 Check the sections you wish to add (cross-list) and uncheck the sections you wish to remove (de-cross-list).
                 Only officially provisioned sections are available for cross-listing. For assistance, contact the
-                <a href="https://kb.iu.edu/d/abxl" target="_blank">UITS Support Center</a>.
+                <a href="https://kb.iu.edu/d/abxl" target="_blank">UITS Support Center.<rvt-icon name="link-external"></rvt-icon>
+                    <span class="rvt-sr-only">Opens in new window</span></a>
             </p>
 
             <form id="main" action="index.html" th:action="@{|/app/${courseId}/continue|}" method="post">
@@ -100,7 +102,7 @@
                                 <div id="loading">
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
                                 </div>
-                                <div id="unavailable-sections-load" class="rvt-p-top-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
+                                <div id="unavailable-sections-load" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
                                 </div>
                                 <div id="unavailable-loading">
                                     <div class="rvt-loader rvt-loader--sm" aria-label="Content loading"></div>
@@ -118,8 +120,8 @@
                     </div>
                 </div>
 
-                <div id="etext-message" th:if="${etextMessage}" class="rvt-alert rvt-alert--warning rvt-m-top-sm" role="alertdialog" aria-labelledby="etext-message-title">
-                    <h1 id="etext-message-title" class="rvt-alert__title">IU eText Reminder</h1>
+                <div id="etext-message" th:if="${etextMessage}" class="rvt-alert rvt-alert--warning rvt-m-top-sm" role="alert" aria-labelledby="etext-message-title" data-rvt-alert="warning">
+                    <div id="etext-message-title" class="rvt-alert__title">IU eText Reminder</div>
                     <p id="etext-message-text" th:text="${etextMessage}" class="rvt-alert__message" />
                 </div>
 

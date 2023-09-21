@@ -89,6 +89,12 @@
     margin: 1.0rem 0 1.2rem;
 }
 
-.toggler {
-    margin-bottom: 0.5rem;
+/* override the rivet style */
+.rvt-disclosure__content {
+    box-shadow: none;
+}
+
+/* override rivet to make the toggle black instead of blue */
+.rvt-disclosure__toggle::before {
+    filter: brightness(0%);
 }

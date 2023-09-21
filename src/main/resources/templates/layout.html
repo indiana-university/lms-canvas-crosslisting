@@ -43,6 +43,7 @@
     <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
     <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link th:href="@{/app/jsrivet/rivet.min.css}" rel="stylesheet" type="text/css" />
+    <link th:href="@{/app/jsrivet/rivet-icons.css}" rel="stylesheet" type="text/css" />
     <link th:href="@{/app/css/crosslisting.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -68,6 +69,8 @@
 </footer>
 
 <script type="text/javascript" th:src="@{/app/jsrivet/rivet.min.js}"></script>
+<script defer th:src="@{/app/jsrivet/rivet-icons.js}"></script>
+<script type="module" th:src="@{/app/jsrivet/rivet-icon-element.js}"></script>
 <script type="text/javascript" th:src="@{/app/webjars/jquery/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/app/js/crosslisting.js}"></script>
 
