@@ -880,7 +880,7 @@ public class CrosslistController extends OidcTokenAwareController {
     }
 
     @RequestMapping("/lookup-launch")
-    @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
+    @Secured({LTIConstants.ADMIN_AUTHORITY})
     public String lookupLaunch(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
         getTokenWithoutContext();
 
@@ -903,7 +903,7 @@ public class CrosslistController extends OidcTokenAwareController {
     }
 
     @PostMapping(value = "/lookup-search-sisid")
-    @Secured({LTIConstants.BASE_USER_AUTHORITY})
+    @Secured({LTIConstants.ADMIN_AUTHORITY})
     public String lookupSearchBySisId(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
         getTokenWithoutContext();
 
@@ -925,7 +925,7 @@ public class CrosslistController extends OidcTokenAwareController {
     }
 
     @PostMapping(value = "/lookup-search-termandclassnumber")
-    @Secured({LTIConstants.BASE_USER_AUTHORITY})
+    @Secured({LTIConstants.ADMIN_AUTHORITY})
     public String lookupSearchByTermAndClassNUmber(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
         getTokenWithoutContext();
 
