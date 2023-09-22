@@ -170,6 +170,12 @@
                 resetCrosslisterLookupForms();
             });
 
+            var resultsMessage = document.getElementById('results-message');
+
+            if (resultsMessage != null) {
+                resultsMessage.focus();
+            }
+
             isCrosslisterLookupInitialLoad = false;
         });
 
