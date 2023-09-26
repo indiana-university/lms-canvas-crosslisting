@@ -1,0 +1,27 @@
+{
+  "title": "Cross-listing Lookup Parent",
+  "description": "For Looking up a course's parent course if cross-listed in Canvas.",
+  "oidc_initiation_url": "http://localhost:8080/lti/login_initiation/lms_lti_crosslisting",
+  "target_link_uri": "http://localhost:8080/app/lookup-launch",
+  "extensions": [
+    {
+      "domain": "localhost",
+      "platform": "canvas.instructure.com",
+      "privacy_level": "public",
+      "settings": {
+        "placements": [
+          {
+            "enabled": true,
+            "placement": "account_navigation",
+            "message_type": "LtiResourceLinkRequest"
+          }
+        ]
+      }
+    }
+  ],
+  "public_jwk_url": "http://localhost:8080/.well-known/jwks.json",
+  "custom_fields": {
+    "instructure_membership_roles": "$com.Instructure.membership.roles",
+    "canvas_user_login_id": "$Canvas.user.loginId"
+  }
+}
