@@ -12,7 +12,7 @@
         "placements": [
           {
             "enabled": true,
-            "placement": "account_navigation",
+            "placement": "course_navigation",
             "message_type": "LtiResourceLinkRequest"
           }
         ]
