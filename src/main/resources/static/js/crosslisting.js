@@ -117,9 +117,6 @@ $(document).ready(function(){
 
             loadUnavailableSections();
 
-            // move focus to the newly added section
-            $("button[aria-controls=" + termId + "]").focus();
-
         });
         // remove the term option from the map since there won't be a need to select it again
         $("#addTerm option[value=" + termId + "]").remove();
@@ -137,24 +134,6 @@ $(document).ready(function(){
         $("#loading").show();
     });
 
-    // this controls the toggle dropdowns
-    $(document).on('click', '.toggleGroup', function() {
-        
-        $(this).parent().find('.toggler:first').slideToggle("slow");
-        
-        if ($(this).find("use:first").attr("xlink:href").includes("rvt-icon-chevron-down")) {
-            $(this).find("button:first").attr("aria-expanded","false");
-            $(this).find("use:first").attr("xlink:href", function(index, old) {
-                return old.replace("rvt-icon-chevron-down", "rvt-icon-chevron-right");
-            });
-        } else {
-            $(this).find("button:first").attr("aria-expanded","true");
-            $(this).find("use:first").attr("xlink:href", function(index, old) {
-                return old.replace("rvt-icon-chevron-right", "rvt-icon-chevron-down");
-            });
-        }
-    });
-
     $(document).ajaxComplete(function(event, xhr, settings) {
         var unavailableSectionsUrl = $('#unavailable-sections-load').data('urlbase');
 
@@ -167,6 +146,12 @@ $(document).ready(function(){
 
            // Canvas has a message listener to resize the iframe
            parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+        }
+
+        // move focus to the newly added term
+        var focusElement = $(".newTerm").first();
+        if (focusElement) {
+            focusElement.focus();
         }
     });
 });
@@ -245,7 +230,7 @@ function checkboxEventRegistration() {
         event.preventDefault();
 
         var currentBox = $(this);
-        var li = currentBox.parent();
+        var li = currentBox.parent().parent();
 
         if (currentBox.is(":checked")) {
             var newLi = $("<li>", {

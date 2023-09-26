@@ -1,23 +1,25 @@
+package edu.iu.uits.lms.crosslist.model;
+
 /*-
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2023 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the Indiana University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -30,75 +32,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-/* Loading page stuff */
-#load {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: 25%;
-    height: 25%;
-    white-space: nowrap;
-}
 
-#loading, #unavailable-loading {
-    display: none;
-}
+import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import lombok.Data;
 
-/* Toggle Color override */
-
-.toggleoverride {
-    color: #000000;
-}
-
-/* Highlights */
-
-.sectionHighlight {
-    animation: fadeIt 3s ease-in;
-}
-
-@keyframes fadeIt {
-    0%    { background-color: #a2b4be; }
-    100%  { background-color: #fafafa; }
-}
-
-/* sets the size of rivet icons */
-.rvt-icon {
-    width: 1rem;
-    height: 1rem;
-}
-
-/* Color overrides */
-
-.buttonColorOverride {
-    background-color: #ffffff;
-}
-
-/* Other stuff */
-
-.impersonationBar {
-    background-color: #ffeecd;
-    border-bottom: 0.125rem solid #dddddd;
-}
-
-#addTerms {
-    font-weight: inherit;
-    font-size: inherit;
-    margin: 1.0rem 0 1.2rem;
-}
-
-/* override the rivet style */
-.rvt-disclosure__content {
-    box-shadow: none;
-}
-
-/* override rivet to make the toggle black instead of blue */
-.rvt-disclosure__toggle::before {
-    filter: brightness(0%);
-}
-
-.resultsWidth {
-    width: max-content;
+@Data
+public class FindParentResult {
+    private String url;
+    private String name;
+    private String sisCourseId;
+    private boolean showCourseInfo;
+    private String statusMessage;
+    private String statusIconCssClasses;
+    private String statusIconName;
 }

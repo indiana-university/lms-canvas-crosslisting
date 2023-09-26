@@ -34,6 +34,7 @@ package edu.iu.uits.lms.crosslist.controller;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.iu.uits.lms.canvas.helpers.CanvasDateFormatUtil;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Section;
@@ -43,6 +44,8 @@ import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import edu.iu.uits.lms.crosslist.model.FindParentModel;
+import edu.iu.uits.lms.crosslist.model.FindParentResult;
 import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.crosslist.model.SectionWrapper;
@@ -79,6 +82,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -127,11 +131,6 @@ public class CrosslistController extends OidcTokenAwareController {
     @Autowired
     private CourseSessionService courseSessionService;
 
-    @RequestMapping(value = "/accessDenied")
-    public String accessDenied() {
-        return "accessDenied";
-    }
-
     private Course getValidatedCourse(OidcAuthenticationToken token, HttpSession session) {
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
         String courseId = oidcTokenUtils.getCourseId();
@@ -154,7 +153,7 @@ public class CrosslistController extends OidcTokenAwareController {
         return currentCourse;
     }
 
-    @RequestMapping("/loading")
+    @RequestMapping({"/launch", "/loading"})
     public String loading(Model model, HttpServletRequest request) {
         OidcAuthenticationToken token = getTokenWithoutContext();
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
@@ -597,6 +596,7 @@ public class CrosslistController extends OidcTokenAwareController {
                 impersonationModel = new ImpersonationModel();
             }
             model.addAttribute("impersonationModel", impersonationModel);
+            model.addAttribute("newestTerm", termId);
 
             String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
@@ -880,6 +880,77 @@ public class CrosslistController extends OidcTokenAwareController {
         return main(courseId, model, session);
     }
 
+    @RequestMapping("/lookup-launch")
+    @Secured({LTIConstants.ADMIN_AUTHORITY})
+    public String lookupLaunch(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
+        getTokenWithoutContext();
+
+        Date nowDate = new Date();
+
+        List<CanvasTerm> terms = termService.getEnrollmentTerms()
+                .stream()
+                .filter(term -> term.getSisTermId().compareTo("4218") >= 0 && term.getSisTermId().charAt(0) == '4')
+                .filter(term -> CanvasDateFormatUtil.string2DateOnly(term.getStartAt()).compareTo(nowDate) < 0)
+                .sorted(Comparator.comparing(CanvasTerm::getSisTermId).reversed())
+                .toList();
+
+        if (courseSessionService.getAttributeFromSession(session, "all", "terms", List.class) == null) {
+            courseSessionService.addAttributeToSession(session, "all", "terms", terms);
+        }
+
+        model.addAttribute("terms", terms);
+
+        return "findParentCourse";
+    }
+
+    @PostMapping(value = "/lookup-search-sisid")
+    @Secured({LTIConstants.ADMIN_AUTHORITY})
+    public String lookupSearchBySisId(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
+        getTokenWithoutContext();
+
+        FindParentResult findParentResult = null;
+
+        List<CanvasTerm> terms = courseSessionService.getAttributeFromSession(session, "all",
+                "terms", List.class);
+
+        SisCourse sisCourse = sisService.getSisCourseBySiteId(findParentModel.getSisIdSearch().trim().toUpperCase());
+        findParentResult = crosslistService.processSisLookup(sisCourse);
+
+        model.addAttribute("terms", terms);
+
+        if (findParentResult != null) {
+            model.addAttribute("findParentResult", findParentResult);
+        }
+
+        return "findParentCourse";
+    }
+
+    @PostMapping(value = "/lookup-search-termandclassnumber")
+    @Secured({LTIConstants.ADMIN_AUTHORITY})
+    public String lookupSearchByTermAndClassNUmber(@ModelAttribute FindParentModel findParentModel, Model model, HttpSession session) {
+        getTokenWithoutContext();
+
+        FindParentResult findParentResult = null;
+
+        List<CanvasTerm> terms = courseSessionService.getAttributeFromSession(session, "all",
+                "terms", List.class);
+
+        final String strm = findParentModel.getTermByClassNumberSearch().trim();
+        final String classNumber = findParentModel.getClassNumberSearch().trim();
+
+        final String iuSiteId = sisService.getIuSiteIdFromStrmAndClassNumber(strm, classNumber);
+
+        SisCourse sisCourse = sisService.getSisCourseBySiteId(iuSiteId);
+        findParentResult = crosslistService.processSisLookup(sisCourse);
+
+        model.addAttribute("terms", terms);
+
+        if (findParentResult != null) {
+            model.addAttribute("findParentResult", findParentResult);
+        }
+
+        return "findParentCourse";
+    }
 
     private List<SectionUIDisplay> removeSectionUiDisplayBySectionName(@NonNull List<SectionUIDisplay> oldList, @NonNull String toRemoveSectionName) {
         List<SectionUIDisplay> newList = new ArrayList<SectionUIDisplay>();

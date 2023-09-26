@@ -40,65 +40,75 @@
 </head>
 <body>
 
-<div th:fragment="enterImpersonationMode">
-    <div class="rvt-flex rvt-justify-space-between">
-        <h1 class="rvt-ts-32">Cross-listing Assistant</h1>
-        <!-- Add logic to this next block if it should display, adminMode and not impersonating yet -->
-        <div class="rvt-flex rvt-items-center" th:if="${impersonationModel.username == null}" sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
-            <button type="button" class="rvt-button rvt-button--secondary rvt-m-left-sm" data-modal-trigger="impersonateModal">Impersonate User</button>
+    <div th:fragment="enterImpersonationMode">
+        <div class="rvt-flex rvt-justify-space-between">
+            <h1 class="rvt-ts-32">Cross-listing Assistant</h1>
+            <!-- Add logic to this next block if it should display, adminMode and not impersonating yet -->
+            <div class="rvt-flex rvt-items-center" th:if="${impersonationModel.username == null}" sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
+                <button type="button" class="rvt-button rvt-button--secondary rvt-m-left-sm" data-rvt-dialog-trigger="dialog-impersonate">Impersonate User</button>
+            </div>
         </div>
-    </div>
 
     <!-- possibly add some admin mode logic to the modal, too, to prevent users from "hacking" their way into it -->
     <!-- not sure if this not being rendered will make the js explode -->
-    <div class="rvt-modal"
-         id="impersonateModal"
-         role="dialog"
-         aria-labelledby="impersonateModalTitle"
-         aria-hidden="true"
-         tabindex=-1
-         data-modal-dialog="true"
-         sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
-        <div class="rvt-modal__inner">
-            <h1 class="rvt-modal__title rvt-modal__header" id="impersonateModalTitle">Impersonate User</h1>
+        <div class="rvt-dialog"
+             id="dialog-impersonate"
+             role="dialog" tabindex="-1"
+             aria-labelledby="impersonateModalTitle"
+             data-rvt-dialog="dialog-impersonate"
+             data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden
+             sec:authorize="hasRole(T(edu.iu.uits.lms.lti.LTIConstants).ADMIN_ROLE)">
+            <header class="rvt-dialog__header">
+                <h1 class="rvt-dialog__title" id="impersonateModalTitle">Impersonate User</h1>
+            </header>
             <form th:object="${impersonationModel}" th:action="@{|/app/${courseId}/impersonate|}" method="post">
-                <div class="rvt-modal__body">
-                    <label for="impersonateDropdown">Impersonate:</label>
-                    <select id="impersonateDropdown" class="rvt-width-sm rvt-m-bottom-sm" th:field="*{username}">
+                <div class="rvt-dialog__body">
+                    <label class="rvt-label rvt-ts-16" for="impersonateDropdown">Impersonate:</label>
+                    <select id="impersonateDropdown" class="rvt-select rvt-width-sm rvt-m-bottom-sm" th:field="*{username}">
                         <option value="">Select user...</option>
                         <option th:each="instructor : ${instructors}" th:value="${instructor.loginId}" th:text="${instructor.loginId}">instructor</option>
                     </select>
-                    <span class="rvt-ts-14 rvt-text-bold rvt-m-top-sm">Display options:</span>
-                    <fieldset>
-                        <legend class="sr-only">Impersonation checkbox options</legend>
-                        <ul class="rvt-plain-list">
+                    <fieldset class="rvt-fieldset rvt-m-top-sm">
+                        <legend class="rvt-ts-14 rvt-text-bold">Display options:</legend>
+                        <ul class="rvt-list-plain">
                             <li>
-                                <input type="checkbox" id="alreadyCrosslisted" name="includeCrosslistedSections" value="true"
-                                       th:checked="${impersonationModel.includeCrosslistedSections}">
-                                <label for="alreadyCrosslisted">Include already cross-listed sections</label>
+                                <div class="rvt-checkbox">
+                                    <input type="checkbox" id="alreadyCrosslisted" name="includeCrosslistedSections" value="true"
+                                           th:checked="${impersonationModel.includeCrosslistedSections}">
+                                    <label for="alreadyCrosslisted">Include already cross-listed sections</label>
+                                </div>
                             </li>
                             <li>
-                                <input type="checkbox" id="nonSis" name="includeNonSisSections" value="true"
-                                       th:checked="${impersonationModel.includeNonSisSections}">
-                                <label for="nonSis">Include non-SIS sections</label>
+                                <div class="rvt-checkbox">
+                                    <input type="checkbox" id="nonSis" name="includeNonSisSections" value="true"
+                                           th:checked="${impersonationModel.includeNonSisSections}">
+                                    <label for="nonSis">Include non-SIS sections</label>
+                                </div>
                             </li>
                             <li>
-                                <input type="checkbox" id="sisSectionsInParentWithCrosslistSections"
-                                       name="includeSisSectionsInParentWithCrosslistSections" value="true"
-                                       th:checked="${impersonationModel.includeSisSectionsInParentWithCrosslistSections}">
-                                <label for="sisSectionsInParentWithCrosslistSections">Include SIS sections in parent courses containing cross-listed sections</label>
+                                <div class="rvt-checkbox">
+                                    <input type="checkbox" id="sisSectionsInParentWithCrosslistSections"
+                                           name="includeSisSectionsInParentWithCrosslistSections" value="true"
+                                           th:checked="${impersonationModel.includeSisSectionsInParentWithCrosslistSections}">
+                                    <label for="sisSectionsInParentWithCrosslistSections">Include SIS sections in parent courses containing cross-listed sections</label>
+                                </div>
                             </li>
                         </ul>
                     </fieldset>
                 </div>
-                <div class="rvt-modal__controls">
-                    <button id="modal-cancel" type="button" class="rvt-button rvt-button--secondary" data-modal-close="impersonateModal">Cancel</button>
+                <div class="rvt-dialog__controls">
+                    <button id="modal-cancel" type="button" class="rvt-button rvt-button--secondary"
+                            data-rvt-dialog-close="dialog-impersonate" role="button">Cancel</button>
                     <button id="modal-submit" class="rvt-button" disabled="disabled" aria-disabled="true"
                             name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_IMPERSONATE}">Submit</button>
                 </div>
             </form>
+
+            <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-impersonate" role="button">
+                <span class="rvt-sr-only">Close</span>
+                <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"></path></svg>
+            </button>
         </div>
     </div>
-</div>
 </body>
 </html>

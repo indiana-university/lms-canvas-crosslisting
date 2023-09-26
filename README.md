@@ -63,6 +63,7 @@ They can be set in a properties file, or overridden as environment variables.
 | Property             | Default Value               | Description                                               |
 |----------------------|-----------------------------|-----------------------------------------------------------|
 | `canvas.host`        |                             | Hostname of the Canvas instance                           |
+| `canvas.sso.host`    |                             | Hostname of the Canvas OIDC auth domain                   |
 | `canvas.baseUrl`     | https://`${canvas.host}`    | Base URL of the Canvas instance                           |
 | `canvas.baseApiUrl`  | `${canvas.baseUrl}`/api/v1  | Base URL for the Canvas API                               |
 | `canvas.token`       |                             | Token for access to Canvas instance                       |
@@ -123,3 +124,37 @@ that need to be accounted for while using this setup.
 
 This is marked as experimental due to the fact that we aren't running with this option at IU.  We are running into CORS
 issues when trying to talk to our OAuth2 service via swagger, so we can't verify if it really works or not!
+
+# Crosslister Lookup
+The Cross-listing Assistant in Canvas at Indiana University has a secondary launch that brings up a user interface to search for a parent
+crosslisted course.  This is restricted to administrator users only. Configuration is the same as the crosslister with the exceptions listed below.
+
+## Test a local launch
+Startup the application with the `LTI_CLIENTREGISTRATION_DEFAULTCLIENT` value set to `saltire`.
+Use an LTI tool consumer launcher, like https://saltire.lti.app/platform.
+Default values are fine, with the below exceptions...
+
+In the `Message` section, set the following:
+<table>
+<tr><th>Property</th><th>Value</th></tr>
+<tr><td>Custom parameters</td><td>
+
+```
+canvas_user_login_id=johnsmith
+instructure_membership_roles=http://purl.imsglobal.org/vocab/lis/v2/institution/person#Administrator
+```
+
+</td></tr>
+</table>
+
+Use an appropriate `canvas_user_login_id`.
+
+From the `Security Model` section, set the following:
+<table>
+<tr><th>Property</th><th>Value</th></tr>
+<tr><td>LTI version</td><td>1.3.0</td></tr>
+<tr><td>Message URL</td><td>http://localhost:8080/app/lookup-launch</td></tr>
+<tr><td>Client ID</td><td>dev (or whatever is appropriate based on the record inserted in the database table from above)</td></tr>
+<tr><td>Initiate login URL</td><td>http://localhost:8080/lti/login_initiation/lms_lti_crosslisting</td></tr>
+<tr><td>Redirection URI(s)</td><td>http://localhost:8080/lti/login</td></tr>
+</table>
