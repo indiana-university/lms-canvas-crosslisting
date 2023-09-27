@@ -13,7 +13,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <version>5.0.6-SNAPSHOT</version>
+    <version>0.99.0-SNAPSHOT</version>
     <description>The Cross-listing Assistant in Canvas at Indiana University is a utility for combining enrollments from multiple course sections into a single primary course site, which reduces the administrative overhead of managing a separate version of the course for each section.</description>
     <url>https://github.com/indiana-university/lms-canvas-crosslisting</url>
     <inceptionYear>2015</inceptionYear>
@@ -45,19 +45,6 @@
         </license>
     </licenses>
 
-    <distributionManagement>
-        <repository>
-            <name>Sonatype OSS Repository</name>
-            <id>Sonatype-OSS</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <name>Sonatype OSS Snapshot Repository</name>
-            <id>Sonatype-OSS</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <scm>
         <connection>scm:git:https://github.com/indiana-university/lms-canvas-crosslisting.git</connection>
         <developerConnection>scm:git:https://github.com/indiana-university/lms-canvas-crosslisting.git</developerConnection>
@@ -82,12 +69,8 @@
         <webjars-locator.version>0.47</webjars-locator.version>
 
         <plugins.compiler.version>3.11.0</plugins.compiler.version>
-        <plugins.gpg.version>3.1.0</plugins.gpg.version>
-        <plugins.javadoc.version>3.5.0</plugins.javadoc.version>
         <plugins.license.version>2.0.0</plugins.license.version>
-        <plugins.nexus-staging.version>1.6.13</plugins.nexus-staging.version>
         <plugins.release.version>3.0.0</plugins.release.version>
-        <plugins.source.version>3.3.0</plugins.source.version>
     </properties>
 
     <dependencyManagement>
@@ -315,25 +298,13 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>${plugins.nexus-staging.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>Sonatype-OSS</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${plugins.release.version}</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <goals>deploy</goals>
+                    <goals>install</goals>
                 </configuration>
             </plugin>
         </plugins>
@@ -355,53 +326,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>${plugins.source.version}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>${plugins.javadoc.version}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${plugins.gpg.version}</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>denodo</id>
             <dependencies>
