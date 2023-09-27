@@ -913,7 +913,7 @@ public class CrosslistController extends OidcTokenAwareController {
         List<CanvasTerm> terms = courseSessionService.getAttributeFromSession(session, "all",
                 "terms", List.class);
 
-        SisCourse sisCourse = sisService.getSisCourseBySiteId(findParentModel.getSisIdSearch().trim().toUpperCase());
+        SisCourse sisCourse = sisService.getLegacySisCourseBySiteId(findParentModel.getSisIdSearch().trim().toUpperCase());
         findParentResult = crosslistService.processSisLookup(sisCourse);
 
         model.addAttribute("terms", terms);
