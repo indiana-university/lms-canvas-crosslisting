@@ -13,7 +13,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <version>0.99.1-SNAPSHOT</version>
+    <version>5.0.6-SNAPSHOT</version>
     <description>The Cross-listing Assistant in Canvas at Indiana University is a utility for combining enrollments from multiple course sections into a single primary course site, which reduces the administrative overhead of managing a separate version of the course for each section.</description>
     <url>https://github.com/indiana-university/lms-canvas-crosslisting</url>
     <inceptionYear>2015</inceptionYear>
