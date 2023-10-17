@@ -81,7 +81,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -671,12 +670,11 @@ public class CrosslistController extends OidcTokenAwareController {
 
             // Make sure the sections are still sorted
             Comparator<SectionUIDisplay> nameComparator = Comparator.comparing(SectionUIDisplay::getSectionName, Comparator.nullsFirst(Comparator.naturalOrder()));
-            Collection<List<SectionUIDisplay>> sectionUIDisplays = rebuiltTermMap.values();
-            for (List<SectionUIDisplay> uiDisplay : sectionUIDisplays) {
-                if (uiDisplay != null) {
-                    uiDisplay.sort(nameComparator);
+            rebuiltTermMap.values().forEach(sectionUIDisplays -> {
+                if (sectionUIDisplays != null) {
+                    sectionUIDisplays.sort(nameComparator);
                 }
-            }
+            });
 
             model.addAttribute("activeCourseSections", rebuiltTermMap.get(currentCourse.getTerm()));
             model.addAttribute("sectionsMap", rebuiltTermMap);
