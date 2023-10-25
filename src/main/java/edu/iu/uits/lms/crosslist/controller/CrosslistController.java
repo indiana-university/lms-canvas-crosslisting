@@ -670,7 +670,11 @@ public class CrosslistController extends OidcTokenAwareController {
 
             // Make sure the sections are still sorted
             Comparator<SectionUIDisplay> nameComparator = Comparator.comparing(SectionUIDisplay::getSectionName, Comparator.nullsFirst(Comparator.naturalOrder()));
-            rebuiltTermMap.values().forEach(sectionUIDisplays -> sectionUIDisplays.sort(nameComparator));
+            rebuiltTermMap.values().forEach(sectionUIDisplays -> {
+                if (sectionUIDisplays != null) {
+                    sectionUIDisplays.sort(nameComparator);
+                }
+            });
 
             model.addAttribute("activeCourseSections", rebuiltTermMap.get(currentCourse.getTerm()));
             model.addAttribute("sectionsMap", rebuiltTermMap);

@@ -43,8 +43,11 @@ public class CanvasTermComparator implements Comparator<CanvasTerm>, Serializabl
 
    @Override
    public int compare(CanvasTerm ct1, CanvasTerm ct2) {
+      // This comparator is used for sorting terms in a map. We don't want it to ever return equal because
+      // that entry would not be added to the map.  In case of equality, return in ABC order.
       if (TermHelper.getStartDate(ct1) == null && TermHelper.getStartDate(ct2) == null) {
-         return 0;
+         // if start dates are the same, return in ABC order
+         return ct1.getName().compareTo(ct2.getName());
       } else if (TermHelper.getStartDate(ct1) == null && TermHelper.getStartDate(ct2) != null) {
          return 1;
       } else if (TermHelper.getStartDate(ct1) != null && TermHelper.getStartDate(ct2) == null) {
@@ -54,7 +57,8 @@ public class CanvasTermComparator implements Comparator<CanvasTerm>, Serializabl
       } else if (TermHelper.getStartDate(ct1).after(TermHelper.getStartDate(ct2))) {
          return -1;
       } else {
-         return 0;
+         // if start dates are the same, return in ABC order
+         return ct1.getName().compareTo(ct2.getName());
       }
    }
 

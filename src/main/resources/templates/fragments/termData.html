@@ -40,7 +40,7 @@
 <body>
 <div th:fragment="termData">
     <h3 id="active-term" th:data-active-term-id = "${activeTerm.id}" th:text="${activeTerm.name}">(Active Term Name)</h3>
-    <div class="rvt-p-left-md rvt-p-bottom-sm rvt-prose">
+    <div class="rvt-p-left-md rvt-prose">
         <p th:if="${#lists.isEmpty(activeCourseSections)}">None available</p>
         <ul th:unless="${#lists.isEmpty(activeCourseSections)}" class="sectionsList rvt-list-plain">
             <li th:id="'row_' + ${section.sectionId}" th:each="section : ${activeCourseSections}" th:class="${section.getAppropriateCssClass()}"
