@@ -376,7 +376,10 @@ public class CrosslistController extends OidcTokenAwareController {
                 newEntry = false;
             }
 
-            uiSection.add(sectionUI);
+            if (sectionUI.getSectionId() != null) {
+                uiSection.add(sectionUI);
+            }
+
             if (newEntry) {
                 rebuiltTermMap.put(termMap.get(sectionUI.getTermId()), uiSection);
             }
