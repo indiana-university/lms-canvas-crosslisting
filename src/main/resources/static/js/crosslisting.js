@@ -304,8 +304,6 @@ function loadUnavailableSections() {
 
     loadDiv.empty();
 
-    $("#unavailable-loading").show();
-
     var displayedTerms = [];
 
     var activeTerm = $('#active-term');
@@ -329,8 +327,6 @@ function loadUnavailableSections() {
             if (xhr.status == 403) {
                 window.location.replace("error");
             }
-
-            $("#unavailable-loading").hide();
         });
 }
 
