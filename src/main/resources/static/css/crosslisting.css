@@ -43,7 +43,7 @@
     white-space: nowrap;
 }
 
-#loading, #unavailable-loading {
+#loading {
     display: none;
 }
 
@@ -86,7 +86,6 @@
 #addTerms {
     font-weight: inherit;
     font-size: inherit;
-    margin: 1.0rem 0 1.2rem;
 }
 
 /* override the rivet style */
