@@ -86,7 +86,7 @@
                             </div>
                             <div class="rvt-cols-8-md bp_checkboxes">
                                 <h2 class="rvt-ts-26">Available Sections</h2>
-                                <div th:if="${impersonationModel == null || impersonationModel.username == null}" class="rvt-flex rvt-m-bottom-md">
+                                <div th:if="${impersonationModel == null || impersonationModel.username == null}" class="rvt-flex rvt-m-bottom-sm">
                                     <span class="rvt-m-right-sm" id="include-crosslisted">
                                         Show already cross-listed sections
                                     </span>
@@ -104,9 +104,9 @@
                                 </div>
                                 <div id="unavailable-sections-load" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
                                 </div>
-                                <div th:if="${multiTermEnabled}">
+                                <div th:if="${multiTermEnabled}" class="rvt-m-top-md">
                                     <h2 class="rvt-sr-only">View additional terms</h2>
-                                    <label for="addTerm" id="addTerms" class="rvt-label">Add a term to choose additional sections:</label>
+                                    <label for="addTerm" id="addTerms" class="rvt-label rvt-m-bottom-xs">Add a term to choose additional sections:</label>
                                     <select id="addTerm" class="rvt-select rvt-width-sm" th:attr="data-urlbase=@{|/app/${courseId}/loadTerm/|}">
                                         <option>- Select a Term -</option>
                                         <option th:each="term : ${selectableTerms}" th:value="${term.id}" th:text="${term.name}">TERMNAME ####</option>
