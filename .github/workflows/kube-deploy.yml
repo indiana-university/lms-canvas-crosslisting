@@ -21,7 +21,6 @@
 name: Build and Deploy
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       server_env:
