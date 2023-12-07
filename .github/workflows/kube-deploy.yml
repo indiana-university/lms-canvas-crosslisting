@@ -1,0 +1,124 @@
+# Description
+# -----------
+# This workflow builds and releases the Docker image to Harbor, then deploys out to the kubernetes environment.
+#
+# Setup
+# -----
+# 1. Create the following secrets inside GitHub:
+#    - LMS_GH_TOKEN (Personal access token for the lmsgit user that has read access to other repositories)
+#    - LMS_MAVEN_SETTINGS (Base64 encoded settings.xml file)
+#    - LMS_REGISTRY_PASSWORD (Registry password - push access)
+#    - LMS_REGISTRY_USERNAME (Registry username)
+# 2. Create the following environments, representative of the deployments:
+#    - reg
+#    - stg
+#    - prd
+# 3. Create the following secrets in each of the above environments
+#    - LMS_KUBECONFIG_DEPLOYER (Base64 encoded kubernetes deployment service account for the appropriate cluster)
+# 4. Create the following variables in each of the above environment
+#    - DOCKER_TAG (tag name for the docker image that will be deployed i.e. stable, unstable-reg, etc)
+# 5. Create the following variables in the repository
+#    - IMAGE_REPO_NAME (Harbor registry name where the docker image will be pushed)
+#    - DEPLOY_DIR (Directory where the helm deployment files can be found)
+#    - JAR_FILE (Name of the application jar file)
+#    - K8S_RELEASE_PREFIX (Kubernetes release name prefix for the deployed application)
+#    - BUILD_PROFILES (Comma separated list of maven build profiles that need to be activated)
+
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_env:
+        type: choice
+        required: true
+        options:
+          - reg
+          - stg
+          - prd
+        description: Select deployment env
+        default: reg
+      helm_deployer_branch:
+        required: true
+        description: Indicate the branch that contains the helm deployment files
+        default: develop
+
+env:
+  TZ: America/New_York
+  IMAGE_REPO: registry.docker.iu.edu/lms/${{ vars.IMAGE_REPO_NAME }}
+  IMAGE_TAG: registry.docker.iu.edu/lms/${{ vars.IMAGE_REPO_NAME }}:${{ vars.DOCKER_TAG }}
+  DIGEST_REPO: registry.docker.iu.edu/lms/${{ vars.IMAGE_REPO_NAME }}@sha256
+  KUBE_NS: ua-vpit--enterprise-systems--lms--helm-release
+
+jobs:
+  mvn_build:
+    name: Maven Build
+    runs-on: self-hosted
+    container:
+      image: maven:3.9.4-eclipse-temurin-17
+    environment: ${{ github.event.inputs.server_env }}
+    steps:
+      - name: Clone GitHub root repository
+        uses: actions/checkout@v4
+        with:
+          repository: iu-uits-es/ess-lms-canvas-standalone-apps
+          ref: ${{ github.event.inputs.helm_deployer_branch }}
+          token: ${{ secrets.LMS_GH_TOKEN }}
+          github-server-url: https://github.iu.edu
+      - name: Clone GitHub tool repository
+        uses: actions/checkout@v4
+        with:
+          path: tools/${{ vars.DEPLOY_DIR }}
+      - name: mvn setup
+        run: mkdir /root/.m2
+      - name: Create maven settings.xml
+        run: echo -n '${{ secrets.LMS_MAVEN_SETTINGS }}' | base64 -d > /root/.m2/settings.xml
+      - name: Maven Build
+        run: mvn clean install -P '${{ vars.BUILD_PROFILES}}'
+        working-directory: tools/${{ vars.DEPLOY_DIR }}
+      - name: copy jar file
+        run: |
+          mkdir -p deployments/${{ vars.DEPLOY_DIR }}/lib
+          cp tools/${{ vars.DEPLOY_DIR }}/target/${{ vars.JAR_FILE }} deployments/${{ vars.DEPLOY_DIR }}/lib/${{ vars.JAR_FILE }}
+      - name: build/push docker image
+        run: |
+          mvn clean install -P docker-push -D dockerfile.username=${{ secrets.LMS_REGISTRY_USERNAME }} \
+            -D dockerfile.password=${{ secrets.LMS_REGISTRY_PASSWORD }} -D docker_repository_base=registry.docker.iu.edu/lms/ \
+            -D docker_tag=${{ vars.DOCKER_TAG }}
+        working-directory: deployments/${{ vars.DEPLOY_DIR }}
+  deploy:
+    name: Deploy to Kubernetes
+    needs: [ mvn_build ]
+    runs-on: self-hosted
+    environment: ${{ github.event.inputs.server_env }}
+    container:
+      image: registry.docker.iu.edu/library/kube-deployer:3.10.2
+      credentials:
+        username: ${{ secrets.LMS_REGISTRY_USERNAME }}
+        password: ${{ secrets.LMS_REGISTRY_PASSWORD }}
+    steps:
+      - name: Clone GitHub repository
+        uses: actions/checkout@v4
+        with:
+          repository: iu-uits-es/ess-lms-canvas-standalone-apps
+          ref: ${{ github.event.inputs.helm_deployer_branch }}
+          token: ${{ secrets.LMS_GH_TOKEN }}
+          github-server-url: https://github.iu.edu
+      - name: Create KUBECONFIG file for the cluster
+        run: |
+          echo -n '${{ secrets.LMS_KUBECONFIG_DEPLOYER}}' | base64 -d > /root/.kube/config
+          chmod 400 /root/.kube/config
+      - name: Get Docker Image SHA
+        id: get-docker-image-sha
+        run: |
+          echo "DOCKER_IMAGE_SHA=$(skopeo inspect --creds '${{ secrets.LMS_REGISTRY_USERNAME }}:${{ secrets.LMS_REGISTRY_PASSWORD }}' \
+            docker://${{ env.IMAGE_TAG }} | jq -rc '.Digest' | awk -F':' '{ print $2 }')" >> "$GITHUB_OUTPUT"
+      - name: Deploy
+        env:
+          KUBECONFIG: /root/.kube/config
+        working-directory: deployments/${{ vars.DEPLOY_DIR }}
+        run: |
+          helm upgrade ${{ vars.K8S_RELEASE_PREFIX }}-${{ github.event.inputs.server_env }} ../../k8s \
+            --values helm-common.yaml,helm-${{ github.event.inputs.server_env }}.yaml --install -n ${{ env.KUBE_NS }} \
+            --set image.repository="${{ env.DIGEST_REPO }}",image.tag="${{ steps.get-docker-image-sha.outputs.docker_image_sha }}",image.tagName="${{ vars.DOCKER_TAG }}" \
+            --wait --timeout 15m
