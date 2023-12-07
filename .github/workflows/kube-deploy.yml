@@ -17,6 +17,12 @@
 #    - LMS_KUBECONFIG_DEPLOYER (Base64 encoded kubernetes deployment service account for the appropriate cluster)
 # 4. Create the following variables in each of the above environment
 #    - DOCKER_TAG (tag name for the docker image that will be deployed i.e. stable, unstable-reg, etc)
+# 5. Create the following variables in the repository
+#    - IMAGE_REPO_NAME (Harbor registry name where the docker image will be pushed)
+#    - DEPLOY_DIR (Directory where the helm deployment files can be found)
+#    - JAR_FILE (Name of the application jar file)
+#    - K8S_RELEASE_PREFIX (Kubernetes release name prefix for the deployed application)
+#    - BUILD_PROFILES (Comma separated list of maven build profiles that need to be activated)
 
 name: Build and Deploy
 
@@ -39,13 +45,10 @@ on:
 
 env:
   TZ: America/New_York
-  IMAGE_REPO: registry.docker.iu.edu/lms/lms-lti-crosslist
-  IMAGE_TAG: registry.docker.iu.edu/lms/lms-lti-crosslist:${{ vars.DOCKER_TAG }}
-  DIGEST_REPO: registry.docker.iu.edu/lms/lms-lti-crosslist@sha256
+  IMAGE_REPO: registry.docker.iu.edu/lms/${{ vars.IMAGE_REPO_NAME }}
+  IMAGE_TAG: registry.docker.iu.edu/lms/${{ vars.IMAGE_REPO_NAME }}:${{ vars.DOCKER_TAG }}
+  DIGEST_REPO: registry.docker.iu.edu/lms/${{ vars.IMAGE_REPO_NAME }}@sha256
   KUBE_NS: ua-vpit--enterprise-systems--lms--helm-release
-  DEPLOY_DIR: crosslisting
-  JAR_FILE: lms-lti-crosslist.jar
-  K8S_RELEASE_PREFIX: lms-lti-crosslist
 
 jobs:
   mvn_build:
@@ -62,35 +65,33 @@ jobs:
           ref: ${{ github.event.inputs.helm_deployer_branch }}
           token: ${{ secrets.LMS_GH_TOKEN }}
           github-server-url: https://github.iu.edu
-#          path: source
       - name: Clone GitHub tool repository
         uses: actions/checkout@v4
         with:
-          path: tools/${{ env.DEPLOY_DIR }}
+          path: tools/${{ vars.DEPLOY_DIR }}
       - name: mvn setup
         run: mkdir /root/.m2
       - name: Create maven settings.xml
         run: echo -n '${{ secrets.LMS_MAVEN_SETTINGS }}' | base64 -d > /root/.m2/settings.xml
       - name: Maven Build
-        run: mvn clean install -P 'denodo,it12'
-        working-directory: tools/${{ env.DEPLOY_DIR }}
+        run: mvn clean install -P '${{ vars.BUILD_PROFILES}}'
+        working-directory: tools/${{ vars.DEPLOY_DIR }}
       - name: copy jar file
         run: |
-          mkdir -p deployments/${{ env.DEPLOY_DIR }}/lib
-          cp tools/${{ env.DEPLOY_DIR }}/target/${{ env.JAR_FILE }} deployments/${{ env.DEPLOY_DIR }}/lib/${{ env.JAR_FILE }}
+          mkdir -p deployments/${{ vars.DEPLOY_DIR }}/lib
+          cp tools/${{ vars.DEPLOY_DIR }}/target/${{ vars.JAR_FILE }} deployments/${{ vars.DEPLOY_DIR }}/lib/${{ vars.JAR_FILE }}
       - name: build/push docker image
         run: |
           mvn clean install -P docker-push -D dockerfile.username=${{ secrets.LMS_REGISTRY_USERNAME }} \
             -D dockerfile.password=${{ secrets.LMS_REGISTRY_PASSWORD }} -D docker_repository_base=registry.docker.iu.edu/lms/ \
             -D docker_tag=${{ vars.DOCKER_TAG }}
-        working-directory: deployments/${{ env.DEPLOY_DIR }}
+        working-directory: deployments/${{ vars.DEPLOY_DIR }}
   deploy:
     name: Deploy to Kubernetes
     needs: [ mvn_build ]
     runs-on: self-hosted
     environment: ${{ github.event.inputs.server_env }}
     container:
-#      image: registry.docker.iu.edu/library/kube-deployer:3.11.0
       image: registry.docker.iu.edu/library/kube-deployer:3.10.2
       credentials:
         username: ${{ secrets.LMS_REGISTRY_USERNAME }}
@@ -115,9 +116,9 @@ jobs:
       - name: Deploy
         env:
           KUBECONFIG: /root/.kube/config
-        working-directory: deployments/${{ env.DEPLOY_DIR }}
+        working-directory: deployments/${{ vars.DEPLOY_DIR }}
         run: |
-          helm upgrade ${{ env.K8S_RELEASE_PREFIX }}-${{ github.event.inputs.server_env }} ../../k8s \
+          helm upgrade ${{ vars.K8S_RELEASE_PREFIX }}-${{ github.event.inputs.server_env }} ../../k8s \
             --values helm-common.yaml,helm-${{ github.event.inputs.server_env }}.yaml --install -n ${{ env.KUBE_NS }} \
             --set image.repository="${{ env.DIGEST_REPO }}",image.tag="${{ steps.get-docker-image-sha.outputs.docker_image_sha }}",image.tagName="${{ vars.DOCKER_TAG }}" \
             --wait --timeout 15m
