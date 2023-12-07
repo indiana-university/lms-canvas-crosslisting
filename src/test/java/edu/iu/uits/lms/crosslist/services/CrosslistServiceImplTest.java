@@ -124,6 +124,9 @@ public class CrosslistServiceImplTest {
       Mockito.when(courseService.getCourse(course5_extra.getId())).thenReturn(course5_extra);
       Mockito.when(courseService.getCourse(unavailableAlienCrosslistCourse.getId())).thenReturn(unavailableAlienCrosslistCourse);
 
+      Mockito.when(sisService.isLegitSisCourse(course1.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(course2.getSisCourseId())).thenReturn(false);
+
       List<Section> sectionList1 = new ArrayList<>();
       List<Section> sectionList2 = new ArrayList<>();
       List<Section> sectionList3 = new ArrayList<>();
@@ -895,6 +898,30 @@ public class CrosslistServiceImplTest {
       Assertions.assertEquals(String.format("%s/courses/%s", canvasConfiguration.getBaseUrl(), course.getId()), findParentResult.getUrl());
       Assertions.assertEquals(courseName, findParentResult.getName());
       Assertions.assertEquals(sisCourseId, findParentResult.getSisCourseId());
+   }
+
+   @Test
+   public void sisCourseReturnSections() {
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
+              crosslistService.getTermStartDateComparator(), courseList1.get(0), false, false, false, true);
+
+      Assertions.assertFalse(sectionMap.isEmpty());
+   }
+
+   @Test
+   public void nonSisCourseReturnNoSections() {
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
+              crosslistService.getTermStartDateComparator(), courseList1.get(1), false, false, false, true);
+
+      Assertions.assertTrue(sectionMap.isEmpty());
+   }
+
+   @Test
+   public void nonSisCourseImpersonationModeReturnSections() {
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
+              crosslistService.getTermStartDateComparator(), courseList1.get(1), false, false, true, true);
+
+      Assertions.assertFalse(sectionMap.isEmpty());
    }
 
 
