@@ -916,6 +916,15 @@ public class CrosslistServiceImplTest {
       Assertions.assertTrue(sectionMap.isEmpty());
    }
 
+   @Test
+   public void nonSisCourseImpersonationModeReturnSections() {
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionMap = crosslistService.buildSectionsMap(courseList1, termMap,
+              crosslistService.getTermStartDateComparator(), courseList1.get(1), false, false, true, true);
+
+      Assertions.assertFalse(sectionMap.isEmpty());
+   }
+
+
    private Course createCourse(String courseId, String sisCourseId) {
       Course course = new Course();
       course.setId(courseId);
