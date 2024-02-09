@@ -41,10 +41,8 @@
     <span th:fragment="sectionName" th:text="${section.sectionName}">Section Name</span>
 
     <span th:fragment="sectionAlreadyCrosslisted" th:if="${section.displayCrosslistedElsewhereWarning}" title="This section is currently cross-listed into a different course">
-        <svg class="rvt-icon">
-            <use th:attr="'xlink:href'=@{/app/jsrivet/rivet-icons.svg#rvt-icon-exclamation}"></use>
-            <span class="rvt-sr-only">Warning that this section is currently cross-listed into a different course</span>
-        </svg>
+        <rvt-icon class="crosslisted-icon" name="exclamation-mark-circle"></rvt-icon>
+        <span class="rvt-sr-only">Warning this section is currently cross-listed into a different course</span>
     </span>
 </body>
 </html>
