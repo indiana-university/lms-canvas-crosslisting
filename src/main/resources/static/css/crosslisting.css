@@ -64,12 +64,6 @@
     100%  { background-color: #fafafa; }
 }
 
-/* sets the size of rivet icons */
-.rvt-icon {
-    width: 1rem;
-    height: 1rem;
-}
-
 /* Color overrides */
 
 .buttonColorOverride {
@@ -100,4 +94,8 @@
 
 .resultsWidth {
     width: max-content;
+}
+
+.crosslisted-icon {
+    vertical-align: middle;
 }
