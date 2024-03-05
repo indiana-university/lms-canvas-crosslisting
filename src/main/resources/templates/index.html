@@ -86,15 +86,18 @@
                             </div>
                             <div class="rvt-cols-8-md bp_checkboxes">
                                 <h2 class="rvt-ts-26">Available Sections</h2>
+                                <div class="rvt-sr-only" aria-live="polite"><span id="sr-annc"></span></div>
                                 <div th:if="${impersonationModel == null || impersonationModel.username == null}" class="rvt-flex rvt-m-bottom-sm">
                                     <span class="rvt-m-right-sm" id="include-crosslisted">
                                         Show already cross-listed sections
                                     </span>
                                     <button type="button" id="crosslisted-switch" class="rvt-switch rvt-switch--small" data-rvt-switch="crosslisted-switch" role="switch"
-                                            th:attr="data-rvt-switch-on=${impersonationModel != null && impersonationModel.includeCrosslistedSections} ? 'true'" aria-labelledby="include-crosslisted">
+                                            th:attr="data-rvt-switch-on=${impersonationModel != null && impersonationModel.includeCrosslistedSections} ? 'true'"
+                                            aria-labelledby="include-crosslisted" aria-describedby="switch-warning">
                                         <span class="rvt-switch__on">On</span>
                                         <span class="rvt-switch__off">Off</span>
                                     </button>
+                                    <div hidden id="switch-warning">Changing this option will reload the Crosslisting Assistant. Any previous term selections that were not saved will be reset.</div>
                                 </div>
                                 <div id="dataDiv">
                                     <div th:insert="fragments/termData :: termData"></div>
@@ -140,6 +143,7 @@
         $(document).ready(function() {
             document.addEventListener('rvtSwitchToggledOn', event => {
                 if (event.srcElement.getAttribute("id") == 'crosslisted-switch') {
+                    $('#sr-annc').text("Reloading Crosslisting Assistant to show already cross-listed sections.");
                     $('#show-crosslisted-in-other-sections-action').attr('value', 'impersonate');
                     $('#show-crosslisted-in-other-sections-form').submit();
                 }
@@ -147,6 +151,7 @@
 
             document.addEventListener('rvtSwitchToggledOff', event => {
                 if (event.srcElement.getAttribute("id") == 'crosslisted-switch') {
+                    $('#sr-annc').text("Reloading Crosslisting Assistant to hide already cross-listed sections.");
                     $('#show-crosslisted-in-other-sections-action').attr('value', 'end_impersonate');
                     $('#show-crosslisted-in-other-sections-form').submit();
                 }
