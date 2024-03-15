@@ -123,11 +123,22 @@
                 </div>
 
                 <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-vertical-center">
-                    <button id="reset-button" class="rvt-button rvt-button--secondary" type="reset" th:unless="${editMode}">Reset</button>
-                    <button id="reset-button" class="rvt-button rvt-button--secondary" type="submit" name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_CANCEL}"
-                            th:if="${editMode}">Reset</button>
-                    <button id="continue-button" class="rvt-button" type="submit" th:unless="${editMode}" disabled="disabled" aria-disabled="true">Continue</button>
-                    <button id="continue-button" class="rvt-button" type="submit" th:if="${editMode}">Continue</button>
+                    <button id="reset-button" class="rvt-button rvt-button--secondary" type="button" >Reset</button>
+
+                    <button id="continue-button" class="rvt-button" type="submit" th:unless="${editMode}" disabled="disabled" aria-disabled="true">
+                        <span class="rvt-button__content">Continue</span>
+                        <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+                        <span aria-live="polite">
+                            <span class="loading-text rvt-sr-only rvt-display-none">Loading summary of changes</span>
+                        </span>
+                    </button>
+                    <button id="continue-button" class="rvt-button" type="submit" th:if="${editMode}">
+                        <span class="rvt-button__content">Continue</span>
+                        <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+                        <span aria-live="polite">
+                            <span class="loading-text rvt-sr-only rvt-display-none">Loading summary of changes-edit mode</span>
+                        </span>
+                    </button>
                 </div>
             </form>
             <form id="show-crosslisted-in-other-sections-form" th:object="${impersonationModel}" th:action="@{|/app/${courseId}/selfimpersonate|}" method="post">

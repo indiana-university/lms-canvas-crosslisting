@@ -51,19 +51,23 @@ $(document).ready(function(){
 
     /* Reset Button */
     $('#reset-button').on('click', function(){
-        //Reset summary area
-        $('.summaryList').replaceWith(summary);
-        summary = $('.summaryList').clone(true);
 
         //Reset section area
         $('.sectionsList li').each(function() {
             var li = $(this);
+            var currCheckbox = li.find('input[type=checkbox]');
+            var isChecked = currCheckbox.is(":checked");
             li.removeClass("currently_checked");
             if (li.hasClass('originally_checked')) {
                 li.addClass("currently_checked");
-                li.find('input[type=checkbox]').attr('checked');
+                if (!isChecked) {
+                    // this will trigger the checkbox handler to add/remove from the section list
+                    currCheckbox.trigger('click');
+                }
             } else {
-                li.find('input[type=checkbox]').removeAttr('checked');
+                if (isChecked) {
+                    currCheckbox.trigger('click');
+                }
             }
         });
 
@@ -75,6 +79,22 @@ $(document).ready(function(){
 
     /* Continue Button, submits the form */
     $('#main').submit(function(event) {
+        var submitButton = $('button:focus');
+        submitButton.attr({'aria-busy': 'true'});
+        submitButton.addClass("rvt-button--loading");
+
+        var submitSpinner = submitButton.find(".rvt-loader").first();
+        if (submitSpinner) {
+            submitSpinner.removeClass("rvt-display-none");
+        }
+
+        var submitSRText = submitButton.find(".loading-text");
+        if (submitSRText) {
+            submitSRText.removeClass("rvt-display-none");
+        }
+
+        $(".rvt-button").attr("disabled", "true");
+
         var sectionList = createJSON($('.sectionsList li'));
 
         var form = event.target;
@@ -225,9 +245,7 @@ jQuery.fn.preventDoubleSubmission = function() {
 };
 
 function checkboxEventRegistration() {
-    $('.sectionsList :checkbox').change('click', function(event) {
-        event.stopPropagation();
-        event.preventDefault();
+    $('.sectionsList :checkbox').on('click', function(event) {
 
         var currentBox = $(this);
         var li = currentBox.parent().parent();
