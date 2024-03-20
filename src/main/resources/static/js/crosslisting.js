@@ -78,22 +78,10 @@ $(document).ready(function(){
     });
 
     /* Continue Button, submits the form */
-    $('#main').submit(function(event) {
+    $('#main').on('submit', function(event) {
         var submitButton = $('button:focus');
-        submitButton.attr({'aria-busy': 'true'});
-        submitButton.addClass("rvt-button--loading");
 
-        var submitSpinner = submitButton.find(".rvt-loader").first();
-        if (submitSpinner) {
-            submitSpinner.removeClass("rvt-display-none");
-        }
-
-        var submitSRText = submitButton.find(".loading-text");
-        if (submitSRText) {
-            submitSRText.removeClass("rvt-display-none");
-        }
-
-        $(".rvt-button").attr("disabled", "true");
+        handleLoading(submitButton);
 
         var sectionList = createJSON($('.sectionsList li'));
 
@@ -151,7 +139,16 @@ $(document).ready(function(){
     });
 
     $('#cancel-button,#edit-button,#submit-button').on('click', function(){
-        $("#loading").show();
+        var actionButton = $(this);
+
+        // when we disable buttons, their values are not submitted. So we need to set the hidden input
+        // to the value of the button clicked
+        var submitValue = actionButton.val();
+        $('#submitValue').val(submitValue);
+
+        handleLoading(actionButton);
+
+        $("#confirmation_form").trigger('submit');
     });
 
     $(document).ajaxComplete(function(event, xhr, settings) {
@@ -175,6 +172,23 @@ $(document).ready(function(){
         }
     });
 });
+
+function handleLoading(actionButton) {
+    actionButton.attr({'aria-busy': 'true'});
+    actionButton.addClass("rvt-button--loading");
+
+    var spinner = actionButton.find(".rvt-loader").first();
+    if (spinner) {
+        spinner.removeClass("rvt-display-none");
+    }
+
+    var SRText = actionButton.find(".loading-text");
+    if (SRText) {
+        SRText.removeClass("rvt-display-none");
+    }
+
+    $(".rvt-button").attr("disabled", "true");
+}
 
 /**
  *
