@@ -142,9 +142,7 @@
                         <span class="loading-text rvt-sr-only rvt-display-none">Content loading</span>
                     </span>
                 </button>
-                <button id="submit-button" th:if="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button"
-                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}" disabled="disabled" aria-disabled="true">Submit</button>
-                <button id="submit-button" th:unless="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button"
+                <button id="submit-button" th:disabled="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button"
                         th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}">
                     <span class="rvt-button__content">Submit</span>
                     <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
