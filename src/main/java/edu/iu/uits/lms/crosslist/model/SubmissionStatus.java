@@ -42,4 +42,6 @@ import lombok.Data;
 public class SubmissionStatus {
     private String statusClass;
     private String statusMessage;
+
+    private String statusTitle;
 }

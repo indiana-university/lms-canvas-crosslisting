@@ -44,10 +44,10 @@
 <body>
 <div layout:fragment="content">
     <div class="rvt-container-xl rvt-m-top-sm">
-        <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
         <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-bottom-md" th:classappend="${submissionStatus.statusClass}"
              role="alert" data-rvt-alert="error">
-            <p class="rvt-alert__message" th:utext="${submissionStatus.statusMessage}">status message goes here</p>
+            <div class="rvt-alert__title" th:text="${submissionStatus.statusTitle}">Success</div>
+            <p class="rvt-alert__message" th:text="${submissionStatus.statusMessage}">status message goes here</p>
             <button type="button" class="rvt-alert__dismiss" data-alert-close>
                 <span class="rvt-sr-only">Close</span>
                 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -55,6 +55,8 @@
                 </svg>
             </button>
         </div>
+
+        <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
 
         <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
             <p id="instructions" class="rvt-ts-18">
