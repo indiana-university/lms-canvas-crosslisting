@@ -126,16 +126,32 @@
                 <p class="rvt-alert__message">Make sure you understand how the changes will affect grades, assignments, and other areas of your site. Information is provided on this page.</p>
             </div>
             <div class="rvt-button-group rvt-button-group--right rvt-m-top-sm rvt-vertical-center">
-                <div id="loading" class="rvt-loader" aria-label="Content loading"></div>
-                <button id="cancel-button" class="rvt-button rvt-button--secondary" name="action"
-                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_CANCEL}">Cancel</button>
-                <button id="edit-button" class="rvt-button rvt-button--secondary" name="action"
-                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_EDIT}">Edit</button>
-                <button id="submit-button" th:if="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button" name="action"
-                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}" disabled="disabled" aria-disabled="true">Submit</button>
-                <button id="submit-button" th:unless="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button" name="action"
-                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}">Submit</button>
+                <button id="cancel-button" class="rvt-button rvt-button--secondary"
+                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_CANCEL}">
+                    <span class="rvt-button__content">Cancel</span>
+                    <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+                    <span aria-live="polite">
+                        <span class="loading-text rvt-sr-only rvt-display-none">Cancelling changes</span>
+                    </span>
+                </button>
+                <button id="edit-button" class="rvt-button rvt-button--secondary"
+                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_EDIT}">
+                    <span class="rvt-button__content">Edit</span>
+                    <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+                    <span aria-live="polite">
+                        <span class="loading-text rvt-sr-only rvt-display-none">Content loading</span>
+                    </span>
+                </button>
+                <button id="submit-button" th:disabled="${#lists.size(addListSections) + #lists.size(removeListSections) == 0}" class="rvt-button"
+                        th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_SUBMIT}">
+                    <span class="rvt-button__content">Submit</span>
+                    <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+                    <span aria-live="polite">
+                        <span class="loading-text rvt-sr-only rvt-display-none">Submitting changes</span>
+                    </span>
+                </button>
             </div>
+            <input id="submitValue" type="hidden" name="action" value="" />
         </form>
     </div>
 </div>
