@@ -553,7 +553,7 @@ public class CrosslistController extends OidcTokenAwareController {
                 pageTitle = "Success - Cross-listing Assistant";
             } else if (hasSuccesses) {
                 status.setStatusClass(CrosslistConstants.STATUS_PARTIAL);
-                messageKey = "status.partial.title";
+                titleKey = "status.partial.title";
                 messageKey = "status.partial.msg";
                 pageTitle = "Some sites cross-listed - Cross-listing Assistant";
             } else {

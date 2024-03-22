@@ -98,15 +98,6 @@ $(document).ready(function(){
     // this will prevent forms from submitting twice
     $('form').preventDoubleSubmission();
 
-    $(function(){
-        if ($("#alert").length) {
-            $("#alert").focus();
-        }
-        if ($("#focusText").length) {
-            $("#focusText").focus();
-        }
-    });
-
     $('#addTerm').on('change', function() {
         var obj = $(this);
         var urlBase = obj.data('urlbase');
