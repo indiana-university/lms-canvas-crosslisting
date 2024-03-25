@@ -542,25 +542,31 @@ public class CrosslistController extends OidcTokenAwareController {
 
         if (hasErrors || hasSuccesses) {
             SubmissionStatus status = new SubmissionStatus();
+            String titleKey = null;
             String messageKey = null;
             String pageTitle = "";
 
             if (hasSuccesses && !hasErrors) {
                 status.setStatusClass(CrosslistConstants.STATUS_SUCCESS);
-                messageKey = "status.success";
+                titleKey = "status.success.title";
+                messageKey = "status.success.msg";
                 pageTitle = "Success - Cross-listing Assistant";
             } else if (hasSuccesses) {
                 status.setStatusClass(CrosslistConstants.STATUS_PARTIAL);
-                messageKey = "status.partial";
+                titleKey = "status.partial.title";
+                messageKey = "status.partial.msg";
                 pageTitle = "Some sites cross-listed - Cross-listing Assistant";
             } else {
                 status.setStatusClass(CrosslistConstants.STATUS_FAILED);
-                messageKey = "status.error";
+                titleKey = "status.error.title";
+                messageKey = "status.error.msg";
                 pageTitle = "Error has occurred - Cross-listing Assistant";
             }
 
             String statusMessage = messageSource.getMessage(messageKey, null, Locale.getDefault());
+            String statusTitle = messageSource.getMessage(titleKey, null, Locale.getDefault());
             status.setStatusMessage(statusMessage);
+            status.setStatusTitle(statusTitle);
             model.addAttribute("submissionStatus", status);
 
             // Page title
