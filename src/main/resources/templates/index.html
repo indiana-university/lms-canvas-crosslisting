@@ -140,7 +140,10 @@
                             <span class="loading-text rvt-sr-only rvt-display-none">Loading summary of changes</span>
                         </span>
                     </button>
+                </div>
 
+                <div aria-live="polite">
+                    <span id="resetMsg" class="rvt-sr-only"></span>
                 </div>
             </form>
             <form id="show-crosslisted-in-other-sections-form" th:object="${impersonationModel}" th:action="@{|/app/${courseId}/selfimpersonate|}" method="post">
