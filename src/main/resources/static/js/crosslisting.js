@@ -75,6 +75,10 @@ $(document).ready(function(){
         var submitButton = $('#continue-button');
         submitButton.attr("disabled", true);
         submitButton.attr("aria-disabled", true);
+
+        // move focus back to the reset button and announce reset
+        $(this).focus();
+        $('#resetMsg').text('Changes reset.');
     });
 
     /* Continue Button, submits the form */
@@ -251,6 +255,8 @@ jQuery.fn.preventDoubleSubmission = function() {
 
 function checkboxEventRegistration() {
     $('.sectionsList :checkbox').on('click', function(event) {
+        // make sure the "reset" msg is cleared out since there is a new change
+        $('#resetMsg').text('');
 
         var currentBox = $(this);
         var li = currentBox.parent().parent();
