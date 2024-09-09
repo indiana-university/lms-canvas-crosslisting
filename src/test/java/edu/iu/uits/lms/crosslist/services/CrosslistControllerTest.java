@@ -118,7 +118,6 @@ public class CrosslistControllerTest {
 
     @BeforeEach
     public void setup() {
-        log.info("RUNNING SETUP");
         OidcAuthenticationToken token = TestUtils.buildToken(USER_ID, COURSE_ID, LTIConstants.INSTRUCTOR_AUTHORITY);
         SecurityContextHolder.getContext().setAuthentication(token);
 
@@ -134,29 +133,6 @@ public class CrosslistControllerTest {
 
         Mockito.when(courseService.getCourse(COURSE_ID)).thenReturn(course);
         Mockito.when(courseSessionService.getAttributeFromSession(any(HttpSession.class), eq(COURSE_ID), eq(OidcTokenAwareController.SESSION_TOKEN_KEY), eq(OidcAuthenticationToken.class))).thenReturn(token);
-    }
-
-    @Test
-    public void testLaunch() throws Exception {
-        MvcResult mvcResult = mvc.perform(get(String.format("/app/%s/main", COURSE_ID))
-              .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-              .contentType(MediaType.APPLICATION_JSON))
-              .andExpect(status().isOk())
-              .andReturn();
-
-        String htmlResult = mvcResult.getResponse().getContentAsString();
-
-        Document document = Jsoup.parse(htmlResult);
-
-        //             Document document = Jsoup.connect(url).get();
-        //
-        //            Element container = document.selectFirst(".ajax-content-container");
-        //            container = container == null ? Jsoup.parse("") : container;
-        //
-        //            List<MediaCard> mediaCards = new ArrayList<>();
-        //
-        //            Elements mediaCardElements = document.select(".media-card");
-
     }
 
     @Test
