@@ -64,7 +64,7 @@
         <jquery.version>3.7.1</jquery.version>
         <jsoup.version>1.18.1</jsoup.version>
         <lms-canvas-rivet.version>5.2.5.2</lms-canvas-rivet.version>
-        <lms-embedded-services.version>5.2.42</lms-embedded-services.version>
+        <lms-embedded-services.version>5.2.43</lms-embedded-services.version>
         <lms-team-spring-boot-it12>4.8</lms-team-spring-boot-it12>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <webjars-locator.version>0.47</webjars-locator.version>
