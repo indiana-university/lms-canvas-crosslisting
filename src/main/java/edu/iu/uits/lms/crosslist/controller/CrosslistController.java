@@ -81,6 +81,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -223,8 +224,6 @@ public class CrosslistController extends OidcTokenAwareController {
 
         String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
-        Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
-
         Course currentCourse = getValidatedCourse(token, session);
 
         CanvasTerm currentTerm = currentCourse.getTerm();
@@ -275,7 +274,7 @@ public class CrosslistController extends OidcTokenAwareController {
             }
 
             // sort it!
-            selectableTerms.sort(termStartDateComparator);
+            Collections.sort(selectableTerms);
 
 // =============================================================================
             // thread start
@@ -289,7 +288,7 @@ public class CrosslistController extends OidcTokenAwareController {
                 int count = 0;
                 for (CanvasTerm canvasTerm : selectableTerms) {
                     if (++count <= MAX_BACKGROUND_LOADS &&
-                            termStartDateComparator.compare(canvasTerm, currentTerm) < 1) {
+                            canvasTerm.compareTo(currentTerm) < 1) {
                         log.debug("***** thread(" + threadId + ") for termId = " + canvasTerm.getId() + " " + canvasTerm.getName());
                         List<Course> threadUserCourses = crosslistService.getCoursesTaughtBy(currentUserId, false);
                         threadUserCourses = threadUserCourses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(canvasTerm.getId())).collect(Collectors.toList());
@@ -323,7 +322,7 @@ public class CrosslistController extends OidcTokenAwareController {
         }
 
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, termStartDateComparator, currentCourse,
+              crosslistService.buildSectionsMap(courses, termMap, currentCourse,
                     impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true);
@@ -342,8 +341,6 @@ public class CrosslistController extends OidcTokenAwareController {
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
     public String doContinue(@PathVariable("courseId") String courseId, @RequestParam("sectionList") String sectionListJson,
                                Model model, HttpSession session) {
-        Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
-
         List<SectionUIDisplay> sectionList = null;
         try {
             sectionList = Arrays.asList(objectMapper.readValue(sectionListJson, SectionUIDisplay[].class));
@@ -352,7 +349,7 @@ public class CrosslistController extends OidcTokenAwareController {
         }
 
         // Rebuild the map in case the user clicks Edit
-        Map<CanvasTerm,List<SectionUIDisplay>> rebuiltTermMap = new TreeMap<>(termStartDateComparator);
+        Map<CanvasTerm,List<SectionUIDisplay>> rebuiltTermMap = new TreeMap<>();
 
         // get the list of terms in Canvas
         List<CanvasTerm> terms = termService.getEnrollmentTerms();
@@ -594,7 +591,6 @@ public class CrosslistController extends OidcTokenAwareController {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
         Course currentCourse = getValidatedCourse(token, session);
-        Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
         boolean featureEnabled = crosslistService.checkForFeature(session, currentCourse, FEATURE_MULTITERM_CROSSLISTING);
         if (featureEnabled) {
@@ -621,7 +617,7 @@ public class CrosslistController extends OidcTokenAwareController {
                 collapsedTermsList = Arrays.asList(collapsedTerms.split(","));
             }
 
-            Map<CanvasTerm,List<SectionUIDisplay>> rebuiltTermMap = new TreeMap<>(termStartDateComparator);
+            Map<CanvasTerm,List<SectionUIDisplay>> rebuiltTermMap = new TreeMap<>();
 
             // get the list of terms in Canvas
             List<CanvasTerm> terms = termService.getEnrollmentTerms();
@@ -663,7 +659,6 @@ public class CrosslistController extends OidcTokenAwareController {
             Map<CanvasTerm, List<SectionUIDisplay>> sections = crosslistService.buildSectionsMap(
                     courses,
                     termMap,
-                    termStartDateComparator,
                     currentCourse,
                     impersonationModel.isIncludeNonSisSections(),
                     impersonationModel.isIncludeCrosslistedSections(),
@@ -712,7 +707,6 @@ public class CrosslistController extends OidcTokenAwareController {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
         Course currentCourse = getValidatedCourse(token, session);
-        Comparator<CanvasTerm> termStartDateComparator = crosslistService.getTermStartDateComparator();
 
         ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
                 CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
@@ -743,7 +737,6 @@ public class CrosslistController extends OidcTokenAwareController {
         Map<CanvasTerm, List<SectionUIDisplay>> sections = crosslistService.buildSectionsMap(
                 courses,
                 termMap,
-                termStartDateComparator,
                 currentCourse,
                 impersonationModel.isIncludeNonSisSections(),
                 impersonationModel.isIncludeCrosslistedSections(),

@@ -74,7 +74,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CrosslistService {
 
-   public final String ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING = "ALIEN_SECTION_BLOCKED";
+   public final static String ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING = "ALIEN_SECTION_BLOCKED";
 
    @Autowired
    private CourseService courseService = null;
@@ -105,7 +105,6 @@ public class CrosslistService {
 
    public Map<CanvasTerm, List<SectionUIDisplay>> buildSectionsMap(List<Course> courses,
                                                                    Map<String,CanvasTerm> termMap,
-                                                                   Comparator<CanvasTerm> termStartDateComparator,
                                                                    Course currentCourse,
                                                                    boolean includeNonSisSections,
                                                                    boolean includeSectionsCrosslistedElsewhere,
@@ -113,7 +112,7 @@ public class CrosslistService {
                                                                    boolean useCachedSections) {
       // This map will contain the CanvasTerm for the key and a List<SectionUIDisplay> for the value
       // The TreeMap with comparator will add new entries to the map in a sorted order
-      Map<CanvasTerm,List<SectionUIDisplay>> sectionsMap = new TreeMap<>(termStartDateComparator);
+      Map<CanvasTerm,List<SectionUIDisplay>> sectionsMap = new TreeMap<>();
 
       // One should only get possible section results if it is an SIS course that the tool was launched from.
       // If the launched course is manually created, one should only get possible sections IF
@@ -312,10 +311,6 @@ public class CrosslistService {
       return sectionsMap;
    }
 
-   public Comparator<CanvasTerm> getTermStartDateComparator() {
-      return new CanvasTermComparator();
-   }
-
    // Don't change this cache key unless you also change how evict works in the CrosslistController
    @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
@@ -348,7 +343,7 @@ public class CrosslistService {
     * Gets dummy term for terms crosslisted into a course that aren't their natural course
     * @return The CanvasTerm
     */
-   public CanvasTerm getAlienBlockedCanvasTerm() {
+   public static CanvasTerm getAlienBlockedCanvasTerm() {
       CanvasTerm alienSectionBlockedFakeCanvasTerm = new CanvasTerm();
       alienSectionBlockedFakeCanvasTerm.setId(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
       alienSectionBlockedFakeCanvasTerm.setName(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);

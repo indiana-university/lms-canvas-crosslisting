@@ -61,7 +61,7 @@
                 with which the section was originally associated and will no longer be visible to you.
             </p>
         </div>
-        <div th:if="${missingEtextSections}" class="rvt-alert rvt-alert--danger rvt-m-tb-md" role="alert"
+        <div th:if="${missingEtextSections}" id="missing-etext-sections-message" class="rvt-alert rvt-alert--danger rvt-m-tb-md" role="alert"
              aria-labelledby="error-alert-title" data-rvt-alert="error">
             <div class="rvt-alert__title" id="error-alert-title">Cross-listing Error</div>
             <p id="error-review" class="rvt-alert__message">
