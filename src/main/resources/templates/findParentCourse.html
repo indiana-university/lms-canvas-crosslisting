@@ -144,7 +144,7 @@
                 </div>
                 <div th:if="${findParentResult.showCourseInfo}" class="rvt-p-top-sm">
                     <div>
-                        <a th:if="${findParentResult.url != null}" th:href="${findParentResult.url}" target="_blank">
+                        <a th:if="${findParentResult.url != null}" th:href="${findParentResult.url}" target="_blank" rel="noopener noreferrer">
                             <span th:text="${findParentResult.name}">SP22: SURVEY OF HIP HOP: 1234</span>
                             <span class="rvt-sr-only">Opens in new window</span>
                             <rvt-icon name="link-external"></rvt-icon></a>
