@@ -1,8 +1,10 @@
+package edu.iu.uits.lms.crosslist.config;
+
 /*-
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2024 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -30,76 +32,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-/* Loading page stuff */
-#load {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: 25%;
-    height: 25%;
-    white-space: nowrap;
-}
 
-#loading {
-    display: none;
-}
+import edu.iu.uits.lms.crosslist.model.DecrosslistUser;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
-/* Toggle Color override */
+@Configuration
+@Slf4j
+public class JpaRestConfig implements RepositoryRestConfigurer {
 
-.toggleoverride {
-    color: #000000;
-}
+    @Override
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
+        //  This is needed to allow the "ids" to be served up via the
+        //  @RepositoryRestResource annotation (by default, it is suppressed)
+        config.exposeIdsFor(DecrosslistUser.class);
 
-/* Highlights */
-
-.sectionHighlight {
-    animation: fadeIt 3s ease-in;
-}
-
-@keyframes fadeIt {
-    0%    { background-color: #a2b4be; }
-    100%  { background-color: #fafafa; }
-}
-
-/* Color overrides */
-
-.buttonColorOverride {
-    background-color: #ffffff;
-}
-
-/* Other stuff */
-
-.impersonationBar {
-    background-color: #ffeecd;
-    border-bottom: 0.125rem solid #dddddd;
-}
-
-#addTerms {
-    font-weight: inherit;
-    font-size: inherit;
-}
-
-/* override the rivet style */
-.rvt-disclosure__content {
-    box-shadow: none;
-}
-
-/* override rivet to make the toggle black instead of blue */
-.rvt-disclosure__toggle::before {
-    filter: brightness(0%);
-}
-
-.crosslisted-icon {
-    vertical-align: middle;
-}
-
-/* decrosslisting section */
-
-/* force first column to be small and override line-height to vertically center checkbox on header */
-.checkboxColumn {
-    width: 1%;
-    line-height: inherit;
+        RepositoryRestConfigurer.super.configureRepositoryRestConfiguration(config, cors);
+        config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+    }
 }

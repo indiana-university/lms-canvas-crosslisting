@@ -67,6 +67,7 @@
         <lms-embedded-services.version>5.2.43</lms-embedded-services.version>
         <lms-team-spring-boot-it12>4.8</lms-team-spring-boot-it12>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <springdoc-openapi-ui.version>1.8.0</springdoc-openapi-ui.version>
         <webjars-locator.version>0.47</webjars-locator.version>
 
         <plugins.compiler.version>3.11.0</plugins.compiler.version>
@@ -147,6 +148,16 @@
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc-openapi-ui.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-data-rest</artifactId>
+            <version>${springdoc-openapi-ui.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -33,8 +33,10 @@ package edu.iu.uits.lms.crosslist.model;
  * #L%
  */
 
-import edu.iu.uits.lms.crosslist.CrosslistConstants;
+import edu.iu.uits.lms.canvas.model.Section;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class FindParentResult {
@@ -45,4 +47,6 @@ public class FindParentResult {
     private String statusMessage;
     private String statusIconCssClasses;
     private String statusIconName;
+    private String canvasCourseId;
+    private List<Section> sectionList;
 }

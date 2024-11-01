@@ -23,6 +23,7 @@
   "custom_fields": {
     "instructure_membership_roles": "$com.Instructure.membership.roles",
     "canvas_course_id": "$Canvas.course.id",
-    "canvas_user_login_id": "$Canvas.user.loginId"
+    "canvas_user_login_id": "$Canvas.user.loginId",
+    "is_crosslist_tool": "true"
   }
 }

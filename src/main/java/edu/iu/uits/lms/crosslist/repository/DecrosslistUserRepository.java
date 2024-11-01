@@ -1,8 +1,10 @@
+package edu.iu.uits.lms.crosslist.repository;
+
 /*-
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2024 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -30,76 +32,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-/* Loading page stuff */
-#load {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: 25%;
-    height: 25%;
-    white-space: nowrap;
-}
 
-#loading {
-    display: none;
-}
+import edu.iu.uits.lms.crosslist.model.DecrosslistUser;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.Description;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
-/* Toggle Color override */
-
-.toggleoverride {
-    color: #000000;
-}
-
-/* Highlights */
-
-.sectionHighlight {
-    animation: fadeIt 3s ease-in;
-}
-
-@keyframes fadeIt {
-    0%    { background-color: #a2b4be; }
-    100%  { background-color: #fafafa; }
-}
-
-/* Color overrides */
-
-.buttonColorOverride {
-    background-color: #ffffff;
-}
-
-/* Other stuff */
-
-.impersonationBar {
-    background-color: #ffeecd;
-    border-bottom: 0.125rem solid #dddddd;
-}
-
-#addTerms {
-    font-weight: inherit;
-    font-size: inherit;
-}
-
-/* override the rivet style */
-.rvt-disclosure__content {
-    box-shadow: none;
-}
-
-/* override rivet to make the toggle black instead of blue */
-.rvt-disclosure__toggle::before {
-    filter: brightness(0%);
-}
-
-.crosslisted-icon {
-    vertical-align: middle;
-}
-
-/* decrosslisting section */
-
-/* force first column to be small and override line-height to vertically center checkbox on header */
-.checkboxColumn {
-    width: 1%;
-    line-height: inherit;
+@Component
+@RepositoryRestResource(path = "decrosslist_users",
+        itemResourceDescription = @Description("decrosslist_users item resource description"),
+        collectionResourceDescription = @Description("decrosslist_users collection resource description"))
+@Tag(name = "DecrosslistUserRepository", description = "Operations involving the DecrosslistUser table")
+@CrossOrigin(origins = {"${lms.swagger.cors.origin}"})
+public interface DecrosslistUserRepository extends PagingAndSortingRepository<DecrosslistUser, Long> {
+    DecrosslistUser findByUsername(@Param("username") String username);
 }
