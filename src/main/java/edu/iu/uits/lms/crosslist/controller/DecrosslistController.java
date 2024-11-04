@@ -160,7 +160,7 @@ public class DecrosslistController extends OidcTokenAwareController {
                 messageKey = "decross.status.partial.msg";
             } else {
                 status.setStatusClass(CrosslistConstants.STATUS_FAILED);
-                titleKey = "status.error.title";
+                titleKey = "decross.status.error.title";
                 messageKey = "decross.status.error.msg";
             }
 

@@ -72,7 +72,7 @@
                        aria-describedby="sisid-search-description" th:field="*{sisIdSearch}" />
                 <div class="rvt-input-group__append">
                     <button id="find-button" type="submit" class="rvt-button" onclick="event.preventDefault(); validateSisIdForm(this);">
-                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='Find2wow', srText='Finding course')"></span>
+                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='Find', srText='Finding course')"></span>
                     </button>
                 </div>
             </div>
@@ -220,7 +220,7 @@
             }
         }
 
-        function buttonLoading(button, formSubmit = true) {
+        function buttonLoading(button) {
             if (button.dataset.action != null) {
                 document.getElementById("submitValue").value = button.dataset.action;
             }
