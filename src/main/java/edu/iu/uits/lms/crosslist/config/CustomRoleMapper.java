@@ -33,12 +33,19 @@ package edu.iu.uits.lms.crosslist.config;
  * #L%
  */
 
+import edu.iu.uits.lms.crosslist.model.DecrosslistUser;
+import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import edu.iu.uits.lms.lti.service.LmsDefaultGrantedAuthoritiesMapper;
+import edu.iu.uits.lms.lti.service.OidcTokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
@@ -46,9 +53,12 @@ public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
    private ToolConfig toolConfig;
 
-   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, ToolConfig toolConfig) {
+   private DecrosslistUserRepository decrosslistUserRepository;
+
+   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, ToolConfig toolConfig, DecrosslistUserRepository decrosslistUserRepository) {
       super(defaultInstructorRoleRepository);
       this.toolConfig = toolConfig;
+      this.decrosslistUserRepository = decrosslistUserRepository;
    }
 
    @Override
@@ -65,5 +75,43 @@ public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
       //Then do normal stuff
       return super.returnEquivalentAuthority(userRoles, instructorRoles);
+   }
+
+   @Override
+   public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
+      List<GrantedAuthority> remappedAuthorities = new ArrayList<>();
+      remappedAuthorities.addAll(authorities);
+      for (GrantedAuthority authority : authorities) {
+         OidcUserAuthority userAuth = (OidcUserAuthority) authority;
+         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(userAuth.getAttributes());
+         log.debug("LTI Claims: {}", userAuth.getAttributes());
+
+         if (Boolean.parseBoolean(oidcTokenUtils.getCustomValue("is_crosslist_tool"))) {
+            log.debug("CustomRoleMapper: Crosslist tool");
+            // Use the legit roles for crosslisting, which is less restrictive than the decrosslist tool
+            return super.mapAuthorities(authorities);
+         } else {
+            log.debug("CustomRoleMapper: Decrosslist tool");
+            // decrosslist tool has a restriction of needing to be in a certain table to access the tool
+            String userId = oidcTokenUtils.getUserLoginId();
+
+            String rolesString = "NotAuthorized";
+
+            DecrosslistUser user = decrosslistUserRepository.findByUsername(userId);
+
+            if (user != null) {
+               rolesString = LTIConstants.CANVAS_INSTRUCTOR_ROLE;
+            }
+
+            String[] userRoles = rolesString.split(",");
+
+            String newAuthString = returnEquivalentAuthority(userRoles, getDefaultInstructorRoles());
+
+            OidcUserAuthority newUserAuth = new OidcUserAuthority(newAuthString, userAuth.getIdToken(), userAuth.getUserInfo());
+            remappedAuthorities.add(newUserAuth);
+         }
+      }
+
+      return remappedAuthorities;
    }
 }

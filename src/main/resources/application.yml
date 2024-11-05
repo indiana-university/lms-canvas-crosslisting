@@ -4,6 +4,9 @@ spring:
   session:
     store-type: none
   config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:denodo.properties, classpath:lti-registrations.properties
+  data:
+    rest:
+      base-path: /rest
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -88,9 +91,18 @@ spring:
 spring:
   config:
     activate.on-profile: swagger
-    import: classpath:lti-api-config.properties
 springdoc:
+  api-docs:
+    enabled: true
+    path: /api/v3/api-docs
+  cache.disabled: true
+  packagesToScan: edu.iu.uits.lms.crosslist.controller.rest
   swagger-ui:
+    enabled: false
+    disable-swagger-default-url: true
+    path: /api/swagger-ui.html
+    # Setting supportedSubmitMethods to an empty list is what turns off the "try it out" button
+    #    supportedSubmitMethods:
     oauth:
       clientId: ${oauth.tokenprovider.clientId}
   oAuthFlow:

@@ -59,7 +59,7 @@ import java.util.Date;
 @Slf4j
 @EnableCookieFilter(ignoredRequestPatterns = "/rest/**")
 @EnableRedisConfiguration
-@EnableLtiClient(toolKeys = {"lms_lti_crosslisting", "lms_lti_crosslisting_lookup"})
+@EnableLtiClient(toolKeys = {"lms_lti_crosslisting", "lms_lti_decrosslisting"})
 @EnableCanvasClient
 @EnableIuOnlyClient
 @EnableConfigurationProperties(GitRepositoryState.class)

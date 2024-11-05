@@ -35,190 +35,160 @@
 <html lang="en-US"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}" xmlns="http://www.w3.org/1999/html">
+      layout:decorate="~{decrosslistlayout}" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8"/>
-    <title>Find parent course</title>
+    <title>De-cross-listing sections</title>
 </head>
 <body>
 <div layout:fragment="content">
+    <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-top-md" th:classappend="${submissionStatus.statusClass}"
+         role="alert" data-rvt-alert="submissionStatus">
+        <div class="rvt-alert__title" th:text="${submissionStatus.statusTitle}">Success</div>
+        <p class="rvt-alert__message" th:text="${submissionStatus.statusMessage}">status message goes here</p>
+        <button th:unless="${submissionStatus.statusClass == T(edu.iu.uits.lms.crosslist.CrosslistConstants).STATUS_FAILED}" type="button" class="rvt-alert__dismiss" data-rvt-alert-close>
+            <span class="rvt-sr-only">Close</span>
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path fill="currentColor" d="M9.41,8l5.29-5.29a1,1,0,0,0-1.41-1.41L8,6.59,2.71,1.29A1,1,0,0,0,1.29,2.71L6.59,8,1.29,13.29a1,1,0,1,0,1.41,1.41L8,9.41l5.29,5.29a1,1,0,0,0,1.41-1.41Z"/>
+            </svg>
+        </button>
+    </div>
+
     <div class="rvt-p-top-sm">
-        <h1 id="tool-title" class="rvt-ts-36">Find parent course</h1>
+        <h1 id="tool-title" class="rvt-ts-36">De-cross-listing sections</h1>
     </div>
 
     <div class="rvt-p-tb-sm">
         <span>This tool will only return exact matches.</span>
     </div>
 
-    <fieldset class="rvt-fieldset">
-        <legend class="rvt-text-bold">Find by</legend>
-        <ul class="rvt-list-plain">
-            <li>
-                <div class="rvt-radio">
-                    <input type="radio" name="radio-search" id="sis-radio" value="sis-radio" onclick="crosslisterLookupRadioFunction();"
-                           th:checked="${findParentModel.getRadioSearch() == null || findParentModel.getRadioSearch() == 'sis-radio'}">
-                    <label for="sis-radio">SIS ID</label>
-                </div>
-            </li>
-            <li>
-                <div class="rvt-radio">
-                    <input type="radio" name="radio-search" id="class-number-radio" value="class-number-radio" onclick="crosslisterLookupRadioFunction();"
-                           th:checked="${findParentModel.getRadioSearch() == 'class-number-radio'}">
-                    <label for="class-number-radio">Class number</label>
-                </div>
-            </li>
-        </ul>
-    </fieldset>
-
     <form th:object="${findParentModel}" id="sisIdForm" action="findParentCourse.html"
-          th:action="@{|/app/lookup-search-sisid|}" onsubmit="return validateSisIdForm()" method="post">
-        <div class="rvt-p-top-sm rvt-m-bottom-md">
-            <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS ID</label>
-            <div id="sisid-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: SP22-BL-FOLK-E295-4441</div>
+          th:action="@{|/app/lookup-search-sisid|}" method="post">
+        <div class="rvt-p-top-sm rvt-m-bottom-md rvt-width-xl">
+            <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS Section ID</label>
+            <div id="sisid-search-description" class="rvt-p-bottom-xs rvt-m-top-none">Example: SP22-BL-FOLK-E295-4441</div>
             <div class="rvt-input-group">
-                <input class="rvt-text-input rvt-width-xl" type="text" id="sisid-search"
+                <input class="rvt-text-input rvt-input-group__input" type="text" id="sisid-search"
                        aria-describedby="sisid-search-description" th:field="*{sisIdSearch}" />
+                <div class="rvt-input-group__append">
+                    <button id="find-button" type="submit" class="rvt-button" onclick="event.preventDefault(); validateSisIdForm(this);">
+                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='Find', srText='Finding course')"></span>
+                    </button>
+                </div>
             </div>
             <div id="sisid-validation-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
-                    <span class="rvt-inline-alert__icon">
-                        <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
-                            <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
-                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
-                        </svg>
-                    </span>
+                <span class="rvt-inline-alert__icon">
+                    <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
+                        <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
+                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
+                    </svg>
+                </span>
                 <span class="rvt-inline-alert__message">SIS ID needs to be supplied.</span>
             </div>
-            <div class="rvt-button-group rvt-p-top-sm">
-                <button type="submit" class="rvt-button">
-                    <span>Find</span>
-                </button>
-                <button id="reset-button-sisid" type="button" class="rvt-button--secondary">
-                    <span>Reset</span>
-                </button>
-            </div>
-            <input type="hidden" name="radioSearch" value="sis-radio" />
         </div>
     </form>
 
-    <form th:object="${findParentModel}" id="classNumberForm" class="rvt-display-none" action="findParentCourse.html"
-          th:action="@{|/app/lookup-search-termandclassnumber|}" onsubmit="return validateTermAndClassNumberForm()" method="post">
-        <div class="rvt-p-top-sm rvt-m-bottom-md">
-            <label for="select-input-default" class="rvt-label rvt-ts-16 rvt-text-bold">Term</label>
-            <select id="select-input-default" name="termByClassNumberSearch" class="rvt-select rvt-width-xl">
-                <option th:each="term : ${terms}" th:value="${term.sisTermId}" th:text="${term.name}" >
-                </option>
-            </select>
-        </div>
-        <div class="rvt-m-bottom-md">
-            <label for="class-number-search" class="rvt-label rvt-ts-16 rvt-text-bold">Class number</label>
-            <div id="class-number-search-description" class="rvt-radio__description rvt-p-bottom-xs rvt-m-top-none">Example: 4441</div>
-            <div class="rvt-input-group">
-                <input class="rvt-text-input rvt-width-xl" type="text" id="class-number-search"
-                       aria-describedby="class-number-search-description" th:field="*{classNumberSearch}" />
+    <div id="results-message" th:if="${findParentResult}" class="rvt-m-top-md rvt-width-xl">
+        <form th:object="${findParentModel}" id="decrosslist-form" th:action="@{|/app/decrosslist-sections|}" method="post">
+            <div class="rvt-flex rvt-items-center">
+                <rvt-icon th:name="${findParentResult.statusIconName}" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
+                <h2 th:text="${findParentResult.statusMessage}" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
             </div>
-            <div id="term-class-number-validation-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
-                    <span class="rvt-inline-alert__icon">
-                        <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
-                            <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
-                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
-                        </svg>
-                    </span>
-                <span class="rvt-inline-alert__message">Class Number needs to be supplied.</span>
-            </div>
-            <div class="rvt-button-group rvt-p-top-sm">
-                <button type="submit" class="rvt-button">
-                    <span>Find</span>
-                </button>
-                <button id="reset-button-class-number" type="button" class="rvt-button--secondary">
-                    <span>Reset</span>
-                </button>
-            </div>
-            <input type="hidden" name="radioSearch" value="class-number-radio"  />
-        </div>
-    </form>
-
-    <div id="results-message" th:if="${findParentResult}" class="rvt-border-all rvt-m-top-md rvt-p-all-md resultsWidth">
-                <div class="rvt-flex rvt-items-center">
-                    <rvt-icon th:name="${findParentResult.statusIconName}" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
-                    <h2 th:text="${findParentResult.statusMessage}" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
-                </div>
-                <div th:if="${findParentResult.showCourseInfo}" class="rvt-p-top-sm">
+            <div th:if="${findParentResult.showCourseInfo}">
+                <div class="rvt-p-top-sm">
                     <div>
                         <a th:if="${findParentResult.url != null}" th:href="${findParentResult.url}" target="_blank" rel="noopener noreferrer">
                             <span th:text="${findParentResult.name}">SP22: SURVEY OF HIP HOP: 1234</span>
                             <span class="rvt-sr-only">Opens in new window</span>
-                            <rvt-icon name="link-external"></rvt-icon></a>
+                            <rvt-icon name="link-external"></rvt-icon>
+                        </a>
                     </div>
                     <div>
                         <span th:text="${findParentResult.sisCourseId}" class="rvt-ts-14">SP22-BL-FOLK-E295-1234</span>
                     </div>
+                    <div class="rvt-m-top-sm">
+                        <span>
+                            Sections listed without a checkbox are not available to de-cross-list because they either do not
+                            have a SIS ID or is the course's original section.
+                        </span>
+                    </div>
                 </div>
+                <div>
+                    <table class="rvt-table-stripes rvt-table-cells rvt-m-top-sm">
+                        <caption class="rvt-sr-only">Table of sections in the course. Select sections to remove, then activate De-cross-list selected sections to de-cross-list them from the course.</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col" class="checkboxColumn">
+                                <div class="rvt-checkbox rvt-checkbox--sr-only-label">
+                                    <input type="checkbox" name="checkbox-sis-section-select-all" id="checkbox-select-all" />
+                                    <label for="checkbox-select-all">Select all checkbox</label>
+                                </div>
+                            </th>
+                            <th scope="col">Section Name</th>
+                        </tr>
+                        </thead>
+                        <tr th:if="${!findParentResult.sectionList.isEmpty()}" th:each="section : ${findParentResult.sectionList}">
+                            <th scope="row">
+                                <div th:if="${section.sis_section_id != null && section.nonxlist_course_id != null}" class="rvt-checkbox rvt-checkbox--sr-only-label">
+                                    <input type="checkbox" name="section-checkboxes" th:id="|checkbox-${section.id}|" th:value="${section.id}" />
+                                    <label th:for="|checkbox-${section.id}|" th:text="|Checkbox for ${section.name}|">Checkbox for 1234</label>
+                                </div>
+                            </th>
+                            <td>
+                                <span th:text="${section.name}"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="checkbox-validation-message" class="rvt-m-top-md rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
+                    <span class="rvt-inline-alert__icon">
+                        <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
+                            <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
+                        </svg>
+                    </span>
+                    <span class="rvt-inline-alert__message">At least one section needs to be checked.</span>
+                </div>
+                <div class="rvt-m-top-md">
+                    <input type="hidden" id="hidden-sisid-search" name="hidden-sisid-search" th:field="*{sisIdSearch}" />
+                    <input type="hidden" id="canvasCourseId" name="canvasCourseId" th:value="${canvasCourseId}" />
+                    <button type="submit" class="rvt-button rvt-m-right-xs" aria-describedby="sections-selected" onclick="event.preventDefault(); validateCheckboxForm(this);">
+                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='De-cross-list selected sections', srText='Decrosslisting sections')"></span>
+                    </button>
+                    <span id="sections-selected" class="sections-selected-text" aria-live="polite">0 selected</span>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 <th:block layout:fragment="script">
     <script type="text/javascript">
-        var isCrosslisterLookupInitialLoad = true;
-
         jQuery(document).ready(function() {
-            crosslisterLookupRadioFunction();
-
-            jQuery("#reset-button-sisid").on( "click", function() {
-                resetCrosslisterLookupForms();
-            });
-
-            jQuery("#reset-button-class-number").on( "click", function() {
-                resetCrosslisterLookupForms();
-            });
-
             var resultsMessage = document.getElementById('results-message');
 
             if (resultsMessage != null) {
                 resultsMessage.focus();
             }
 
-            isCrosslisterLookupInitialLoad = false;
+            $("#checkbox-select-all").click(function() {
+                $('input:checkbox').not(this).prop('checked', this.checked);
+            });
+
+            checkboxCounter();
         });
 
-        function crosslisterLookupRadioFunction() {
-            if (document.getElementById('sis-radio').checked) {
-                document.getElementById('sisIdForm').classList.remove("rvt-display-none");
-                document.getElementById('classNumberForm').classList.add("rvt-display-none");
-            } else if (document.getElementById('class-number-radio').checked) {
-                document.getElementById('sisIdForm').classList.add("rvt-display-none");
-                document.getElementById('classNumberForm').classList.remove("rvt-display-none");
-            } else {
-                document.getElementById('sisIdForm').classList.add("rvt-display-none");
-                document.getElementById('classNumberForm').classList.add("rvt-display-none");
-            }
+        function checkboxCounter() {
+            // Get all the selected checkboxes, except the "select-all" one up in the table header
+            var $checkboxes = $('#decrosslist-form input[type="checkbox"]');
 
-            if (! isCrosslisterLookupInitialLoad) {
-                resetCrosslisterLookupForms();
-            }
+            // update the count
+            $checkboxes.change(function() {
+                var countCheckedCheckboxes = $checkboxes.not("#checkbox-select-all").filter(':checked').length;
+                $('#sections-selected').text(countCheckedCheckboxes + ' selected');
+            });
         }
 
-        function resetCrosslisterLookupForms() {
-            var form1ValidationMessage = document.getElementById('sisid-validation-message');
-            var form2ValidationMessage = document.getElementById('term-class-number-validation-message');
-
-            form1ValidationMessage.classList.add('rvt-display-none');
-            form1ValidationMessage.removeAttribute('aria-invalid');
-            form1ValidationMessage.removeAttribute('aria-describedby');
-
-            form2ValidationMessage.classList.add('rvt-display-none');
-            form2ValidationMessage.removeAttribute('aria-invalid');
-            form2ValidationMessage.removeAttribute('aria-describedby');
-
-            document.getElementById('sisid-search').value = "";
-            document.getElementById('class-number-search').value = "";
-
-            var resultsMessage = document.getElementById('results-message');
-
-            if (resultsMessage != null) {
-                resultsMessage.classList.add("rvt-display-none");
-            }
-        }
-
-        function validateSisIdForm() {
+        function validateSisIdForm(button) {
             var inputFieldToSearch = 'sisid-search';
 
             if (document.getElementById(inputFieldToSearch).value.trim() === '') {
@@ -229,22 +199,46 @@
                 validationMessage.setAttribute('aria-describedby', inputFieldToSearch);
                 return false;
             } else {
+                buttonLoading(button);
                 document.getElementById('sisIdForm').submit();
             }
         }
 
-       function validateTermAndClassNumberForm() {
-            var inputFieldToSearch = 'class-number-search';
+        function validateCheckboxForm(button) {
+            // Get all the selected checkboxes, except the "select-all" one up in the table header
+            var checkboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").filter(':checked').length;
 
-            if (document.getElementById(inputFieldToSearch).value.trim() === '') {
-                var validationMessage = document.getElementById('term-class-number-validation-message');
-
-                validationMessage.classList.remove('rvt-display-none');
-                validationMessage.setAttribute('aria-invalid', true);
-                validationMessage.setAttribute('aria-describedby', inputFieldToSearch);
-                return false;
+            if (checkboxes > 0) {
+                buttonLoading(button);
+                document.getElementById('decrosslist-form').submit();
             } else {
-                document.getElementById('classNumberForm').submit();
+                var checkboxValidationMessage = document.getElementById('checkbox-validation-message');
+
+                checkboxValidationMessage.classList.remove('rvt-display-none');
+                checkboxValidationMessage.setAttribute('aria-invalid', true);
+                return false;
+            }
+        }
+
+        function buttonLoading(button) {
+            if (button.dataset.action != null) {
+                document.getElementById("submitValue").value = button.dataset.action;
+            }
+            button.setAttribute("aria-busy", true);
+            var buttonsToDisable = document.getElementsByTagName('button');
+            for(var i = 0; i < buttonsToDisable.length; i++) {
+                buttonsToDisable[i].disabled = true;
+            }
+            button.classList.add("rvt-button--loading");
+
+            let spinners = button.getElementsByClassName('rvt-loader');
+            if (spinners && spinners.length > 0) {
+                spinners[0].classList.remove("rvt-display-none");
+            }
+
+            let srText = button.getElementsByClassName('sr-loader-text');
+            if (srText && srText.length > 0) {
+                srText[0].classList.remove("rvt-display-none");
             }
         }
     </script>

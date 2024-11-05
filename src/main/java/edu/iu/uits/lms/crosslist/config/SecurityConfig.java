@@ -36,6 +36,7 @@ package edu.iu.uits.lms.crosslist.config;
 import edu.iu.uits.lms.common.it12logging.LmsFilterSecurityInterceptorObjectPostProcessor;
 import edu.iu.uits.lms.common.it12logging.RestSecurityLoggingConfig;
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
+import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -58,6 +59,30 @@ import static edu.iu.uits.lms.lti.LTIConstants.WELL_KNOWN_ALL;
 public class SecurityConfig {
 
     @Configuration
+    @Order(SecurityProperties.BASIC_AUTH_ORDER - 5)
+    public static class CrosslistRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http
+                    .cors().and()
+                    .requestMatchers().antMatchers("/rest/**","/api/**")
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers("/api/**").permitAll()
+                    .antMatchers("/rest/**")
+                    .access("hasAuthority('SCOPE_lms:rest') and hasAuthority('ROLE_LMS_REST_ADMINS')")
+                    .and()
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                    .oauth2ResourceServer()
+                    .jwt().jwtAuthenticationConverter(new CustomJwtAuthenticationConverter());
+
+            http.apply(new RestSecurityLoggingConfig());
+        }
+    }
+
+    @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER - 4)
     public static class CrosslistWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
@@ -66,6 +91,9 @@ public class SecurityConfig {
 
         @Autowired
         private ToolConfig toolConfig;
+
+        @Autowired
+        private DecrosslistUserRepository decrosslistUserRepository;
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -86,7 +114,7 @@ public class SecurityConfig {
 
             //Setup the LTI handshake
             Lti13Configurer lti13Configurer = new Lti13Configurer()
-                    .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, toolConfig));
+                    .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, toolConfig, decrosslistUserRepository));
 
             http.apply(lti13Configurer);
 
@@ -110,29 +138,6 @@ public class SecurityConfig {
             web.ignoring().antMatchers("/app/jsrivet/**", "/app/webjars/**", "/app/css/**", "/app/js/**");
         }
 
-    }
-
-    @Configuration
-    @Order(SecurityProperties.BASIC_AUTH_ORDER - 3)
-    public static class CrosslistRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Override
-        public void configure(HttpSecurity http) throws Exception {
-            http
-                    .cors().and()
-                    .requestMatchers().antMatchers("/rest/**")
-                    .and()
-                    .authorizeRequests()
-                    .antMatchers("/rest/**")
-                    .access("hasAuthority('SCOPE_lms:rest') and hasAuthority('ROLE_LMS_REST_ADMINS')")
-                    .and()
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and()
-                    .oauth2ResourceServer()
-                    .jwt().jwtAuthenticationConverter(new CustomJwtAuthenticationConverter());
-
-            http.apply(new RestSecurityLoggingConfig());
-        }
     }
 
     @Configuration

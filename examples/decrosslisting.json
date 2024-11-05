@@ -1,7 +1,7 @@
 {
-  "title": "Cross-listing Lookup Parent",
-  "description": "For Looking up a course's parent course if cross-listed in Canvas.",
-  "oidc_initiation_url": "http://localhost:8080/lti/login_initiation/lms_lti_crosslisting_lookup",
+  "title": "De-Cross-listing Sections",
+  "description": "For searching for parent courses and de-cross-listing sections quickly.",
+  "oidc_initiation_url": "http://localhost:8080/lti/login_initiation/lms_lti_decrosslisting",
   "target_link_uri": "http://localhost:8080/app/lookup-launch",
   "extensions": [
     {
@@ -12,7 +12,7 @@
         "placements": [
           {
             "enabled": true,
-            "placement": "account_navigation",
+            "placement": "course_navigation",
             "message_type": "LtiResourceLinkRequest"
           }
         ]

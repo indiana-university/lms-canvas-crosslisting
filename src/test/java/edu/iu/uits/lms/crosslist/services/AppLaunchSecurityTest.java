@@ -40,6 +40,7 @@ import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.canvas.services.TermService;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
+import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
@@ -101,6 +102,9 @@ public class AppLaunchSecurityTest {
 
    @MockBean
    private SisServiceImpl sisService;
+
+   @MockBean
+   private DecrosslistUserRepository decrosslistUserRepository;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {

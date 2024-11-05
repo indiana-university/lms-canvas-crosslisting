@@ -1,8 +1,10 @@
+package edu.iu.uits.lms.crosslist.model;
+
 /*-
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2024 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -30,76 +32,55 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-/* Loading page stuff */
-#load {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: 25%;
-    height: 25%;
-    white-space: nowrap;
-}
 
-#loading {
-    display: none;
-}
+import com.fasterxml.jackson.annotation.JsonFormat;
+import edu.iu.uits.lms.common.date.DateFormatUtil;
+import lombok.Data;
 
-/* Toggle Color override */
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import java.util.Date;
 
-.toggleoverride {
-    color: #000000;
-}
+@Entity
+@Table(name = "DECROSSLIST_AUDIT")
+@SequenceGenerator(name = "DECROSSLIST_AUDIT_ID_SEQ", sequenceName = "DECROSSLIST_AUDIT_ID_SEQ", allocationSize = 1)
+@Data
+public class DecrosslistAudit {
+    @Id
+    @GeneratedValue(generator = "DECROSSLIST_AUDIT_ID_SEQ")
+    @Column(name = "DECROSSLIST_AUDIT_ID")
+    private Long id;
 
-/* Highlights */
+    @JsonFormat(pattern = DateFormatUtil.JSON_DATE_FORMAT)
+    @Column(name = "AUDIT_DATE")
+    private Date auditDate;
 
-.sectionHighlight {
-    animation: fadeIt 3s ease-in;
-}
+    @Column(name = "DECROSSLISTED_FROM")
+    private String decrosslistedFrom;
 
-@keyframes fadeIt {
-    0%    { background-color: #a2b4be; }
-    100%  { background-color: #fafafa; }
-}
+    @Column(name = "SIS_SECTION")
+    private String sisSection;
 
-/* Color overrides */
+    @Column(name = "USERNAME")
+    private String username;
 
-.buttonColorOverride {
-    background-color: #ffffff;
-}
+    @Column(name = "CANVAS_USER_ID")
+    private String canvasUserId;
 
-/* Other stuff */
+    @Column(name = "DISPLAY_NAME")
+    private String displayName;
 
-.impersonationBar {
-    background-color: #ffeecd;
-    border-bottom: 0.125rem solid #dddddd;
-}
-
-#addTerms {
-    font-weight: inherit;
-    font-size: inherit;
-}
-
-/* override the rivet style */
-.rvt-disclosure__content {
-    box-shadow: none;
-}
-
-/* override rivet to make the toggle black instead of blue */
-.rvt-disclosure__toggle::before {
-    filter: brightness(0%);
-}
-
-.crosslisted-icon {
-    vertical-align: middle;
-}
-
-/* decrosslisting section */
-
-/* force first column to be small and override line-height to vertically center checkbox on header */
-.checkboxColumn {
-    width: 1%;
-    line-height: inherit;
+    @PreUpdate
+    @PrePersist
+    public void updateTimeStamps() {
+        if (auditDate==null) {
+            auditDate = new Date();
+        }
+    }
 }
