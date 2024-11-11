@@ -106,6 +106,11 @@ public class DecrosslistController extends OidcTokenAwareController {
             model.addAttribute("findParentResult", findParentResult);
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
+
+            // If we aren't showing the course info, there must be an error
+            if (!findParentResult.isShowCourseInfo()){
+                model.addAttribute("errorMsg", findParentResult.getStatusMessage());
+            }
         }
 
         return "findParentCourse";

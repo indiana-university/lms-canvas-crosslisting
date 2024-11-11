@@ -54,6 +54,7 @@ public interface CrosslistConstants {
     String LOOKUP_FAILURE_COURSE_NOT_CROSSLISTED_MESSAGE = "This course has not been crosslisted";
     String LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE = "Not found in Canvas";
     String LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE = "Not found in SIS";
+    String LOOKUP_FAILURE_MISSING_SIS_ID = "SIS Section ID is required.";
 
     String LOOKUP_SUCCESS_CSS = "rvt-color-green rvt-bg-green-100";
     String LOOKUP_FAILURE_CSS = "rvt-orange-green rvt-bg-orange-100";

@@ -395,9 +395,7 @@ public class CrosslistService {
 
       if (sisSectionId == null || sisSectionId.isEmpty()) {
          findParentResult.setShowCourseInfo(false);
-         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_SIS_MESSAGE);
-         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
+         findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_MISSING_SIS_ID);
          return findParentResult;
       }
 
@@ -406,8 +404,6 @@ public class CrosslistService {
       if (section == null) {
          findParentResult.setShowCourseInfo(false);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
-         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          return findParentResult;
       }
 
@@ -416,8 +412,6 @@ public class CrosslistService {
       if (course == null) {
          findParentResult.setShowCourseInfo(false);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
-         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          return findParentResult;
       }
 
@@ -429,8 +423,6 @@ public class CrosslistService {
       if (sectionsList == null) {
          findParentResult.setShowCourseInfo(false);
          findParentResult.setStatusMessage(CrosslistConstants.LOOKUP_FAILURE_NOT_FOUND_IN_CANVAS_MESSAGE);
-         findParentResult.setStatusIconCssClasses(CrosslistConstants.LOOKUP_FAILURE_CSS);
-         findParentResult.setStatusIconName(CrosslistConstants.LOOKUP_FAILURE_ICON_NAME);
          return findParentResult;
       }
 

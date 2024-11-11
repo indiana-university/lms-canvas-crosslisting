@@ -103,3 +103,7 @@
     width: 1%;
     line-height: inherit;
 }
+
+#results-message:focus {
+    outline: none;
+}
