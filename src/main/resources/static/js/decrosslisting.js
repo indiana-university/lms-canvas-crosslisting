@@ -38,8 +38,14 @@ jQuery(document).ready(function() {
         resultsMessage.focus();
     }
 
-    $("#checkbox-select-all").click(function() {
-        $('input:checkbox').not(this).prop('checked', this.checked);
+    $("#select-all-button").click(function() {
+        $('input:checkbox').prop('checked', true);
+        updateCounter();
+    });
+
+    $("#deselect-all-button").click(function() {
+        $('input:checkbox').prop('checked', false);
+        updateCounter();
     });
 
     checkboxCounter();
@@ -53,14 +59,31 @@ function checkboxCounter() {
 
     // update the count
     $checkboxes.change(function() {
-        var countCheckedCheckboxes = $checkboxes.not("#checkbox-select-all").filter(':checked').length;
+        var countCheckedCheckboxes = $checkboxes.filter(':checked').length;
         $('#sections-selected').text(countCheckedCheckboxes + ' selected');
     });
 }
 
+function updateCounter() {
+    var $checkboxes = $('#decrosslist-form input[type="checkbox"]');
+    var countCheckedCheckboxes = $checkboxes.filter(':checked').length;
+    $('#sections-selected').text(countCheckedCheckboxes + ' selected');
+}
+
 function submitSisIdForm(button) {
-    buttonLoading(button);
-    document.getElementById('sisIdForm').submit();
+    var inputFieldToSearch = 'sisid-search';
+
+    if (document.getElementById(inputFieldToSearch).value.trim() === '') {
+        var validationMessage = document.getElementById('sisid-validation-message');
+
+        validationMessage.classList.remove('rvt-display-none');
+        validationMessage.setAttribute('aria-invalid', true);
+        validationMessage.setAttribute('aria-describedby', inputFieldToSearch);
+        return false;
+    } else {
+        buttonLoading(button);
+        document.getElementById('sisIdForm').submit();
+    }
 }
 
 function validateCheckboxForm(button) {
