@@ -205,6 +205,23 @@ public class DecrosslistController extends OidcTokenAwareController {
             model.addAttribute("findParentResult", findParentResult);
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
+
+            List<Section> fullSectionList = findParentResult.getSectionList();
+            List<Section> unavailableToDecrosslistSectionsList = new ArrayList<>();
+            List<Section> availableToDecrosslistSectionsList = new ArrayList<>();
+
+            if (fullSectionList != null) {
+                for (Section section : fullSectionList) {
+                    if (section.getSis_section_id() == null || section.getNonxlist_course_id() == null) {
+                        unavailableToDecrosslistSectionsList.add(section);
+                    } else {
+                        availableToDecrosslistSectionsList.add(section);
+                    }
+                }
+            }
+
+            model.addAttribute("unavailableToDecrosslistSectionsList", unavailableToDecrosslistSectionsList);
+            model.addAttribute("availableToDecrosslistSectionsList", availableToDecrosslistSectionsList);
         }
 
         return "findParentCourse";

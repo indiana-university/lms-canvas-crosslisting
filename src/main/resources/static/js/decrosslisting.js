@@ -50,7 +50,8 @@ jQuery(document).ready(function() {
 
     checkboxCounter();
 
-    $('[aria-invalid="true"]').first().focus();
+    // This will move focus to the invalid search if it fails the server-side validation
+    $('#sisid-search[aria-invalid="true"]').focus();
 });
 
 function checkboxCounter() {
@@ -71,14 +72,18 @@ function updateCounter() {
 }
 
 function submitSisIdForm(button) {
-    var inputFieldToSearch = 'sisid-search';
+    let searchInput = document.getElementById('sisid-search');
+    if (searchInput.value.trim() === '') {
+        let validationText = document.getElementById('sisid-error-text');
+        validationText.innerText = 'SIS Section ID is required.';
 
-    if (document.getElementById(inputFieldToSearch).value.trim() === '') {
-        var validationMessage = document.getElementById('sisid-validation-message');
-
+        let validationMessage = document.getElementById('sisid-error-message');
         validationMessage.classList.remove('rvt-display-none');
-        validationMessage.setAttribute('aria-invalid', true);
-        validationMessage.setAttribute('aria-describedby', inputFieldToSearch);
+
+        searchInput.setAttribute('aria-invalid', true);
+        searchInput.setAttribute('aria-describedby', 'sisid-error-text sisid-search-description');
+        searchInput.focus();
+
         return false;
     } else {
         buttonLoading(button);

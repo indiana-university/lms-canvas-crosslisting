@@ -66,7 +66,7 @@
             <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS Section ID</label>
             <div class="rvt-input-group">
                 <input class="rvt-text-input rvt-input-group__input" type="text" id="sisid-search"
-                       th:attr="aria-describedby=${errorMsg} ? 'sisid-validation-text sisid-search-description' : 'sisid-search-description', aria-invalid=${errorMsg} ? 'true'"
+                       th:attr="aria-describedby=${errorMsg} ? 'sisid-error-text sisid-search-description' : 'sisid-search-description', aria-invalid=${errorMsg} ? 'true'"
                        th:field="*{sisIdSearch}" aria-required="true" />
                 <div class="rvt-input-group__append">
                     <button id="find-button" type="submit" class="rvt-button" onclick="event.preventDefault(); submitSisIdForm(this);">
@@ -77,17 +77,8 @@
 
             <div id="sisid-search-description" class="rvt-m-top-xxs rvt-ts-14">Example: SP22-BL-FOLK-E295-4441</div>
 
-            <div id="sisid-validation-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
-                <span class="rvt-inline-alert__icon">
-                    <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
-                        <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
-                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"></path>
-                    </svg>
-                </span>
-                <span id="sisid-validation-text" class="rvt-inline-alert__message">SIS Section ID is required.</span>
-            </div>
-
-            <div th:if="${errorMsg}" id="sisid-error-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger">
+            <div id="sisid-error-message" class="rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger"
+                th:classappend="${errorMsg == null} ? 'rvt-display-none'">
                 <span class="rvt-inline-alert__icon">
                     <svg fill="currentColor" width="16" height="16" viewBox="0 0 16 16">
                         <path d="m8 6.586-2-2L4.586 6l2 2-2 2L6 11.414l2-2 2 2L11.414 10l-2-2 2-2L10 4.586l-2 2Z"></path>
@@ -123,32 +114,38 @@
                     </div>
                 </div>
                 <div class="rvt-m-top-sm">
-                    <span>Unavailable sections</span>
-                    <div class="rvt-m-tb-sm">
-                        <p th:if="${unavailableToDecrosslistSectionsList.isEmpty()}">None listed</p>
-                        <ul th:if="${!unavailableToDecrosslistSectionsList.isEmpty()}" class="rvt-list-plain">
+                    <fieldset class="rvt-fieldset">
+                        <legend class="rvt-legend rvt-text-bold rvt-ts-16">Unavailable sections</legend>
+                        <p th:if="${unavailableToDecrosslistSectionsList == null or unavailableToDecrosslistSectionsList.empty}">None listed</p>
+                        <ul th:unless="${unavailableToDecrosslistSectionsList == null or unavailableToDecrosslistSectionsList.empty}" class="rvt-list-plain">
                             <li th:id="'row_' + ${section.Id}" th:each="section : ${unavailableToDecrosslistSectionsList}">
                                 <span th:text="${section.name}">Section Name</span>
                             </li>
                         </ul>
-                    </div>
+                    </fieldset>
                 </div>
                 <div class="rvt-m-top-sm">
-                    <p th:if="${availableToDecrosslistSectionsList.isEmpty()}">None listed</p>
-                    <fieldset class="rvt-fieldset">
-                        <legend class="rvt-m-tb-sm">Available sections</legend>
-                        <button type="button" id="select-all-button" class="rvt-button rvt-button--small rvt-button--secondary rvt-m-bottom-sm">Select all</button>
-                        <button type="button" id="deselect-all-button" class="rvt-button rvt-button--small rvt-button--secondary rvt-m-bottom-sm">Deselect all</button>
-                        <ul th:if="${!availableToDecrosslistSectionsList.isEmpty()}" class="rvt-list-plain">
-                            <li th:id="'row_' + ${section.id}" th:each="section : ${availableToDecrosslistSectionsList}">
-                                <div class="rvt-checkbox">
-                                    <input type="checkbox" th:id="|checkbox-${section.id}|" name="section-checkboxes" th:value="${section.id}" />
-                                    <label th:for="|checkbox-${section.id}|" class="rvt-m-right-sm">
-                                        <span th:text="${section.name}">Section Name</span>
-                                    </label>
-                                </div>
-                            </li>
-                        </ul>
+                    <fieldset id="available-sections" class="rvt-fieldset" aria-required="true">
+                        <legend class="rvt-m-bottom-sm rvt-legend rvt-text-bold rvt-ts-16">Available sections
+                            <span class="rvt-sr-only">Select at least one course to de-cross-list</span>
+                        </legend>
+
+                        <p th:if="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}" class="-rvt-m-top-xs">No sections available</p>
+
+                        <th:block th:unless="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}">
+                            <button type="button" id="select-all-button" class="rvt-button rvt-button--small rvt-button--secondary rvt-m-bottom-sm">Select all</button>
+                            <button type="button" id="deselect-all-button" class="rvt-button rvt-button--small rvt-button--secondary rvt-m-bottom-sm">Deselect all</button>
+                            <ul class="rvt-list-plain">
+                                <li th:id="'row_' + ${section.id}" th:each="section : ${availableToDecrosslistSectionsList}">
+                                    <div class="rvt-checkbox">
+                                        <input type="checkbox" th:id="|checkbox-${section.id}|" name="section-checkboxes" th:value="${section.id}" />
+                                        <label th:for="|checkbox-${section.id}|" class="rvt-m-right-sm">
+                                            <span th:text="${section.name}">Section Name</span>
+                                        </label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </th:block>
                     </fieldset>
                 </div>
                 <div id="checkbox-validation-message" class="rvt-m-top-md rvt-inline-alert rvt-inline-alert--standalone rvt-inline-alert--danger rvt-display-none">
@@ -160,14 +157,16 @@
                     </span>
                     <span class="rvt-inline-alert__message">Select at least one section to de-cross-list.</span>
                 </div>
-                <div class="rvt-m-top-md">
-                    <input type="hidden" id="hidden-sisid-search" name="hidden-sisid-search" th:field="*{sisIdSearch}" />
-                    <input type="hidden" id="canvasCourseId" name="canvasCourseId" th:value="${canvasCourseId}" />
+                <div class="rvt-m-top-md" th:unless="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}">
                     <button type="submit" class="rvt-button rvt-m-right-xs" aria-describedby="sections-selected" onclick="event.preventDefault(); validateCheckboxForm(this);">
-                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='De-cross-list selected sections', srText='Decrosslisting sections')"></span>
+                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='De-cross-list selected sections', srText='De-crosslisting sections')"></span>
                     </button>
                     <span id="sections-selected" class="sections-selected-text" aria-live="polite">0 selected</span>
                 </div>
+
+                <input type="hidden" id="hidden-sisid-search" name="hidden-sisid-search" th:field="*{sisIdSearch}" />
+                <input type="hidden" id="canvasCourseId" name="canvasCourseId" th:value="${canvasCourseId}" />
+
             </div>
         </form>
     </div>
