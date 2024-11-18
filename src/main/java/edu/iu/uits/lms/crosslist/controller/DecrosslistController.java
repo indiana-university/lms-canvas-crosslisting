@@ -60,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -102,10 +103,33 @@ public class DecrosslistController extends OidcTokenAwareController {
         String sisIdSearch = findParentModel.getSisIdSearch().trim();
         findParentResult = crosslistService.processSisLookup(sisIdSearch);
 
+        List<Section> unavailableToDecrosslistSectionsList = new ArrayList<>();
+        List<Section> availableToDecrosslistSectionsList = new ArrayList<>();
+
         if (findParentResult != null) {
+            List<Section> fullSectionList = findParentResult.getSectionList();
+
+            if (fullSectionList != null) {
+                for (Section section : fullSectionList) {
+                    if (section.getSis_section_id() == null || section.getNonxlist_course_id() == null) {
+                        unavailableToDecrosslistSectionsList.add(section);
+                    } else {
+                        availableToDecrosslistSectionsList.add(section);
+                    }
+                }
+            }
+
+            model.addAttribute("unavailableToDecrosslistSectionsList", unavailableToDecrosslistSectionsList);
+            model.addAttribute("availableToDecrosslistSectionsList", availableToDecrosslistSectionsList);
+
             model.addAttribute("findParentResult", findParentResult);
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
+
+            // If we aren't showing the course info, there must be an error
+            if (!findParentResult.isShowCourseInfo()){
+                model.addAttribute("errorMsg", findParentResult.getStatusMessage());
+            }
         }
 
         return "findParentCourse";
@@ -181,6 +205,23 @@ public class DecrosslistController extends OidcTokenAwareController {
             model.addAttribute("findParentResult", findParentResult);
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
+
+            List<Section> fullSectionList = findParentResult.getSectionList();
+            List<Section> unavailableToDecrosslistSectionsList = new ArrayList<>();
+            List<Section> availableToDecrosslistSectionsList = new ArrayList<>();
+
+            if (fullSectionList != null) {
+                for (Section section : fullSectionList) {
+                    if (section.getSis_section_id() == null || section.getNonxlist_course_id() == null) {
+                        unavailableToDecrosslistSectionsList.add(section);
+                    } else {
+                        availableToDecrosslistSectionsList.add(section);
+                    }
+                }
+            }
+
+            model.addAttribute("unavailableToDecrosslistSectionsList", unavailableToDecrosslistSectionsList);
+            model.addAttribute("availableToDecrosslistSectionsList", availableToDecrosslistSectionsList);
         }
 
         return "findParentCourse";
