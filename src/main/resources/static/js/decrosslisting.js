@@ -32,7 +32,7 @@
  */
 
 jQuery(document).ready(function() {
-    var resultsMessage = document.getElementById('results-message');
+    let resultsMessage = document.getElementById('results-message');
 
     if (resultsMessage != null) {
         resultsMessage.focus();
@@ -56,18 +56,18 @@ jQuery(document).ready(function() {
 
 function checkboxCounter() {
     // Get all the selected checkboxes, except the "select-all" one up in the table header
-    var $checkboxes = $('#decrosslist-form input[type="checkbox"]');
+    let $checkboxes = $('#decrosslist-form input[type="checkbox"]');
 
     // update the count
     $checkboxes.change(function() {
-        var countCheckedCheckboxes = $checkboxes.filter(':checked').length;
+        let countCheckedCheckboxes = $checkboxes.filter(':checked').length;
         $('#sections-selected').text(countCheckedCheckboxes + ' selected');
     });
 }
 
 function updateCounter() {
-    var $checkboxes = $('#decrosslist-form input[type="checkbox"]');
-    var countCheckedCheckboxes = $checkboxes.filter(':checked').length;
+    let $checkboxes = $('#decrosslist-form input[type="checkbox"]');
+    let countCheckedCheckboxes = $checkboxes.filter(':checked').length;
     $('#sections-selected').text(countCheckedCheckboxes + ' selected');
 }
 
@@ -93,13 +93,13 @@ function submitSisIdForm(button) {
 
 function validateCheckboxForm(button) {
     // Get all the selected checkboxes, except the "select-all" one up in the table header
-    var checkboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").filter(':checked').length;
+    let checkboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").filter(':checked').length;
 
     if (checkboxes > 0) {
         buttonLoading(button);
         document.getElementById('decrosslist-form').submit();
     } else {
-        var checkboxValidationMessage = document.getElementById('checkbox-validation-message');
+        let checkboxValidationMessage = document.getElementById('checkbox-validation-message');
         checkboxValidationMessage.classList.remove('rvt-display-none');
 
         let firstCheckbox = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").first();
@@ -116,8 +116,8 @@ function buttonLoading(button) {
         document.getElementById("submitValue").value = button.dataset.action;
     }
     button.setAttribute("aria-busy", true);
-    var buttonsToDisable = document.getElementsByTagName('button');
-    for(var i = 0; i < buttonsToDisable.length; i++) {
+    let buttonsToDisable = document.getElementsByTagName('button');
+    for(let i = 0; i < buttonsToDisable.length; i++) {
         buttonsToDisable[i].disabled = true;
     }
     button.classList.add("rvt-button--loading");
