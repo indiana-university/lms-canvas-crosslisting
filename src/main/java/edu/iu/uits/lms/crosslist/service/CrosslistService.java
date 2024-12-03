@@ -400,9 +400,7 @@ public class CrosslistService {
       }
 
       // this style of Canvas search is case-sensitive, so let's force the upper case that will be accurate for SIS
-      sisSectionId = sisSectionId.toUpperCase();
-
-      Section section = sectionService.getSection(String.format("sis_section_id:%s", sisSectionId));
+      Section section = sectionService.getSection(String.format("sis_section_id:%s", sisSectionId.toUpperCase()));
 
       if (section == null) {
          findParentResult.setShowCourseInfo(false);
