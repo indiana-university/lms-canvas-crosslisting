@@ -49,4 +49,8 @@ public class FindParentResult {
     private String statusIconName;
     private String canvasCourseId;
     private List<Section> sectionList;
+
+    public String displaySisCourseId() {
+        return sisCourseId == null ? "non-SIS course" : sisCourseId;
+    }
 }

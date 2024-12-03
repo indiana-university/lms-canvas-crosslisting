@@ -123,6 +123,7 @@ public class DecrosslistController extends OidcTokenAwareController {
             model.addAttribute("availableToDecrosslistSectionsList", availableToDecrosslistSectionsList);
 
             model.addAttribute("findParentResult", findParentResult);
+
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
 
@@ -203,6 +204,7 @@ public class DecrosslistController extends OidcTokenAwareController {
 
         if (findParentResult != null) {
             model.addAttribute("findParentResult", findParentResult);
+
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
 

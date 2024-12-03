@@ -94,7 +94,7 @@
         <form th:object="${findParentModel}" id="decrosslist-form" th:action="@{|/app/decrosslist-sections|}" method="post">
             <div class="rvt-flex rvt-items-center">
                 <rvt-icon th:name="${findParentResult.statusIconName}" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
-                <h2 id="results-message" tabindex="-1" th:text="|Parent course found: ${findParentResult.sisCourseId}|" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
+                <h2 id="results-message" tabindex="-1" th:text="|Parent course found: ${findParentResult.displaySisCourseId}|" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
             </div>
             <div>
                 <div class="rvt-p-top-sm">
