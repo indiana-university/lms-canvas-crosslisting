@@ -48,8 +48,8 @@
                 <div class="rvt-checkbox">
                     <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
                     <label th:for="${section.sectionId}" class="rvt-m-right-sm">
-                        <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                        <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                        <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
+                        <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                     </label>
                 </div>
             </li>
@@ -79,7 +79,7 @@
                                         <div class="rvt-checkbox">
                                             <input type="checkbox" th:value="${section.sectionName}" th:id="${section.sectionId}" th:checked="${section.currentlyChecked}?checked" />
                                             <label th:for="${section.sectionId}" th:text="${section.sectionName}">SP16-BL-MUS-A112-15891</label>
-                                            <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                            <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                                         </div>
                                     </li>
                                 </ul>

@@ -55,7 +55,7 @@ jobs:
     name: Maven Build
     runs-on: self-hosted
     container:
-      image: maven:3.9.4-eclipse-temurin-17
+      image: maven:3.9.9-eclipse-temurin-21
     environment: ${{ github.event.inputs.server_env }}
     steps:
       - name: Clone GitHub root repository
@@ -74,7 +74,7 @@ jobs:
       - name: Create maven settings.xml
         run: echo -n '${{ secrets.LMS_MAVEN_SETTINGS }}' | base64 -d > /root/.m2/settings.xml
       - name: Maven Build
-        run: mvn clean install -P '${{ vars.BUILD_PROFILES}}'
+        run: mvn clean install -B -P '${{ vars.BUILD_PROFILES}}'
         working-directory: tools/${{ vars.DEPLOY_DIR }}
       - name: copy jar file
         run: |
@@ -82,7 +82,7 @@ jobs:
           cp tools/${{ vars.DEPLOY_DIR }}/target/${{ vars.JAR_FILE }} deployments/${{ vars.DEPLOY_DIR }}/lib/${{ vars.JAR_FILE }}
       - name: build/push docker image
         run: |
-          mvn clean install -P docker-push -D dockerfile.username=${{ secrets.LMS_REGISTRY_USERNAME }} \
+          mvn clean install -B -P docker-push -D dockerfile.username=${{ secrets.LMS_REGISTRY_USERNAME }} \
             -D dockerfile.password=${{ secrets.LMS_REGISTRY_PASSWORD }} -D docker_repository_base=registry.docker.iu.edu/lms/ \
             -D docker_tag=${{ vars.DOCKER_TAG }}
         working-directory: deployments/${{ vars.DEPLOY_DIR }}
@@ -92,7 +92,7 @@ jobs:
     runs-on: self-hosted
     environment: ${{ github.event.inputs.server_env }}
     container:
-      image: registry.docker.iu.edu/library/kube-deployer:3.10.2
+      image: registry.docker.iu.edu/library/kube-deployer:stable
       credentials:
         username: ${{ secrets.LMS_REGISTRY_USERNAME }}
         password: ${{ secrets.LMS_REGISTRY_PASSWORD }}

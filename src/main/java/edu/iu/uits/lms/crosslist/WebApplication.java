@@ -38,12 +38,11 @@ import edu.iu.uits.lms.common.samesite.EnableCookieFilter;
 import edu.iu.uits.lms.common.server.GitRepositoryState;
 import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.common.server.ServerUtils;
-import edu.iu.uits.lms.lti.config.EnableGlobalErrorHandler;
 import edu.iu.uits.lms.common.session.EnableCourseSessionService;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.iuonly.config.EnableIuOnlyClient;
+import edu.iu.uits.lms.lti.config.EnableGlobalErrorHandler;
 import edu.iu.uits.lms.lti.config.EnableLtiClient;
-import edu.iu.uits.lms.redis.config.EnableRedisConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -58,7 +57,6 @@ import java.util.Date;
 @EnableGlobalErrorHandler
 @Slf4j
 @EnableCookieFilter(ignoredRequestPatterns = "/rest/**")
-@EnableRedisConfiguration
 @EnableLtiClient(toolKeys = {"lms_lti_crosslisting", "lms_lti_decrosslisting"})
 @EnableCanvasClient
 @EnableIuOnlyClient

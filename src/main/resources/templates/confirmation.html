@@ -43,7 +43,7 @@
 <body>
 <div layout:fragment="content">
     <div class="rvt-container-xl rvt-m-top-sm">
-        <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
+        <div th:insert="~{fragments/enterImpersonationMode :: enterImpersonationMode}"></div>
 
         <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
 
@@ -85,8 +85,8 @@
                             <li id="summaryNone" th:unless="${#lists.size(summaryListSections) > 0}">None</li>
                             <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${summaryListSections}"
                                 th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
-                                <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                                <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
+                                <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                             </li>
                         </ul>
                         </p>
@@ -99,8 +99,8 @@
                             <li id="addNone" th:unless="${#lists.size(addListSections) > 0}">None</li>
                             <li th:id="'add_' + ${section.sectionId}" th:each="section : ${addListSections}"
                                 th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
-                                <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                                <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
+                                <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                             </li>
                         </ul>
                         </p>
@@ -110,8 +110,8 @@
                             <li id="removeNone" th:unless="${#lists.size(removeListSections) > 0}">None</li>
                             <li th:id="'remove_' + ${section.sectionId}" th:each="section : ${removeListSections}"
                                 th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
-                                <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                                <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
+                                <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                             </li>
                         </ul>
                         </p>

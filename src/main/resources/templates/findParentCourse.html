@@ -70,7 +70,7 @@
                        th:field="*{sisIdSearch}" aria-required="true" />
                 <div class="rvt-input-group__append">
                     <button id="find-button" type="submit" class="rvt-button" onclick="event.preventDefault(); submitSisIdForm(this);">
-                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='Find', srText='Finding course')"></span>
+                        <span th:replace="~{fragments/loadingButton.html :: loadingButton(buttonText='Find', srText='Finding course')}"></span>
                     </button>
                 </div>
             </div>
@@ -159,7 +159,7 @@
                 </div>
                 <div class="rvt-m-top-md" th:unless="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}">
                     <button type="submit" class="rvt-button rvt-m-right-xs" aria-describedby="sections-selected" onclick="event.preventDefault(); validateCheckboxForm(this);">
-                        <span th:replace="fragments/loadingButton.html :: loadingButton(buttonText='De-cross-list selected sections', srText='De-crosslisting sections')"></span>
+                        <span th:replace="~{fragments/loadingButton.html :: loadingButton(buttonText='De-cross-list selected sections', srText='De-crosslisting sections')}"></span>
                     </button>
                     <span id="sections-selected" class="sections-selected-text" aria-live="polite">0 selected</span>
                 </div>

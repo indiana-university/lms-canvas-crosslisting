@@ -110,6 +110,15 @@ Then can be set in a properties file, or overridden as environment variables.
 If you would like to use HasiCorp's Vault for secure property storage, you will need to enable it by including the value `vault` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
 Include any `spring.cloud.vault.*` properties that your environment requires in a properties file, or override as environment variables.
 
+### Favicon.ico Configuration (optional)
+If you would like to use a favicon.ico file for your application, it can be enabled with the following properties in the table below.
+
+| Property              | Default Value  | Description                                                                                                                                                                       |
+|-----------------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `lms.favicon.enabled` | `false`        | Enable favicon                                                                                                                                                                    |
+| `lms.favicon.url`     |                | URL of externally hosted favicon.  Will be the preferred value if both url and path are set.                                                                                      |
+| `lms.favicon.path`    | `/favicon.ico` | Path of favicon that is hosted by the application.  There is a default image in the classpath (IU Trident). Can be overridden with an image placed in `src/main/resources/static` |
+
 ### Exposing the LTI authz REST endpoints
 If you would like to expose the LTI authz endpoints in this tool (for CRUD operations on the LTI authorizations), you will
 need to enable it by including the value `ltirest` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that
