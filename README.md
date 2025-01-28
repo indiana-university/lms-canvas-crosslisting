@@ -107,7 +107,7 @@ Then can be set in a properties file, or overridden as environment variables.
 
 
 ### Vault Configuration (optional)
-If you would like to use HasiCorp's Vault for secure property storage, you will need to enable it by including the value `vault` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
+If you would like to use HashiCorp's Vault for secure property storage, you will need to enable it by including the value `vault` into the `SPRING_PROFILES_ACTIVE` environment variable. Be aware that if the tool requires multiple values, that there could be more than one profile value in there.
 Include any `spring.cloud.vault.*` properties that your environment requires in a properties file, or override as environment variables.
 
 ### Favicon.ico Configuration (optional)
