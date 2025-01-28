@@ -43,8 +43,8 @@ import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.config.SecurityConfig;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
@@ -114,7 +114,7 @@ public class AppLaunchSecurityTest {
    private SisServiceImpl sisService;
 
    @MockBean
-   private DecrosslistUserRepository decrosslistUserRepository;
+   private AuthorizedUserService authorizedUserService;
 
    @MockBean
    private ClientRegistrationRepository clientRegistrationRepository;

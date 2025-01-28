@@ -33,7 +33,6 @@ package edu.iu.uits.lms.crosslist.config;
  * #L%
  */
 
-import edu.iu.uits.lms.crosslist.model.DecrosslistUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -49,7 +48,6 @@ public class JpaRestConfig implements RepositoryRestConfigurer {
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         //  This is needed to allow the "ids" to be served up via the
         //  @RepositoryRestResource annotation (by default, it is suppressed)
-        config.exposeIdsFor(DecrosslistUser.class);
 
         RepositoryRestConfigurer.super.configureRepositoryRestConfiguration(config, cors);
         config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);

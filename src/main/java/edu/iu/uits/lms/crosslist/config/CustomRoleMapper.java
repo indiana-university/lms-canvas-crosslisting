@@ -33,8 +33,8 @@ package edu.iu.uits.lms.crosslist.config;
  * #L%
  */
 
-import edu.iu.uits.lms.crosslist.model.DecrosslistUser;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import edu.iu.uits.lms.lti.service.LmsDefaultGrantedAuthoritiesMapper;
@@ -48,17 +48,19 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static edu.iu.uits.lms.crosslist.CrosslistConstants.AUTH_USER_TOOL_PERMISSION;
+
 @Slf4j
 public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
    private ToolConfig toolConfig;
 
-   private DecrosslistUserRepository decrosslistUserRepository;
+   private AuthorizedUserService authorizedUserService;
 
-   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, ToolConfig toolConfig, DecrosslistUserRepository decrosslistUserRepository) {
+   public CustomRoleMapper(DefaultInstructorRoleRepository defaultInstructorRoleRepository, ToolConfig toolConfig, AuthorizedUserService authorizedUserService) {
       super(defaultInstructorRoleRepository);
       this.toolConfig = toolConfig;
-      this.decrosslistUserRepository = decrosslistUserRepository;
+      this.authorizedUserService = authorizedUserService;
    }
 
    @Override
@@ -97,7 +99,7 @@ public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
             String rolesString = "NotAuthorized";
 
-            DecrosslistUser user = decrosslistUserRepository.findByUsername(userId);
+            AuthorizedUser user = authorizedUserService.findByUsernameAndToolPermission(userId, AUTH_USER_TOOL_PERMISSION);
 
             if (user != null) {
                rolesString = LTIConstants.CANVAS_INSTRUCTOR_ROLE;
