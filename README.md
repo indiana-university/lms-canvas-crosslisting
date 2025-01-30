@@ -32,6 +32,7 @@ In the `Message` section, set the following:
 canvas_course_id=123456
 canvas_user_login_id=johnsmith
 instructure_membership_roles=http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor
+is_crosslist_tool=true
 ```
 
 </td></tr>
@@ -134,9 +135,22 @@ that need to be accounted for while using this setup.
 This is marked as experimental due to the fact that we aren't running with this option at IU.  We are running into CORS
 issues when trying to talk to our OAuth2 service via swagger, so we can't verify if it really works or not!
 
-# Crosslister Lookup
-The Cross-listing Assistant in Canvas at Indiana University has a secondary launch that brings up a user interface to search for a parent
-crosslisted course.  This is restricted to administrator users only. Configuration is the same as the crosslister with the exceptions listed below.
+# De-Cross-listing Sections
+The Cross-listing Assistant in Canvas at Indiana University has a secondary launch that brings up a user interface to 
+help with de-cross-listing.  This is restricted to administrator users only. Configuration is the same as the crosslister 
+with the exceptions listed below.
+
+## Setup Database
+After compiling, see `target/generated-resources/sql/ddl/auto/postgresql9.sql` for appropriate ddl.
+Insert a record into the `LTI_13_AUTHZ` table with your tool's registration_id (`lms_lti_decrosslisting`), along with the client_id
+and secret from Canvas's Developer Key.  An `env` designator is also required here, and allows a database to support
+multiple environments simultaneously (dev and reg, for example).
+
+### Giving users access
+This tool requires explicit access via some tables: `AUTHORIZED_USERS`, `AUTHORIZED_TOOL_PERMISSION`, `AUTHORIZED_TOOL_PERMISSION_PROPERTIES`.
+Note: These tables can be used with other tools as well, if you happen to be running multiple!
+For this tool, only the first two will be important.  Add an appropriate user record.  Then, add a corresponding permission 
+record, using `DECROSSLIST` as the permission.  This should grant your user access to the de-cross-listing tool.
 
 ## Test a local launch
 Startup the application with the `LTI_CLIENTREGISTRATION_DEFAULTCLIENT` value set to `saltire`.
@@ -164,6 +178,6 @@ From the `Security Model` section, set the following:
 <tr><td>LTI version</td><td>1.3.0</td></tr>
 <tr><td>Message URL</td><td>http://localhost:8080/app/lookup-launch</td></tr>
 <tr><td>Client ID</td><td>dev (or whatever is appropriate based on the record inserted in the database table from above)</td></tr>
-<tr><td>Initiate login URL</td><td>http://localhost:8080/lti/login_initiation/lms_lti_crosslisting</td></tr>
+<tr><td>Initiate login URL</td><td>http://localhost:8080/lti/login_initiation/lms_lti_decrosslisting</td></tr>
 <tr><td>Redirection URI(s)</td><td>http://localhost:8080/lti/login</td></tr>
 </table>

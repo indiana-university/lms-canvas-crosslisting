@@ -43,8 +43,8 @@ import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.config.SecurityConfig;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
@@ -85,7 +85,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = CrosslistController.class, properties = {"oauth.tokenprovider.url=http://foo"})
-//@Import({ToolConfig.class, CanvasClientTestConfig.class, LtiClientTestConfig.class})
 @ContextConfiguration(classes = {CrosslistController.class, SecurityConfig.class})
 @Slf4j
 public class CrosslistControllerTest {
@@ -133,7 +132,7 @@ public class CrosslistControllerTest {
     private SisServiceImpl sisService;
 
     @MockBean
-    private DecrosslistUserRepository decrosslistUserRepository;
+    private AuthorizedUserService authorizedUserService;
 
     private static String COURSE_ID = "1234";
     private static String SIS_COURSE_ID = "1234_SIS";

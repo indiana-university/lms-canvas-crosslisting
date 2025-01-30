@@ -37,13 +37,13 @@ import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.DecrosslistAudit;
-import edu.iu.uits.lms.crosslist.model.DecrosslistUser;
 import edu.iu.uits.lms.crosslist.model.FindParentModel;
 import edu.iu.uits.lms.crosslist.model.FindParentResult;
 import edu.iu.uits.lms.crosslist.model.SubmissionStatus;
 import edu.iu.uits.lms.crosslist.repository.DecrosslistAuditRepository;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
 import edu.iu.uits.lms.lti.service.OidcTokenUtils;
@@ -64,6 +64,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static edu.iu.uits.lms.crosslist.CrosslistConstants.AUTH_USER_TOOL_PERMISSION;
+
 @Controller
 @Slf4j
 @RequestMapping("/app")
@@ -79,7 +81,7 @@ public class DecrosslistController extends OidcTokenAwareController {
     private ResourceBundleMessageSource messageSource;
 
     @Autowired
-    private DecrosslistUserRepository decrosslistUserRepository;
+    private AuthorizedUserService authorizedUserService;
 
     @Autowired
     private DecrosslistAuditRepository decrosslistAuditRepository;
@@ -146,7 +148,7 @@ public class DecrosslistController extends OidcTokenAwareController {
         // get current username for logging purposes
         String username = oidcTokenUtils.getUserLoginId();
         // get official user info from database table for the audit log
-        DecrosslistUser userInfo = decrosslistUserRepository.findByUsername(username);
+        AuthorizedUser userInfo = authorizedUserService.findByActiveUsernameAndToolPermission(username, AUTH_USER_TOOL_PERMISSION);
 
         boolean hasSuccesses = false;
         boolean hasErrors = false;

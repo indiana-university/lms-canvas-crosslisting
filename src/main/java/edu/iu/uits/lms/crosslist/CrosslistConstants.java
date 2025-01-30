@@ -69,4 +69,6 @@ public interface CrosslistConstants {
     String STATUS_PARTIAL = "rvt-alert--warning";
     String STATUS_NOOP = "noop";
 
+    String AUTH_USER_TOOL_PERMISSION = "DECROSSLIST";
+
 }

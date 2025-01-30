@@ -36,7 +36,7 @@ package edu.iu.uits.lms.crosslist.config;
 import edu.iu.uits.lms.common.it12logging.LmsFilterSecurityInterceptorObjectPostProcessor;
 import edu.iu.uits.lms.common.it12logging.RestSecurityLoggingConfig;
 import edu.iu.uits.lms.common.oauth.CustomJwtAuthenticationConverter;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -68,7 +68,7 @@ public class SecurityConfig {
     private ToolConfig toolConfig;
 
     @Autowired
-    private DecrosslistUserRepository decrosslistUserRepository;
+    private AuthorizedUserService authorizedUserService;
 
     @Order(5)
     @Bean
@@ -117,7 +117,7 @@ public class SecurityConfig {
         //Setup the LTI handshake
         http.with(new Lti13Configurer(), lti ->
                 lti.setSecurityContextRepository(new HttpSessionSecurityContextRepository())
-                        .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, toolConfig, decrosslistUserRepository)));
+                        .grantedAuthoritiesMapper(new CustomRoleMapper(defaultInstructorRoleRepository, toolConfig, authorizedUserService)));
 
         http.securityMatcher("/**")
                 .authorizeHttpRequests((authz) -> authz.anyRequest().authenticated()
