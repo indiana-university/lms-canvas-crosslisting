@@ -99,7 +99,7 @@ public class CustomRoleMapper extends LmsDefaultGrantedAuthoritiesMapper {
 
             String rolesString = "NotAuthorized";
 
-            AuthorizedUser user = authorizedUserService.findByUsernameAndToolPermission(userId, AUTH_USER_TOOL_PERMISSION);
+            AuthorizedUser user = authorizedUserService.findByActiveUsernameAndToolPermission(userId, AUTH_USER_TOOL_PERMISSION);
 
             if (user != null) {
                rolesString = LTIConstants.CANVAS_INSTRUCTOR_ROLE;

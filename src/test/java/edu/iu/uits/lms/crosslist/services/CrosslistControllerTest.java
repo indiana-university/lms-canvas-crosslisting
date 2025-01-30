@@ -85,7 +85,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = CrosslistController.class, properties = {"oauth.tokenprovider.url=http://foo"})
-//@Import({ToolConfig.class, CanvasClientTestConfig.class, LtiClientTestConfig.class})
 @ContextConfiguration(classes = {CrosslistController.class, SecurityConfig.class})
 @Slf4j
 public class CrosslistControllerTest {

@@ -148,7 +148,7 @@ public class DecrosslistController extends OidcTokenAwareController {
         // get current username for logging purposes
         String username = oidcTokenUtils.getUserLoginId();
         // get official user info from database table for the audit log
-        AuthorizedUser userInfo = authorizedUserService.findByUsernameAndToolPermission(username, AUTH_USER_TOOL_PERMISSION);
+        AuthorizedUser userInfo = authorizedUserService.findByActiveUsernameAndToolPermission(username, AUTH_USER_TOOL_PERMISSION);
 
         boolean hasSuccesses = false;
         boolean hasErrors = false;
