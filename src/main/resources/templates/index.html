@@ -56,7 +56,7 @@
             </button>
         </div>
 
-        <div th:insert="fragments/enterImpersonationMode :: enterImpersonationMode"></div>
+        <div th:insert="~{fragments/enterImpersonationMode :: enterImpersonationMode}"></div>
 
         <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
             <p id="instructions" class="rvt-ts-18">
@@ -79,8 +79,8 @@
                                     <th:block th:if="${!sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
                                         <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:if="${section.currentlyChecked}"
                                             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
-                                            <span th:replace="fragments/sectionNameDetails :: sectionName"></span>
-                                            <span th:replace="fragments/sectionNameDetails :: sectionAlreadyCrosslisted"></span>
+                                            <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
+                                            <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                                         </li>
                                     </th:block>
                                 </ul>
@@ -102,7 +102,7 @@
                                     <div hidden id="switch-warning">Changing this option will reload the Crosslisting Assistant. Any term selections that were not saved will be reset.</div>
                                 </div>
                                 <div id="dataDiv">
-                                    <div th:insert="fragments/termData :: termData"></div>
+                                    <div th:insert="~{fragments/termData :: termData}"></div>
                                 </div>
                                 <div aria-live="polite">
                                     <div id="loading">

@@ -33,23 +33,30 @@ package edu.iu.uits.lms.crosslist.services;
  * #L%
  */
 
-import edu.iu.uits.lms.canvas.config.CanvasClientTestConfig;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.services.CourseService;
+import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
+import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.common.session.CourseSessionService;
+import edu.iu.uits.lms.crosslist.config.SecurityConfig;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
-import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
 import edu.iu.uits.lms.lti.config.TestUtils;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,32 +66,26 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.support.SimpleCacheManager;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
-
-import javax.servlet.http.HttpSession;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = CrosslistController.class, properties = {"oauth.tokenprovider.url=http://foo"})
-@Import({ToolConfig.class, CanvasClientTestConfig.class, LtiClientTestConfig.class})
+@ContextConfiguration(classes = {CrosslistController.class, SecurityConfig.class})
 @Slf4j
 public class CrosslistControllerTest {
     @Autowired
@@ -107,13 +108,31 @@ public class CrosslistControllerTest {
     private TermService termService;
 
     @MockBean
+    private ToolConfig toolConfig;
+
+    @MockBean
+    private SectionService sectionService;
+
+    @MockBean
+    private ResourceBundleMessageSource messageSource;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+    @MockBean(name = ServerInfo.BEAN_NAME)
+    private ServerInfo serverInfo;
+
+    @MockBean
     private FeatureAccessServiceImpl featureAccessService;
 
     @MockBean
     private SisServiceImpl sisService;
 
     @MockBean
-    private DecrosslistUserRepository decrosslistUserRepository;
+    private AuthorizedUserService authorizedUserService;
 
     private static String COURSE_ID = "1234";
     private static String SIS_COURSE_ID = "1234_SIS";

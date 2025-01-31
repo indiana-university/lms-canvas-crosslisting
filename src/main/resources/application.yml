@@ -78,7 +78,7 @@ spring:
   cloud.vault:
     enabled: true
     config:
-      lifecycle.lease-endpoints: sysleases
+      lifecycle.lease-endpoints: leases
     generic:
       enabled: false
     kv:

@@ -33,22 +33,28 @@ package edu.iu.uits.lms.crosslist.services;
  * #L%
  */
 
-import edu.iu.uits.lms.canvas.config.CanvasClientTestConfig;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.services.CourseService;
+import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
+import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.common.session.CourseSessionService;
+import edu.iu.uits.lms.crosslist.config.SecurityConfig;
+import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
-import edu.iu.uits.lms.crosslist.repository.DecrosslistUserRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
+import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import edu.iu.uits.lms.lti.LTIConstants;
-import edu.iu.uits.lms.lti.config.LtiClientTestConfig;
-import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.lti.config.TestUtils;
+import edu.iu.uits.lms.lti.controller.InvalidTokenContextException;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
+import edu.iu.uits.lms.lti.repository.DefaultInstructorRoleRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpSession;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,19 +62,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.support.SimpleCacheManager;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
-
-import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -76,10 +77,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = CrosslistController.class, properties = {"oauth.tokenprovider.url=http://foo"})
-@Import({ToolConfig.class, CanvasClientTestConfig.class, LtiClientTestConfig.class})
+@ContextConfiguration(classes = {CrosslistController.class, SecurityConfig.class})
 public class AppLaunchSecurityTest {
    @Autowired
    private MockMvc mvc;
+
+   @MockBean
+   private ToolConfig toolConfig;
 
    @MockBean
    @Qualifier("CrosslistCacheManager")
@@ -98,13 +102,28 @@ public class AppLaunchSecurityTest {
    private TermService termService;
 
    @MockBean
+   private SectionService sectionService;
+
+   @MockBean
+   private ResourceBundleMessageSource messageSource;
+
+   @MockBean
    private FeatureAccessServiceImpl featureAccessService;
 
    @MockBean
    private SisServiceImpl sisService;
 
    @MockBean
-   private DecrosslistUserRepository decrosslistUserRepository;
+   private AuthorizedUserService authorizedUserService;
+
+   @MockBean
+   private ClientRegistrationRepository clientRegistrationRepository;
+
+   @MockBean
+   private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
+
+   @MockBean(name = ServerInfo.BEAN_NAME)
+   private ServerInfo serverInfo;
 
    @Test
    public void appNoAuthnLaunch() throws Exception {
@@ -119,18 +138,16 @@ public class AppLaunchSecurityTest {
    public void appAuthnWrongContextLaunch() throws Exception {
       OidcAuthenticationToken token = TestUtils.buildToken("userId","asdf", LTIConstants.INSTRUCTOR_AUTHORITY);
 
-      List<OidcAuthenticationToken> tokenList = new ArrayList<OidcAuthenticationToken>(Arrays.asList(token));
-
       SecurityContextHolder.getContext().setAuthentication(token);
 
-      //This is a secured endpoint and should not allow access without authn
-      ResultActions mockMvcAction = mvc.perform(get("/app/1234/main")
-            .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
-            .contentType(MediaType.APPLICATION_JSON));
+      ServletException t = Assertions.assertThrows(ServletException.class, () ->
+              mvc.perform(get("/app/1234/main")
+                      .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
+                      .contentType(MediaType.APPLICATION_JSON))
+      );
 
-      mockMvcAction.andExpect(status().isInternalServerError());
-      mockMvcAction.andExpect(MockMvcResultMatchers.view().name ("error"));
-      mockMvcAction.andExpect(MockMvcResultMatchers.model().attributeExists("error"));
+      Assertions.assertInstanceOf(InvalidTokenContextException.class, t.getCause());
+      Assertions.assertEquals("Context in authentication token does not match any session context", t.getCause().getMessage());
    }
 
    @Test

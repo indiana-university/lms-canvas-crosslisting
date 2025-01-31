@@ -34,7 +34,7 @@
 
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       lang="en-US">
 <head>
     <meta charset="UTF-8"/>
@@ -42,8 +42,10 @@
     <title>Cross-listing Assistant</title>
     <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
     <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <link th:href="@{/app/jsrivet/rivet.min.css}" rel="stylesheet" type="text/css" />
-    <link th:href="@{/app/jsrivet/rivet-icons.css}" rel="stylesheet" type="text/css" />
+    <!-- The below link references commonFragments which lives in common-configuration and comes along on the classpath  -->
+    <link th:replace="~{commonFragments/favicon :: favicon}" />
+    <link th:href="@{/app/jsrivet/rivet-core/rivet.min.css}" rel="stylesheet" type="text/css" />
+    <link th:href="@{/app/jsrivet/rivet-icons/rivet-icon-element.css}" rel="stylesheet" type="text/css" />
     <link th:href="@{/app/css/crosslisting.css}" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -68,9 +70,8 @@
     <div th:text="${@serverInfo}"></div>
 </footer>
 
-<script type="text/javascript" th:src="@{/app/jsrivet/rivet.min.js}"></script>
-<script defer th:src="@{/app/jsrivet/rivet-icons.js}"></script>
-<script type="module" th:src="@{/app/jsrivet/rivet-icon-element.js}"></script>
+<script type="text/javascript" th:src="@{/app/jsrivet/rivet-core/rivet.min.js}"></script>
+<script type="module" th:src="@{/app/jsrivet/rivet-icons/rivet-icons.js}"></script>
 <script type="text/javascript" th:src="@{/app/webjars/jquery/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/app/js/crosslisting.js}"></script>
 

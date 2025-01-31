@@ -34,10 +34,11 @@ package edu.iu.uits.lms.crosslist.repository;
  */
 
 import edu.iu.uits.lms.crosslist.model.DecrosslistAudit;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public interface DecrosslistAuditRepository extends PagingAndSortingRepository<DecrosslistAudit, Long> {
+public interface DecrosslistAuditRepository extends PagingAndSortingRepository<DecrosslistAudit, Long>, ListCrudRepository<DecrosslistAudit, Long> {
 
 }
