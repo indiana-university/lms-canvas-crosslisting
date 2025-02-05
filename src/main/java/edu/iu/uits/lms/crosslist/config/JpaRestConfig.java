@@ -33,10 +33,12 @@ package edu.iu.uits.lms.crosslist.config;
  * #L%
  */
 
+import edu.iu.uits.lms.common.swagger.LmsRepositoryDetectionStrategy;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
@@ -44,12 +46,16 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 @Slf4j
 public class JpaRestConfig implements RepositoryRestConfigurer {
 
+    @Autowired
+    private SpringDocConfigProperties springDocConfigProperties;
+
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         //  This is needed to allow the "ids" to be served up via the
         //  @RepositoryRestResource annotation (by default, it is suppressed)
 
+
         RepositoryRestConfigurer.super.configureRepositoryRestConfiguration(config, cors);
-        config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+        config.setRepositoryDetectionStrategy(new LmsRepositoryDetectionStrategy(springDocConfigProperties.getPackagesToScan()));
     }
 }
