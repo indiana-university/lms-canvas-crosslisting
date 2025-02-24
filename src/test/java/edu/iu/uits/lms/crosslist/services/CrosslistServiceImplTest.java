@@ -47,6 +47,7 @@ import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -296,8 +297,8 @@ public class CrosslistServiceImplTest {
                  }});
                  // non-SIS section, won't be included
                  add(new Section() {{
-                    setName(courses.get(1).getId() + "-Section-Adhoc1");
-                    setId(courses.get(1).getId() + "-Section-Adhoc1");
+                    setName(courses.get(1).getId() + "-Section-nonSis1");
+                    setId(courses.get(1).getId() + "-Section-nonSis1");
                     setCourse_id(courses.get(1).getId());
                  }});
               }});
@@ -415,8 +416,8 @@ public class CrosslistServiceImplTest {
                  }});
                  // non-SIS section
                  add(new Section() {{
-                    setName(courses.get(1).getId() + "-Section-Adhoc1");
-                    setId(courses.get(1).getId() + "-Section-Adhoc1");
+                    setName(courses.get(1).getId() + "-Section-nonSis1");
+                    setId(courses.get(1).getId() + "-Section-nonSis1");
                     setCourse_id(courses.get(1).getId());
                  }});
               }});
@@ -433,8 +434,8 @@ public class CrosslistServiceImplTest {
                  }});
                  // non-SIS section
                  add(new Section() {{
-                    setName(courses.get(2).getId() + "-Section1-Adhoc2");
-                    setId(courses.get(2).getId() + "-Section-Adhoc2");
+                    setName(courses.get(2).getId() + "-Section1-nonSis2");
+                    setId(courses.get(2).getId() + "-Section-nonSis2");
                     setCourse_id(courses.get(2).getId());
                  }});
               }});
@@ -666,7 +667,7 @@ public class CrosslistServiceImplTest {
    }
 
    @Test
-   public void impersonationShowAdhocSections() {
+   public void impersonationShowNonSisSections() {
       ImpersonationModel impersonationModel = new ImpersonationModel();
       impersonationModel.setUsername("me");
       impersonationModel.setIncludeNonSisSections(true);
@@ -736,14 +737,14 @@ public class CrosslistServiceImplTest {
                  }});
                  // non-SIS section
                  add(new Section() {{
-                    setName(courses.get(1).getId() + "-Adhoc-Section2");
-                    setId(courses.get(1).getId() + "-Adhoc-Section2");
+                    setName(courses.get(1).getId() + "-NonSis-Section2");
+                    setId(courses.get(1).getId() + "-NonSis-Section2");
                     setCourse_id(courses.get(1).getId());
                  }});
                  // non-SIS section
                  add(new Section() {{
-                    setName(courses.get(1).getId() + "-Adhoc-Section3");
-                    setId(courses.get(1).getId() + "-Adhoc-Section3");
+                    setName(courses.get(1).getId() + "-NonSis-Section3");
+                    setId(courses.get(1).getId() + "-NonSis-Section3");
                     setCourse_id(courses.get(1).getId());
                  }});
               }});
@@ -760,8 +761,8 @@ public class CrosslistServiceImplTest {
                  }});
                  // non-SIS section
                  add(new Section() {{
-                    setName(courses.get(2).getId() + "-Adhoc-Section2");
-                    setId(courses.get(2).getId() + "-Adhoc-Section2");
+                    setName(courses.get(2).getId() + "-NonSis-Section2");
+                    setId(courses.get(2).getId() + "-NonSis-Section2");
                     setCourse_id(courses.get(2).getId());
                  }});
               }});
@@ -778,8 +779,8 @@ public class CrosslistServiceImplTest {
                  }});
                  // non-SIS section
                  add(new Section() {{
-                    setName(courses.get(3).getId() + "-Adhoc-Section2");
-                    setId(courses.get(3).getId() + "-Adhoc-Section2");
+                    setName(courses.get(3).getId() + "-NonSis-Section2");
+                    setId(courses.get(3).getId() + "-NonSis-Section2");
                     setCourse_id(courses.get(3).getId());
                  }});
               }});
@@ -794,308 +795,339 @@ public class CrosslistServiceImplTest {
       Assertions.assertEquals(1, sectionsMap.size());
       Assertions.assertTrue(sectionsMap.containsKey(term1));
       Assertions.assertEquals(7, sectionsMap.get(term1).size());
-      Assertions.assertEquals("OtherSisCourse1Id-Adhoc-Section2", sectionsMap.get(term1).get(0).getSectionId());
-      Assertions.assertEquals("OtherSisCourse1Id-Adhoc-Section2 (OtherSisCourse1Code)", sectionsMap.get(term1).get(0).getSectionName());
-      Assertions.assertEquals("OtherSisCourse1Id-Adhoc-Section3", sectionsMap.get(term1).get(1).getSectionId());
-      Assertions.assertEquals("OtherSisCourse1Id-Adhoc-Section3 (OtherSisCourse1Code)", sectionsMap.get(term1).get(1).getSectionName());
+      Assertions.assertEquals("OtherSisCourse1Id-NonSis-Section2", sectionsMap.get(term1).get(0).getSectionId());
+      Assertions.assertEquals("OtherSisCourse1Id-NonSis-Section2 (OtherSisCourse1Code)", sectionsMap.get(term1).get(0).getSectionName());
+      Assertions.assertEquals("OtherSisCourse1Id-NonSis-Section3", sectionsMap.get(term1).get(1).getSectionId());
+      Assertions.assertEquals("OtherSisCourse1Id-NonSis-Section3 (OtherSisCourse1Code)", sectionsMap.get(term1).get(1).getSectionName());
       Assertions.assertEquals("OtherSisCourse1Id-Section1", sectionsMap.get(term1).get(2).getSectionId());
       Assertions.assertEquals("OtherSisCourse1Id-Section1 (OtherSisCourse1Code)", sectionsMap.get(term1).get(2).getSectionName());
-      Assertions.assertEquals("OtherSisCourse2Id-Adhoc-Section2", sectionsMap.get(term1).get(3).getSectionId());
-      Assertions.assertEquals("OtherSisCourse2Id-Adhoc-Section2 (OtherSisCourse2Code)", sectionsMap.get(term1).get(3).getSectionName());
+      Assertions.assertEquals("OtherSisCourse2Id-NonSis-Section2", sectionsMap.get(term1).get(3).getSectionId());
+      Assertions.assertEquals("OtherSisCourse2Id-NonSis-Section2 (OtherSisCourse2Code)", sectionsMap.get(term1).get(3).getSectionName());
       Assertions.assertEquals("OtherSisCourse2Id-Section1", sectionsMap.get(term1).get(4).getSectionId());
       Assertions.assertEquals("OtherSisCourse2Id-Section1 (OtherSisCourse2Code)", sectionsMap.get(term1).get(4).getSectionName());
-      Assertions.assertEquals("OtherSisCourse3Id-Adhoc-Section2", sectionsMap.get(term1).get(5).getSectionId());
-      Assertions.assertEquals("OtherSisCourse3Id-Adhoc-Section2 (OtherSisCourse3Code)", sectionsMap.get(term1).get(5).getSectionName());
+      Assertions.assertEquals("OtherSisCourse3Id-NonSis-Section2", sectionsMap.get(term1).get(5).getSectionId());
+      Assertions.assertEquals("OtherSisCourse3Id-NonSis-Section2 (OtherSisCourse3Code)", sectionsMap.get(term1).get(5).getSectionName());
       Assertions.assertEquals("OtherSisCourse3Id-Section1", sectionsMap.get(term1).get(6).getSectionId());
       Assertions.assertEquals("OtherSisCourse3Id-Section1 (OtherSisCourse3Code)", sectionsMap.get(term1).get(6).getSectionName());
    }
 
-   @Test
-   public void ultraTestForAllFlagsAndPermutations() {
-      // first pass, do as a regular user and no flags
-      ImpersonationModel impersonationModel = new ImpersonationModel();
+   @Nested
+   class BuildSectionsMapNest {
+      // set common variables buildSectionsMap needs
+      private CanvasTerm term1 = new CanvasTerm();
+      private List<Course> courses = new ArrayList<>();
+      private Map<String, CanvasTerm> termMap = new HashMap<>();
+      private Course currentSisCourse = new Course();
 
-      CanvasTerm term1 = new CanvasTerm() {{
-         setId("TermId1");
-         setName("TermName1");
-      }};
+      // these SectionUIDisplays are used to check for proper existence in the map, both if they're present or omitted
+      private SectionUIDisplay originalCourseSection = new SectionUIDisplay("TermId1", "c0-CurrentCourseOriginalSectionId", "c0-CurrentCourseName (c0-CurrentCourseCode)", false, false, false);
+      private SectionUIDisplay etextCourseSection = new SectionUIDisplay("TermId1", "c1-EtextMismatchCourseId-SectionId1", "c1-EtextMismatchCourse (c1-EtextMismatchCourseCode)", false, false, false);
+      private SectionUIDisplay anotherCrosslistedRuleCourseOriginalSection = new SectionUIDisplay("TermId1", "c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseId-SectionId1", "c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourse (c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseCode)", false, false, false);
+      private SectionUIDisplay anotherCrosslistedRuleCourseCrosslistedSection = new SectionUIDisplay("TermId1", "c2-someOtherSectionId", "c2-someOtherCourseName (c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseCode)", false, false, true);
+      private SectionUIDisplay nonSis1 = new SectionUIDisplay("TermId1", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section1", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section1 (c3-CourseWithSisAndNonSisSectionsCourseCode)", false, false, false);
+      private SectionUIDisplay nonSis2 = new SectionUIDisplay("TermId1", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section2", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section2 (c3-CourseWithSisAndNonSisSectionsCourseCode)", false, false, false);
 
-      Map<String, CanvasTerm> termMap = new HashMap<>() {{
-         put(term1.getId(), term1);
-      }};
+      @BeforeEach
+      public void setup() {
+         // setup all of our data and mocks for the buildSectionMap tests
+         term1 = new CanvasTerm() {{
+            setId("TermId1");
+            setName("TermName1");
+         }};
 
-      Course currentSisCourse = new Course() {{
-         setName("c0-CurrentCourseName");
-         setId("c0-CurrentCourseId");
-         setCourseCode("c0-CurrentCourseCode");
-         setSisCourseId("c0-CurrentSisCourseId");
-         setEnrollmentTermId(term1.getId());
-      }};
+         termMap = new HashMap<>() {{
+            put(term1.getId(), term1);
+         }};
 
-      final SisCourse currentSisCourseForEtextLookup = new SisCourse() {{
-         setIuSiteId(currentSisCourse.getSisCourseId());
-      }};
-
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
-              new ArrayList<>() {{
-                 // original section
-                 add(new Section() {{
-                    setName(currentSisCourse.getName());
-                    setId("c0-CurrentCourseOriginalSectionId");
-                    setSis_course_id(currentSisCourse.getSisCourseId());
-                    setSis_section_id(currentSisCourse.getSisCourseId());
-                 }});
-                 // some other section already crosslisted into current course
-                 add(new Section() {{
-                    setName("c0-crosslistedSectionInCurrentCourseName1");
-                    setId("c0-crosslistedSectionInCurrentCourseId1");
-                    setSis_course_id(currentSisCourse.getSisCourseId());
-                    setSis_section_id("c0-crosslistedSectionInCurrentCourseName1");
-                    setCourse_id(currentSisCourse.getId());
-                    setNonxlist_course_id("c0-oldSisCourseId");
-                 }});
-              }});
-
-      List<Course> courses = new ArrayList<>() {{
-         add(currentSisCourse);
-         add(new Course() {{
-            setName("c1-EtextMismatchCourse");
-            setId("c1-EtextMismatchCourseId");
-            setCourseCode("c1-EtextMismatchCourseCode");
-            setSisCourseId("c1-EtextMismatchSisCourseId");
+         currentSisCourse = new Course() {{
+            setName("c0-CurrentCourseName");
+            setId("c0-CurrentCourseId");
+            setCourseCode("c0-CurrentCourseCode");
+            setSisCourseId("c0-CurrentSisCourseId");
             setEnrollmentTermId(term1.getId());
-         }});
-         add(new Course() {{
-            setName("c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourse");
-            setId("c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseId");
-            setCourseCode("c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseCode");
-            setSisCourseId("c2-MultipleSectionsAndAdditionalCrosslistedSectionsSisCourseId");
-            setEnrollmentTermId(term1.getId());
-         }});
-         add(new Course() {{
-            setName("c3-CourseWithSisAndNonSisSectionsCourse");
-            setId("c3-CourseWithSisAndNonSisSectionsCourseId");
-            setCourseCode("c3-CourseWithSisAndNonSisSectionsCourseCode");
-            setSisCourseId("c3-CourseWithSisAndNonSisSectionsSisCourseId");
-            setEnrollmentTermId(term1.getId());
-         }});
-      }};
+         }};
 
-      final SisCourse etextMismatchSisCourseForEtextLookup = new SisCourse() {{
-         setIuSiteId(courses.get(1).getSisCourseId());
-         setEtextIsbns("etextIsbn1");
-      }};
+         final SisCourse currentSisCourseForEtextLookup = new SisCourse() {{
+            setIuSiteId(currentSisCourse.getSisCourseId());
+         }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
-              new ArrayList<>() {{
-                 // original section
-                 add(new Section() {{
-                    setName(courses.get(1).getName());
-                    setId(courses.get(1).getId() + "-SectionId1");
-                    setCourse_id(courses.get(1).getId());
-                    setSis_course_id(courses.get(1).getSisCourseId());
-                    setSis_section_id(courses.get(1).getSisCourseId());
+         Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+                 new ArrayList<>() {{
+                    // original section
+                    add(new Section() {{
+                       setName(currentSisCourse.getName());
+                       setId("c0-CurrentCourseOriginalSectionId");
+                       setSis_course_id(currentSisCourse.getSisCourseId());
+                       setSis_section_id(currentSisCourse.getSisCourseId());
+                    }});
+                    // some other section already crosslisted into current course
+                    add(new Section() {{
+                       setName("c0-crosslistedSectionInCurrentCourseName1");
+                       setId("c0-crosslistedSectionInCurrentCourseId1");
+                       setSis_course_id(currentSisCourse.getSisCourseId());
+                       setSis_section_id("c0-crosslistedSectionInCurrentCourseName1");
+                       setCourse_id(currentSisCourse.getId());
+                       setNonxlist_course_id("c0-oldSisCourseId");
+                    }});
                  }});
-              }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
-              new ArrayList<>() {{
-                 // original section
-                 add(new Section() {{
-                    setName(courses.get(2).getName());
-                    setId(courses.get(2).getId() + "-SectionId1");
-                    setCourse_id(courses.get(2).getId());
-                    setSis_course_id(courses.get(2).getSisCourseId());
-                    setSis_section_id(courses.get(2).getSisCourseId());
+         courses = new ArrayList<>() {{
+            add(currentSisCourse);
+            add(new Course() {{
+               setName("c1-EtextMismatchCourse");
+               setId("c1-EtextMismatchCourseId");
+               setCourseCode("c1-EtextMismatchCourseCode");
+               setSisCourseId("c1-EtextMismatchSisCourseId");
+               setEnrollmentTermId(term1.getId());
+            }});
+            add(new Course() {{
+               setName("c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourse");
+               setId("c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseId");
+               setCourseCode("c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseCode");
+               setSisCourseId("c2-MultipleSectionsAndAdditionalCrosslistedSectionsSisCourseId");
+               setEnrollmentTermId(term1.getId());
+            }});
+            add(new Course() {{
+               setName("c3-CourseWithSisAndNonSisSectionsCourse");
+               setId("c3-CourseWithSisAndNonSisSectionsCourseId");
+               setCourseCode("c3-CourseWithSisAndNonSisSectionsCourseCode");
+               setSisCourseId("c3-CourseWithSisAndNonSisSectionsSisCourseId");
+               setEnrollmentTermId(term1.getId());
+            }});
+         }};
+
+         final SisCourse etextMismatchSisCourseForEtextLookup = new SisCourse() {{
+            setIuSiteId(courses.get(1).getSisCourseId());
+            setEtextIsbns("etextIsbn1");
+         }};
+
+         Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+                 new ArrayList<>() {{
+                    // original section
+                    add(new Section() {{
+                       setName(courses.get(1).getName());
+                       setId(courses.get(1).getId() + "-SectionId1");
+                       setCourse_id(courses.get(1).getId());
+                       setSis_course_id(courses.get(1).getSisCourseId());
+                       setSis_section_id(courses.get(1).getSisCourseId());
+                    }});
                  }});
-                 // another section crosslisted into this course
-                 add(new Section() {{
-                    setName("c2-someOtherCourseName");
-                    setId("c2-someOtherSectionId");
-                    setSis_course_id(courses.get(2).getSisCourseId());
-                    setSis_section_id("c2-someOtherCourseName");
-                    setCourse_id(courses.get(2).getId());
-                    setNonxlist_course_id("c2-someOtherCourseId");
+
+         Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+                 new ArrayList<>() {{
+                    // original section
+                    add(new Section() {{
+                       setName(courses.get(2).getName());
+                       setId(courses.get(2).getId() + "-SectionId1");
+                       setCourse_id(courses.get(2).getId());
+                       setSis_course_id(courses.get(2).getSisCourseId());
+                       setSis_section_id(courses.get(2).getSisCourseId());
+                    }});
+                    // another section crosslisted into this course
+                    add(new Section() {{
+                       setName("c2-someOtherCourseName");
+                       setId("c2-someOtherSectionId");
+                       setSis_course_id(courses.get(2).getSisCourseId());
+                       setSis_section_id("c2-someOtherCourseName");
+                       setCourse_id(courses.get(2).getId());
+                       setNonxlist_course_id("c2-someOtherCourseId");
+                    }});
                  }});
-              }});
 
-      Mockito.when(self.getCourseSections(courses.get(3).getId())).thenReturn(
-              new ArrayList<>() {{
-                 // original section
-                 add(new Section() {{
-                    setName(courses.get(3).getName());
-                    setId(courses.get(3).getId() + "-SectionId1");
-                    setCourse_id(courses.get(3).getId());
-                    setSis_course_id(courses.get(3).getSisCourseId());
-                    setSis_section_id(courses.get(3).getSisCourseId());
+         Mockito.when(self.getCourseSections(courses.get(3).getId())).thenReturn(
+                 new ArrayList<>() {{
+                    // original section
+                    add(new Section() {{
+                       setName(courses.get(3).getName());
+                       setId(courses.get(3).getId() + "-SectionId1");
+                       setCourse_id(courses.get(3).getId());
+                       setSis_course_id(courses.get(3).getSisCourseId());
+                       setSis_section_id(courses.get(3).getSisCourseId());
+                    }});
+                    // non-SIS section
+                    add(new Section() {{
+                       setName(courses.get(3).getId() + "-nonSis-Section1");
+                       setId(courses.get(3).getId() + "-nonSis-Section1");
+                       setCourse_id(courses.get(3).getId());
+                    }});
+                    // non-SIS section
+                    add(new Section() {{
+                       setName(courses.get(3).getId() + "-nonSis-Section2");
+                       setId(courses.get(3).getId() + "-nonSis-Section2");
+                       setCourse_id(courses.get(3).getId());
+                    }});
                  }});
-                 // non-SIS section
-                 add(new Section() {{
-                    setName(courses.get(3).getId() + "-nonSis-Section1");
-                    setId(courses.get(3).getId() + "-nonSis-Section1");
-                    setCourse_id(courses.get(3).getId());
-                 }});
-                 // non-SIS section
-                 add(new Section() {{
-                    setName(courses.get(3).getId() + "-nonSis-Section2");
-                    setId(courses.get(3).getId() + "-nonSis-Section2");
-                    setCourse_id(courses.get(3).getId());
-                 }});
-              }});
 
-      // mock current course and course1 for etext rule
-      Mockito.when(sisService.getSisCourseBySiteId(currentSisCourse.getSisCourseId())).thenReturn(currentSisCourseForEtextLookup);
-      Mockito.when(sisService.getSisCourseBySiteId(courses.get(1).getSisCourseId())).thenReturn(etextMismatchSisCourseForEtextLookup);
+         // mock current course and course1 for etext rule
+         Mockito.when(sisService.getSisCourseBySiteId(currentSisCourse.getSisCourseId())).thenReturn(currentSisCourseForEtextLookup);
+         Mockito.when(sisService.getSisCourseBySiteId(courses.get(1).getSisCourseId())).thenReturn(etextMismatchSisCourseForEtextLookup);
 
-      // These Ids should match for original sections in each course and mocks that they're legit SIS, plus the "already crosslisted" section
-      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
-      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
-      Mockito.when(sisService.isLegitSisCourse(courses.get(3).getSisCourseId())).thenReturn(true);
-      Mockito.when(sisService.isLegitSisCourse("c2-someOtherCourseName")).thenReturn(true);
+         // These Ids should match for original sections in each course and mocks that they're legit SIS, plus the "already crosslisted" section
+         Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+         Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+         Mockito.when(sisService.isLegitSisCourse(courses.get(3).getSisCourseId())).thenReturn(true);
+         Mockito.when(sisService.isLegitSisCourse("c2-someOtherCourseName")).thenReturn(true);
+      }
 
-      Map<CanvasTerm, List<SectionUIDisplay>> regularUserNoFlagSectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                      true, false);
+      @Test
+      public void buildSectionsMapRegularUserNoFlagsTest() {
+         // regular user and no flags
+         ImpersonationModel impersonationModel = new ImpersonationModel();
 
-      // general check for expected size results
-      Assertions.assertNotNull(regularUserNoFlagSectionsMap);
-      Assertions.assertEquals(1, regularUserNoFlagSectionsMap.size());
-      Assertions.assertTrue(regularUserNoFlagSectionsMap.containsKey(term1));
-      Assertions.assertEquals(2, regularUserNoFlagSectionsMap.get(term1).size());
+         Map<CanvasTerm, List<SectionUIDisplay>> regularUserNoFlagSectionsMap =
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
+                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                         impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                         true, false);
 
-      // make sure the current course's original section is not included
-      SectionUIDisplay originalCourseSection = new SectionUIDisplay("TermId1", "c0-CurrentCourseOriginalSectionId", "c0-CurrentCourseName (c0-CurrentCourseCode)", false, false, false);
-      Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
+         // general check for expected size results
+         Assertions.assertNotNull(regularUserNoFlagSectionsMap);
+         Assertions.assertEquals(1, regularUserNoFlagSectionsMap.size());
+         Assertions.assertTrue(regularUserNoFlagSectionsMap.containsKey(term1));
+         Assertions.assertEquals(2, regularUserNoFlagSectionsMap.get(term1).size());
 
-      // make sure a section from an etext mismatch did not make it in
-      SectionUIDisplay etextCourseSection = new SectionUIDisplay("TermId1", "c1-EtextMismatchCourseId-SectionId1", "c1-EtextMismatchCourse (c1-EtextMismatchCourseCode)", false, false, false);
-      Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
+         // make sure the current course's original section is not included
+         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
 
-      // check if existing crosslisted section is in the map and is already checked
-      Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", regularUserNoFlagSectionsMap.get(term1).get(0).getSectionId());
-      Assertions.assertTrue(regularUserNoFlagSectionsMap.get(term1).get(0).isOriginallyChecked());
-      Assertions.assertTrue(regularUserNoFlagSectionsMap.get(term1).get(0).isCurrentlyChecked());
+         // make sure a section from an etext mismatch did not make it in
+         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
 
-      // check if sections are thrown out from the 'contains other crosslisted section' rule
-      SectionUIDisplay anotherCrosslistedRuleCourseOriginalSection = new SectionUIDisplay("TermId1", "c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseId-SectionId1", "c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourse (c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseCode)", false, false, false);
-      Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
+         // check if existing crosslisted section is in the map and is already checked
+         Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", regularUserNoFlagSectionsMap.get(term1).get(0).getSectionId());
+         Assertions.assertTrue(regularUserNoFlagSectionsMap.get(term1).get(0).isOriginallyChecked());
+         Assertions.assertTrue(regularUserNoFlagSectionsMap.get(term1).get(0).isCurrentlyChecked());
 
-      SectionUIDisplay anotherCrosslistedRuleCourseCrosslistedSection = new SectionUIDisplay("TermId1", "c2-someOtherSectionId", "c2-someOtherCourseName (c2-MultipleSectionsAndAdditionalCrosslistedSectionsCourseCode)", false, false, true);
-      Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
+         // check if sections are thrown out from the 'contains other crosslisted section' rule
+         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
+         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
 
-      // check if SIS section from "courses.get(3)" made it in
-      Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserNoFlagSectionsMap.get(term1).get(1).getSectionId());
-      Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse", regularUserNoFlagSectionsMap.get(term1).get(1).getSectionName());
+         // check if SIS section from "courses.get(3)" made it in
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserNoFlagSectionsMap.get(term1).get(1).getSectionId());
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse", regularUserNoFlagSectionsMap.get(term1).get(1).getSectionName());
 
-      // make sure non-SIS are not included
-      SectionUIDisplay nonSis1 = new SectionUIDisplay("TermId1", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section1", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section1 (c3-CourseWithSisAndNonSisSectionsCourseCode)", false, false, false);
-      Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
+         // make sure non-SIS are not included
+         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
+         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
+      }
 
-      SectionUIDisplay nonSis2 = new SectionUIDisplay("TermId1", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section2", "c3-CourseWithSisAndNonSisSectionsCourseId-nonSis-Section2 (c3-CourseWithSisAndNonSisSectionsCourseCode)", false, false, false);
-      Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
+      @Test
+      public void buildSectionsMapRegularUserIncludeCrosslistedSectionsTest() {
+         // turn on the includeCrosslistedSections flag, same data
+         ImpersonationModel impersonationModel = new ImpersonationModel();
+         impersonationModel.setIncludeCrosslistedSections(true);
 
-      // 2nd pass, turn on the includeCrosslistedSections flag, same data
-      impersonationModel.setIncludeCrosslistedSections(true);
+         Map<CanvasTerm, List<SectionUIDisplay>> regularUserIncludeCrosslistedSectionsFlagSectionsMap =
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
+                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                         impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                         true, false);
 
-      Map<CanvasTerm, List<SectionUIDisplay>> regularUserIncludeCrosslistedSectionsFlagSectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                      true, false);
+         // general check for expected size results
+         Assertions.assertNotNull(regularUserIncludeCrosslistedSectionsFlagSectionsMap);
+         Assertions.assertEquals(1, regularUserIncludeCrosslistedSectionsFlagSectionsMap.size());
+         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.containsKey(term1));
+         Assertions.assertEquals(3, regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).size());
 
-      // general check for expected size results
-      Assertions.assertNotNull(regularUserIncludeCrosslistedSectionsFlagSectionsMap);
-      Assertions.assertEquals(1, regularUserIncludeCrosslistedSectionsFlagSectionsMap.size());
-      Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.containsKey(term1));
-      Assertions.assertEquals(3, regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).size());
+         // make sure the current course's original section is not included
+         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
 
-      // make sure the current course's original section is not included
-      Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
+         // make sure a section from an etext mismatch did not make it in
+         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
 
-      // make sure a section from an etext mismatch did not make it in
-      Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
+         // check if existing crosslisted section is in the map and is already checked
+         Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).getSectionId());
+         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).isOriginallyChecked());
+         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).isCurrentlyChecked());
 
-      // check if existing crosslisted section is in the map and is already checked
-      Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).getSectionId());
-      Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).isOriginallyChecked());
-      Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).isCurrentlyChecked());
+         // check if sections are thrown out from the 'contains other crosslisted section' rule
+         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
+         // this one should be true this time
+         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
 
-      // check if sections are thrown out from the 'contains other crosslisted section' rule
-      Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
-      // this one should be true this time
-      Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
+         // check if SIS section from "courses.get(3)" made it in, bump the get to get(2)
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(2).getSectionId());
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(2).getSectionName());
 
-      // check if SIS section from "courses.get(3)" made it in, bump the get to get(2)
-      Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(2).getSectionId());
-      Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(2).getSectionName());
+         // make sure non-SIS are not included
+         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
+         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
+      }
 
-      // make sure non-SIS are not included
-      Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
-      Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
+      @Test
+      public void buildSectionsMapImpersonateUserAllFlagsExceptLoadUnavailableTest() {
+         // enter impersonation mode and turn every flag on except for loadUnavailable
+         ImpersonationModel impersonationModel = new ImpersonationModel();
+         impersonationModel.setIncludeCrosslistedSections(true);
+         impersonationModel.setUsername("me");
+         impersonationModel.setIncludeNonSisSections(true);
+         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
 
-      // 3rd pass, enter impersonation mode and turn every flag on except for loadUnavailable
-      impersonationModel.setUsername("me");
-      impersonationModel.setIncludeNonSisSections(true);
-      impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
+         Map<CanvasTerm, List<SectionUIDisplay>> impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap =
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
+                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                         impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                         true, false);
 
-      Map<CanvasTerm, List<SectionUIDisplay>> impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                      true, false);
+         // general check for expected size results
+         Assertions.assertNotNull(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap);
+         Assertions.assertEquals(1, impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.size());
+         Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.containsKey(term1));
+         Assertions.assertEquals(5, impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).size());
 
-      // general check for expected size results
-      Assertions.assertNotNull(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap);
-      Assertions.assertEquals(1, impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.size());
-      Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.containsKey(term1));
-      Assertions.assertEquals(5, impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).size());
+         // make sure the current course's original section is not included
+         Assertions.assertFalse(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
 
-      // make sure the current course's original section is not included
-      Assertions.assertFalse(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
+         // make sure a section from an etext mismatch did not make it in
+         Assertions.assertFalse(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
 
-      // make sure a section from an etext mismatch did not make it in
-      Assertions.assertFalse(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
+         // check if existing crosslisted section is in the map and is already checked
+         Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(0).getSectionId());
+         Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(0).isOriginallyChecked());
+         Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(0).isCurrentlyChecked());
 
-      // check if existing crosslisted section is in the map and is already checked
-      Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(0).getSectionId());
-      Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(0).isOriginallyChecked());
-      Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(0).isCurrentlyChecked());
+         // check if sections are thrown out from the 'contains other crosslisted section' rule
+         Assertions.assertFalse(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
+         // this one should be true this time
+         Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
 
-      // check if sections are thrown out from the 'contains other crosslisted section' rule
-      Assertions.assertFalse(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
-      // this one should be true this time
-      Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
+         // check if SIS section from "courses.get(3)" made it in
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(2).getSectionId());
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse (c3-CourseWithSisAndNonSisSectionsCourseCode)", impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(2).getSectionName());
 
-      // check if SIS section from "courses.get(3)" made it in
-      Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(2).getSectionId());
-      Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse (c3-CourseWithSisAndNonSisSectionsCourseCode)", impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.get(term1).get(2).getSectionName());
+         // make sure non-SIS are included
+         Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
+         Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
+      }
 
-      // make sure non-SIS are included
-      Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
-      Assertions.assertTrue(impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
+      @Test
+      public void buildSectionsMapImpersonateUserAllFlagsLoadUnavailableTest() {
+         // impersonation and all flags on, including loading the unavailable term
+         ImpersonationModel impersonationModel = new ImpersonationModel();
+         impersonationModel.setIncludeCrosslistedSections(true);
+         impersonationModel.setUsername("me");
+         impersonationModel.setIncludeNonSisSections(true);
+         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
 
-      // 4th pass, impersonation and all flags on, including loading the unavailable term
-      Map<CanvasTerm, List<SectionUIDisplay>> impersonateUserAllFlagOnAndLoadUnavailableSectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                      true, true);
+         Map<CanvasTerm, List<SectionUIDisplay>> impersonateUserAllFlagOnAndLoadUnavailableSectionsMap =
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
+                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                         impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                         true, true);
 
-      // loading unavailable will be smaller and this test should just have the 1 value in the Unavailable Term
-      final CanvasTerm unavailableCanvasTerm = new CanvasTerm() {{
-         setId(crosslistService.UNAVAILABLE_SECTION_TERM_STRING);
-         setName(crosslistService.UNAVAILABLE_SECTION_TERM_STRING);
-         setStartAt("3000-01-01T12:00:00Z");
-      }};
+         // loading unavailable will be smaller and this test should just have the 1 value in the Unavailable Term
+         final CanvasTerm unavailableCanvasTerm = new CanvasTerm() {{
+            setId(crosslistService.UNAVAILABLE_SECTION_TERM_STRING);
+            setName(crosslistService.UNAVAILABLE_SECTION_TERM_STRING);
+            setStartAt("3000-01-01T12:00:00Z");
+         }};
 
-      Assertions.assertNotNull(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap);
-      Assertions.assertEquals(1, impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.size());
-      Assertions.assertTrue(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.containsKey(unavailableCanvasTerm));
-      Assertions.assertEquals(1, impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.get(unavailableCanvasTerm).size());
+         Assertions.assertNotNull(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap);
+         Assertions.assertEquals(1, impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.size());
+         Assertions.assertTrue(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.containsKey(unavailableCanvasTerm));
+         Assertions.assertEquals(1, impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.get(unavailableCanvasTerm).size());
 
-      Assertions.assertTrue(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
-      Assertions.assertFalse(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
+         Assertions.assertTrue(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
+         Assertions.assertFalse(impersonateUserAllFlagOnAndLoadUnavailableSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
+      }
    }
 }
