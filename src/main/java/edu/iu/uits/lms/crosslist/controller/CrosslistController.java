@@ -321,11 +321,11 @@ public class CrosslistController extends OidcTokenAwareController {
               crosslistService.buildSectionsMap(courses, termMap, currentCourse,
                     impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                      true);
+                      true, false);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
-            if (canvasTermKey.getName().equals(crosslistService.ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING)) {
-                model.addAttribute("hasAlienBlocked", true);
+            if (canvasTermKey.getName().equals(crosslistService.UNAVAILABLE_SECTION_TERM_STRING)) {
+                model.addAttribute("hasUnavailableSection", true);
                 break;
             }
         }
@@ -354,8 +354,8 @@ public class CrosslistController extends OidcTokenAwareController {
         Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
         // add fake canvas term for unavailable list in the UI
-        CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
-        termMap.put(alienSectionBlockedFakeCanvasTerm.getId(), alienSectionBlockedFakeCanvasTerm);
+        CanvasTerm unavailableCanvasTerm = crosslistService.getUnavailableCanvasTerm();
+        termMap.put(unavailableCanvasTerm.getId(), unavailableCanvasTerm);
 
         // Rebuild the map. This is less complex compared to the main()
         for (SectionUIDisplay sectionUI : sectionList) {
@@ -622,8 +622,8 @@ public class CrosslistController extends OidcTokenAwareController {
             Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
             // add fake canvas term for unavailable list in the UI
-            CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
-            termMap.put(alienSectionBlockedFakeCanvasTerm.getId(), alienSectionBlockedFakeCanvasTerm);
+            CanvasTerm unavailableCanvasTerm = crosslistService.getUnavailableCanvasTerm();
+            termMap.put(unavailableCanvasTerm.getId(), unavailableCanvasTerm);
 
             // rebuild the json feed into the Map
             for (SectionUIDisplay sectionUI : sectionList) {
@@ -659,7 +659,8 @@ public class CrosslistController extends OidcTokenAwareController {
                     impersonationModel.isIncludeNonSisSections(),
                     impersonationModel.isIncludeCrosslistedSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                    true
+                    true,
+                    false
             );
 
             // get the CanvasTerm object for use later for the map
@@ -728,7 +729,7 @@ public class CrosslistController extends OidcTokenAwareController {
         Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
         // add fake canvas term for unavailable list in the UI
-        CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
+        CanvasTerm unavailableCanvasTerm = crosslistService.getUnavailableCanvasTerm();
 
         Map<CanvasTerm, List<SectionUIDisplay>> sections = crosslistService.buildSectionsMap(
                 courses,
@@ -737,15 +738,16 @@ public class CrosslistController extends OidcTokenAwareController {
                 impersonationModel.isIncludeNonSisSections(),
                 impersonationModel.isIncludeCrosslistedSections(),
                 impersonationModel.getUsername() != null,
+                true,
                 true
         );
 
-        if (sections.containsKey(alienSectionBlockedFakeCanvasTerm)) {
+        if (sections.containsKey(unavailableCanvasTerm)) {
             Map<CanvasTerm, List<SectionUIDisplay>> unavailableSectionMap = new HashMap<>();
-            unavailableSectionMap.put(alienSectionBlockedFakeCanvasTerm, sections.get(alienSectionBlockedFakeCanvasTerm));
+            unavailableSectionMap.put(unavailableCanvasTerm, sections.get(unavailableCanvasTerm));
 
             model.addAttribute("sectionsMap", unavailableSectionMap);
-            model.addAttribute("hasAlienBlocked", true);
+            model.addAttribute("hasUnavailableSection", true);
         }
 
         return "fragments/termData :: termDataUnavailable";
