@@ -110,7 +110,8 @@
                                         <div class="rvt-sr-only">Loading additional sections</div>
                                     </div>
                                 </div>
-                                <div id="unavailable-sections-load" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
+                                <div th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections}"
+                                        id="unavailable-sections-load" th:attr="data-urlbase=@{|/app/${courseId}/loadUnavailableSections/|}">
                                 </div>
                                 <div th:if="${multiTermEnabled}" class="rvt-m-top-md">
                                     <h2 class="rvt-sr-only">View additional terms</h2>

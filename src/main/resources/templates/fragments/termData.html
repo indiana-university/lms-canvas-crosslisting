@@ -59,7 +59,7 @@
     <div th:if="${multiTermEnabled}">
         <!-- loop through the map to get the semester name and loop through the list of sections -->
         <div th:unless="${sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
-            <div th:if="${mapInstance.key.name != 'ALIEN_SECTION_BLOCKED'}">
+            <div th:if="${mapInstance.key.name != 'UNAVAILABLE_SECTION'}">
                 <div class="rvt-disclosure rvt-p-bottom-xs" th:data-rvt-disclosure="|#${mapInstance.key.id}|" th:if="${mapInstance.key.id!=activeTerm.id}"
                      data-rvt-disclosure-open-on-init>
                     <button th:id="|toggle-${mapInstance.key.id}|" type="button" class="rvt-disclosure__toggle toggleoverride rvt-ts-18"
@@ -92,12 +92,12 @@
     </div>
 </div>
 <div th:fragment="termDataUnavailable">
-    <div th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections && hasAlienBlocked != null && hasAlienBlocked}">
+    <div th:if="${impersonationModel.includeSisSectionsInParentWithCrosslistSections && hasUnavailableSection != null && hasUnavailableSection}">
         <h2 class="rvt-ts-26 rvt-m-top-md">Unavailable Sections</h2>
         <p id="unavailableSections">The section(s) below cannot be cross-listed until the cross-listed sections in their parent course(s) have been removed.</p>
         <div id="dataDiv2">
             <div th:unless="${sectionsMap.isEmpty()}" th:each="mapInstance : ${sectionsMap}">
-                <ul class="sectionsList rvt-list-plain" th:if="${mapInstance.key.id == 'ALIEN_SECTION_BLOCKED'}">
+                <ul class="sectionsList rvt-list-plain" th:if="${mapInstance.key.id == 'UNAVAILABLE_SECTION'}">
                     <li th:id="'row_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:class="${section.getAppropriateCssClass()}"
                         th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${mapInstance.key.id}">
                         <div class="rvt-checkbox">
