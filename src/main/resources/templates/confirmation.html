@@ -86,7 +86,6 @@
                             <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${summaryListSections}"
                                 th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
                                 <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
-                                <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                             </li>
                         </ul>
                         </p>
@@ -100,7 +99,6 @@
                             <li th:id="'add_' + ${section.sectionId}" th:each="section : ${addListSections}"
                                 th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
                                 <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
-                                <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                             </li>
                         </ul>
                         </p>
@@ -111,7 +109,6 @@
                             <li th:id="'remove_' + ${section.sectionId}" th:each="section : ${removeListSections}"
                                 th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName}">
                                 <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
-                                <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                             </li>
                         </ul>
                         </p>

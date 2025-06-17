@@ -206,9 +206,21 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @RequestMapping("/{courseId}/main")
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
-    public String main(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
+    public String main(@PathVariable("courseId") String courseId, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
+
+        Course currentCourse = getValidatedCourse(token, session);
+        boolean isAdmin = request.isUserInRole(LTIConstants.ADMIN_AUTHORITY);
+        boolean isCurrentCourseLegitSis = sisService.isLegitSisCourse(currentCourse.getSisCourseId());
+
+        // if this course is a non-SIS course and the user is not an admin, deny access to the tool
+        if (!isCurrentCourseLegitSis && !isAdmin) {
+            log.debug("Non-SIS course access denied for user: {}", oidcTokenUtils.getUserLoginId());
+            return "nonSisDeniedForInstructors";
+        }
+
+        log.debug("Course access accepted for user: {} , admin status: {}", oidcTokenUtils.getUserLoginId(), isAdmin);
 
         ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
@@ -219,8 +231,6 @@ public class CrosslistController extends OidcTokenAwareController {
         model.addAttribute("impersonationModel", impersonationModel);
 
         String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
-
-        Course currentCourse = getValidatedCourse(token, session);
 
         CanvasTerm currentTerm = currentCourse.getTerm();
 
@@ -318,8 +328,8 @@ public class CrosslistController extends OidcTokenAwareController {
         }
 
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentCourse,
-                    impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentCourse, currentUserId,
+                    impersonationModel.isIncludeNonSisSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, false);
 
@@ -439,9 +449,9 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @RequestMapping(value = {"/{courseId}/confirm", "/{courseId}/continue"}, method = RequestMethod.POST, params="action=" + CrosslistConstants.ACTION_CANCEL)
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
-    public String doCancel(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
+    public String doCancel(@PathVariable("courseId") String courseId, Model model, HttpSession session, HttpServletRequest request) {
         log.debug("doCancel");
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @RequestMapping(value = "/{courseId}/confirm", method = RequestMethod.POST, params="action=" + CrosslistConstants.ACTION_EDIT)
@@ -477,7 +487,7 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @RequestMapping(value = "/{courseId}/confirm", method = RequestMethod.POST, params="action=" + CrosslistConstants.ACTION_SUBMIT)
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
-    public String doSubmitConfirmation(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
+    public String doSubmitConfirmation(@PathVariable("courseId") String courseId, Model model, HttpSession session, HttpServletRequest request) {
         log.debug("doSubmit");
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
@@ -567,7 +577,7 @@ public class CrosslistController extends OidcTokenAwareController {
             evictCourseIdAndSectionsFromCache(courses2Evict, sectionWrapper, currentUserId);
         }
 
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     /**
@@ -656,8 +666,8 @@ public class CrosslistController extends OidcTokenAwareController {
                     courses,
                     termMap,
                     currentCourse,
+                    currentUserId,
                     impersonationModel.isIncludeNonSisSections(),
-                    impersonationModel.isIncludeCrosslistedSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                     true,
                     false
@@ -735,8 +745,8 @@ public class CrosslistController extends OidcTokenAwareController {
                 courses,
                 termMap,
                 currentCourse,
+                currentUserId,
                 impersonationModel.isIncludeNonSisSections(),
-                impersonationModel.isIncludeCrosslistedSections(),
                 impersonationModel.getUsername() != null,
                 true,
                 true
@@ -834,54 +844,52 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
     @Secured({LTIConstants.ADMIN_AUTHORITY})
-    public String beginImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String beginImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
     @Secured({LTIConstants.ADMIN_AUTHORITY})
-    public String endImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String endImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         courseSessionService.removeAttributeFromSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
     @Secured({LTIConstants.BASE_USER_AUTHORITY})
-    public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
 
-        impersonationModel.setIncludeCrosslistedSections(true);
         impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
         impersonationModel.setSelfMode(true);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
     @Secured({LTIConstants.BASE_USER_AUTHORITY})
-    public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
 
-        impersonationModel.setIncludeCrosslistedSections(false);
         impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(false);
         impersonationModel.setSelfMode(false);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     private List<SectionUIDisplay> removeSectionUiDisplayBySectionName(@NonNull List<SectionUIDisplay> oldList, @NonNull String toRemoveSectionName) {

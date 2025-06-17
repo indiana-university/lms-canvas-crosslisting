@@ -34,9 +34,12 @@ package edu.iu.uits.lms.crosslist.services;
  */
 
 import edu.iu.uits.lms.canvas.config.CanvasConfiguration;
+import edu.iu.uits.lms.canvas.helpers.EnrollmentHelper;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
+import edu.iu.uits.lms.canvas.model.Enrollment;
 import edu.iu.uits.lms.canvas.model.Section;
+import edu.iu.uits.lms.canvas.model.User;
 import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
@@ -229,8 +232,391 @@ public class CrosslistServiceImplTest {
    }
 
    @Test
+   public void userIsEnrolledAndTeacherTest() {
+      ImpersonationModel impersonationModel = new ImpersonationModel();
+
+      String username = "testUser1";
+
+      CanvasTerm term1 = new CanvasTerm() {{
+         setId("TermId1");
+         setName("TermName1");
+      }};
+
+      Map<String, CanvasTerm> termMap = new HashMap<>() {{
+         put(term1.getId(), term1);
+      }};
+
+      Course currentSisCourse = new Course() {{
+         setName("CurrentSisCourse");
+         setId("CurrentSisCourseId");
+         setCourseCode("CurrentSisCourseCode");
+         setSisCourseId("CurrentSisCourseSisId");
+         setEnrollmentTermId(term1.getId());
+      }};
+
+      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName("currentSisCourseSection1");
+                    setId("currentSisCourseSectionId1");
+                    setSis_course_id(currentSisCourse.getSisCourseId());
+                    setSis_section_id(currentSisCourse.getSisCourseId());
+                 }});
+              }});
+
+      List<Course> courses = new ArrayList<>() {{
+         add(currentSisCourse);
+         add(new Course() {{
+            setName("OtherSisCourse1");
+            setId("OtherSisCourse1Id");
+            setCourseCode("OtherSisCourse1Code");
+            setSisCourseId("OtherSisCourse1SisId");
+            setEnrollmentTermId(term1.getId());
+         }});
+         add(new Course() {{
+            setName("OtherSisCourse2");
+            setId("OtherSisCourse2Id");
+            setCourseCode("OtherSisCourse2Code");
+            setSisCourseId("OtherSisCourse2SisId");
+            setEnrollmentTermId(term1.getId());
+         }});
+      }};
+
+      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName(courses.get(1).getId() + "-Section1");
+                    setId(courses.get(1).getId() + "-Section1");
+                    setCourse_id(courses.get(1).getId());
+                    setSis_course_id(courses.get(1).getSisCourseId());
+                    setSis_section_id(courses.get(1).getSisCourseId());
+                 }});
+              }});
+
+      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName(courses.get(2).getId() + "-Section1");
+                    setId(courses.get(2).getId() + "-Section1");
+                    setCourse_id(courses.get(2).getId());
+                    setSis_course_id(courses.get(2).getSisCourseId());
+                    setSis_section_id(courses.get(2).getSisCourseId());
+                 }});
+              }});
+
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
+                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                      true, false);
+
+      Assertions.assertNotNull(sectionsMap);
+      Assertions.assertEquals(1, sectionsMap.size());
+      Assertions.assertTrue(sectionsMap.containsKey(term1));
+      Assertions.assertEquals(2, sectionsMap.get(term1).size());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1", sectionsMap.get(term1).get(0).getSectionId());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1 (OtherSisCourse1Code)", sectionsMap.get(term1).get(0).getSectionName());
+      Assertions.assertEquals("OtherSisCourse2Id-Section1", sectionsMap.get(term1).get(1).getSectionId());
+      Assertions.assertEquals("OtherSisCourse2Id-Section1 (OtherSisCourse2Code)", sectionsMap.get(term1).get(1).getSectionName());
+   }
+
+   @Test
+   public void userIsEnrolledAndNotTeacherTest() {
+      ImpersonationModel impersonationModel = new ImpersonationModel();
+
+      String username = "testUser1";
+
+      CanvasTerm term1 = new CanvasTerm() {{
+         setId("TermId1");
+         setName("TermName1");
+      }};
+
+      Map<String, CanvasTerm> termMap = new HashMap<>() {{
+         put(term1.getId(), term1);
+      }};
+
+      Course currentSisCourse = new Course() {{
+         setName("CurrentSisCourse");
+         setId("CurrentSisCourseId");
+         setCourseCode("CurrentSisCourseCode");
+         setSisCourseId("CurrentSisCourseSisId");
+         setEnrollmentTermId(term1.getId());
+      }};
+
+      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName("currentSisCourseSection1");
+                    setId("currentSisCourseSectionId1");
+                    setSis_course_id(currentSisCourse.getSisCourseId());
+                    setSis_section_id(currentSisCourse.getSisCourseId());
+                 }});
+              }});
+
+      List<Course> courses = new ArrayList<>() {{
+         add(currentSisCourse);
+         add(new Course() {{
+            setName("OtherSisCourse1");
+            setId("OtherSisCourse1Id");
+            setCourseCode("OtherSisCourse1Code");
+            setSisCourseId("OtherSisCourse1SisId");
+            setEnrollmentTermId(term1.getId());
+         }});
+         add(new Course() {{
+            setName("OtherSisCourse2");
+            setId("OtherSisCourse2Id");
+            setCourseCode("OtherSisCourse2Code");
+            setSisCourseId("OtherSisCourse2SisId");
+            setEnrollmentTermId(term1.getId());
+         }});
+      }};
+
+      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName(courses.get(1).getId() + "-Section1");
+                    setId(courses.get(1).getId() + "-Section1");
+                    setCourse_id(courses.get(1).getId());
+                    setSis_course_id(courses.get(1).getSisCourseId());
+                    setSis_section_id(courses.get(1).getSisCourseId());
+                 }});
+              }});
+
+      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName(courses.get(2).getId() + "-Section1");
+                    setId(courses.get(2).getId() + "-Section1");
+                    setCourse_id(courses.get(2).getId());
+                    setSis_course_id(courses.get(2).getSisCourseId());
+                    setSis_section_id(courses.get(2).getSisCourseId());
+                 }});
+              }});
+
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_STUDENT);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
+                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                      true, false);
+
+      Assertions.assertNotNull(sectionsMap);
+      Assertions.assertEquals(1, sectionsMap.size());
+      Assertions.assertTrue(sectionsMap.containsKey(term1));
+      Assertions.assertEquals(1, sectionsMap.get(term1).size());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1", sectionsMap.get(term1).get(0).getSectionId());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1 (OtherSisCourse1Code)", sectionsMap.get(term1).get(0).getSectionName());
+   }
+
+   @Test
+   public void userIsNotEnrolledTest() {
+      ImpersonationModel impersonationModel = new ImpersonationModel();
+
+      String username = "testUser1";
+
+      CanvasTerm term1 = new CanvasTerm() {{
+         setId("TermId1");
+         setName("TermName1");
+      }};
+
+      Map<String, CanvasTerm> termMap = new HashMap<>() {{
+         put(term1.getId(), term1);
+      }};
+
+      Course currentSisCourse = new Course() {{
+         setName("CurrentSisCourse");
+         setId("CurrentSisCourseId");
+         setCourseCode("CurrentSisCourseCode");
+         setSisCourseId("CurrentSisCourseSisId");
+         setEnrollmentTermId(term1.getId());
+      }};
+
+      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName("currentSisCourseSection1");
+                    setId("currentSisCourseSectionId1");
+                    setSis_course_id(currentSisCourse.getSisCourseId());
+                    setSis_section_id(currentSisCourse.getSisCourseId());
+                 }});
+              }});
+
+      List<Course> courses = new ArrayList<>() {{
+         add(currentSisCourse);
+         add(new Course() {{
+            setName("OtherSisCourse1");
+            setId("OtherSisCourse1Id");
+            setCourseCode("OtherSisCourse1Code");
+            setSisCourseId("OtherSisCourse1SisId");
+            setEnrollmentTermId(term1.getId());
+         }});
+         add(new Course() {{
+            setName("OtherSisCourse2");
+            setId("OtherSisCourse2Id");
+            setCourseCode("OtherSisCourse2Code");
+            setSisCourseId("OtherSisCourse2SisId");
+            setEnrollmentTermId(term1.getId());
+         }});
+      }};
+
+      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName(courses.get(1).getId() + "-Section1");
+                    setId(courses.get(1).getId() + "-Section1");
+                    setCourse_id(courses.get(1).getId());
+                    setSis_course_id(courses.get(1).getSisCourseId());
+                    setSis_section_id(courses.get(1).getSisCourseId());
+                 }});
+              }});
+
+      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+              new ArrayList<>() {{
+                 // original section
+                 add(new Section() {{
+                    setName(courses.get(2).getId() + "-Section1");
+                    setId(courses.get(2).getId() + "-Section1");
+                    setCourse_id(courses.get(2).getId());
+                    setSis_course_id(courses.get(2).getSisCourseId());
+                    setSis_section_id(courses.get(2).getSisCourseId());
+                 }});
+              }});
+
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
+                      impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
+                      true, false);
+
+      Assertions.assertNotNull(sectionsMap);
+      Assertions.assertEquals(1, sectionsMap.size());
+      Assertions.assertTrue(sectionsMap.containsKey(term1));
+      Assertions.assertEquals(1, sectionsMap.get(term1).size());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1", sectionsMap.get(term1).get(0).getSectionId());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1 (OtherSisCourse1Code)", sectionsMap.get(term1).get(0).getSectionName());
+   }
+
+   @Test
    public void properListofPotentialSectionsToCrosslistWithNothingPreviouslyCrosslisted() {
       ImpersonationModel impersonationModel = new ImpersonationModel();
+
+      String username = "testUser1";
 
       CanvasTerm term1 = new CanvasTerm() {{
          setId("TermId1");
@@ -327,14 +713,66 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      // verify the sections are legit SIS sections
-      Mockito.when(sisService.isLegitSisCourse("OtherSisCourse1SisId")).thenReturn(true);
-      Mockito.when(sisService.isLegitSisCourse("OtherSisCourse2SisId")).thenReturn(true);
-      Mockito.when(sisService.isLegitSisCourse("OtherSisCourse3SisId")).thenReturn(true);
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section-nonSis1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(3).getId());
+            setCourseSectionId(courses.get(3).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(3).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(3).getSisCourseId())).thenReturn(true);
 
       Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
                       impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, false);
 
@@ -350,6 +788,8 @@ public class CrosslistServiceImplTest {
       impersonationModel.setIncludeNonSisSections(true);
       // non-SIS needs to be coupled with impersonation mode
       impersonationModel.setSelfMode(true);
+
+      String username = "testUser1";
 
       CanvasTerm term1 = new CanvasTerm() {{
          setId("TermId1");
@@ -452,9 +892,74 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section-nonSis1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-Section-nonSis2");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(3).getId());
+            setCourseSectionId(courses.get(3).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(3).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(3).getSisCourseId())).thenReturn(true);
+
       Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
                       impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, false);
 
@@ -545,8 +1050,8 @@ public class CrosslistServiceImplTest {
               }});
 
       Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, "test",
+                      impersonationModel.isIncludeNonSisSections(),
                       impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, true);
 
@@ -566,7 +1071,8 @@ public class CrosslistServiceImplTest {
    @Test
    public void sectionCannotBeCrosslistedIfCourseHasOtherCrosslistedSectionInItAndShowAlreadyCrosslistedSliderOn() {
       ImpersonationModel impersonationModel = new ImpersonationModel();
-      impersonationModel.setIncludeCrosslistedSections(true);
+
+      String username = "testUser1";
 
       CanvasTerm term1 = new CanvasTerm() {{
          setId("TermId1");
@@ -630,12 +1136,47 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section2");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
       Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
       Mockito.when(sisService.isLegitSisCourse("Some sis section id not the same as sis_course_id")).thenReturn(true);
 
       Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
                       impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, false);
 
@@ -655,15 +1196,15 @@ public class CrosslistServiceImplTest {
 
       // 2nd call for Unavailable Section, since that's how it works on the actual page
       Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap2wow =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
                       impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, true);
 
       Assertions.assertTrue(sectionsMap2wow.containsKey(unavailableCanvasTerm));
       Assertions.assertEquals(1, sectionsMap2wow.get(unavailableCanvasTerm).size());
       Assertions.assertEquals("OtherSisCourse1Id-Section1", sectionsMap2wow.get(unavailableCanvasTerm).get(0).getSectionId());
-      Assertions.assertEquals("OtherSisCourse1Id-Section1", sectionsMap2wow.get(unavailableCanvasTerm).get(0).getSectionName());
+      Assertions.assertEquals("OtherSisCourse1Id-Section1 (OtherSisCourse1Code)", sectionsMap2wow.get(unavailableCanvasTerm).get(0).getSectionName());
    }
 
    @Test
@@ -671,6 +1212,8 @@ public class CrosslistServiceImplTest {
       ImpersonationModel impersonationModel = new ImpersonationModel();
       impersonationModel.setUsername("me");
       impersonationModel.setIncludeNonSisSections(true);
+
+      String username = "testUser1";
 
       CanvasTerm term1 = new CanvasTerm() {{
          setId("TermId1");
@@ -785,9 +1328,90 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
+      // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+      List<Enrollment> enrollments = new ArrayList<>() {{
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(0).getId());
+            setCourseSectionId("currentSisCourseSectionId1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-NonSis-Section2");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(1).getId());
+            setCourseSectionId(courses.get(1).getId() + "-NonSis-Section3");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(2).getId());
+            setCourseSectionId(courses.get(2).getId() + "-NonSis-Section2");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(3).getId());
+            setCourseSectionId(courses.get(3).getId() + "-Section1");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+         add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(courses.get(3).getId());
+            setCourseSectionId(courses.get(3).getId() + "-NonSis-Section2");
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }};
+
+      // mock the course service to return the teacher enrollments
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(3).getId())).thenReturn(enrollments);
+
+      // verify the appropriate sections are legit SIS sections, and the current course
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
+      Mockito.when(sisService.isLegitSisCourse(courses.get(3).getSisCourseId())).thenReturn(true);
+
       Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                      impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      impersonationModel.isIncludeNonSisSections(),
                       impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, false);
 
@@ -819,6 +1443,8 @@ public class CrosslistServiceImplTest {
       private Map<String, CanvasTerm> termMap = new HashMap<>();
       private Course currentSisCourse = new Course();
 
+      String username = "testUser1";
+
       // these SectionUIDisplays are used to check for proper existence in the map, both if they're present or omitted
       private SectionUIDisplay originalCourseSection = new SectionUIDisplay("TermId1", "c0-CurrentCourseOriginalSectionId", "c0-CurrentCourseName (c0-CurrentCourseCode)", false, false, false);
       private SectionUIDisplay etextCourseSection = new SectionUIDisplay("TermId1", "c1-EtextMismatchCourseId-SectionId1", "c1-EtextMismatchCourse (c1-EtextMismatchCourseCode)", false, false, false);
@@ -838,6 +1464,8 @@ public class CrosslistServiceImplTest {
          termMap = new HashMap<>() {{
             put(term1.getId(), term1);
          }};
+
+         String username = "testUser1";
 
          currentSisCourse = new Course() {{
             setName("c0-CurrentCourseName");
@@ -958,15 +1586,92 @@ public class CrosslistServiceImplTest {
                     }});
                  }});
 
-         // mock current course and course1 for etext rule
-         Mockito.when(sisService.getSisCourseBySiteId(currentSisCourse.getSisCourseId())).thenReturn(currentSisCourseForEtextLookup);
-         Mockito.when(sisService.getSisCourseBySiteId(courses.get(1).getSisCourseId())).thenReturn(etextMismatchSisCourseForEtextLookup);
+         // not "technically" right to add all the enrollments here for each course, but it simplifies the test
+         List<Enrollment> enrollments = new ArrayList<>() {{
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(0).getId());
+               setCourseSectionId("c0-CurrentCourseOriginalSectionId");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(0).getId());
+               setCourseSectionId("c0-crosslistedSectionInCurrentCourseId1");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(1).getId());
+               setCourseSectionId(courses.get(1).getId() + "-SectionId1");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(2).getId());
+               setCourseSectionId(courses.get(2).getId() + "-SectionId1");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(2).getId());
+               setCourseSectionId("c2-someOtherSectionId");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(3).getId());
+               setCourseSectionId(courses.get(3).getId() + "-SectionId1");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(3).getId());
+               setCourseSectionId(courses.get(3).getId() + "-nonSis-Section1");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+            add(new Enrollment() {{
+               setType(EnrollmentHelper.TYPE_TEACHER);
+               setCourseId(courses.get(3).getId());
+               setCourseSectionId(courses.get(3).getId() + "-nonSis-Section2");
+               setUser(new User() {{
+                  setLoginId(username);
+               }});
+            }});
+         }};
 
+         // mock the course service to return the teacher enrollments
+         Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(0).getId())).thenReturn(enrollments);
+         Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(1).getId())).thenReturn(enrollments);
+         Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(2).getId())).thenReturn(enrollments);
+         Mockito.when(courseService.getTeacherCourseEnrollment(courses.get(3).getId())).thenReturn(enrollments);
+
+         // verify the appropriate sections are legit SIS sections, and the current course
          // These Ids should match for original sections in each course and mocks that they're legit SIS, plus the "already crosslisted" section
+         Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+         Mockito.when(sisService.isLegitSisCourse(courses.get(0).getSisCourseId())).thenReturn(true);
          Mockito.when(sisService.isLegitSisCourse(courses.get(1).getSisCourseId())).thenReturn(true);
          Mockito.when(sisService.isLegitSisCourse(courses.get(2).getSisCourseId())).thenReturn(true);
          Mockito.when(sisService.isLegitSisCourse(courses.get(3).getSisCourseId())).thenReturn(true);
          Mockito.when(sisService.isLegitSisCourse("c2-someOtherCourseName")).thenReturn(true);
+
+         // mock current course and course1 for etext rule
+         Mockito.when(sisService.getSisCourseBySiteId(currentSisCourse.getSisCourseId())).thenReturn(currentSisCourseForEtextLookup);
+         Mockito.when(sisService.getSisCourseBySiteId(courses.get(1).getSisCourseId())).thenReturn(etextMismatchSisCourseForEtextLookup);
       }
 
       @Test
@@ -975,8 +1680,8 @@ public class CrosslistServiceImplTest {
          ImpersonationModel impersonationModel = new ImpersonationModel();
 
          Map<CanvasTerm, List<SectionUIDisplay>> regularUserNoFlagSectionsMap =
-                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                         impersonationModel.isIncludeNonSisSections(),
                          impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                          true, false);
 
@@ -984,7 +1689,7 @@ public class CrosslistServiceImplTest {
          Assertions.assertNotNull(regularUserNoFlagSectionsMap);
          Assertions.assertEquals(1, regularUserNoFlagSectionsMap.size());
          Assertions.assertTrue(regularUserNoFlagSectionsMap.containsKey(term1));
-         Assertions.assertEquals(2, regularUserNoFlagSectionsMap.get(term1).size());
+         Assertions.assertEquals(3, regularUserNoFlagSectionsMap.get(term1).size());
 
          // make sure the current course's original section is not included
          Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
@@ -997,13 +1702,15 @@ public class CrosslistServiceImplTest {
          Assertions.assertTrue(regularUserNoFlagSectionsMap.get(term1).get(0).isOriginallyChecked());
          Assertions.assertTrue(regularUserNoFlagSectionsMap.get(term1).get(0).isCurrentlyChecked());
 
-         // check if sections are thrown out from the 'contains other crosslisted section' rule
+         // check if sections is thrown out from the 'contains other crosslisted section' rule
          Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
-         Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
+
+         // this one should be true
+         Assertions.assertTrue(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
 
          // check if SIS section from "courses.get(3)" made it in
-         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserNoFlagSectionsMap.get(term1).get(1).getSectionId());
-         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse", regularUserNoFlagSectionsMap.get(term1).get(1).getSectionName());
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserNoFlagSectionsMap.get(term1).get(2).getSectionId());
+         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse (c3-CourseWithSisAndNonSisSectionsCourseCode)", regularUserNoFlagSectionsMap.get(term1).get(2).getSectionName());
 
          // make sure non-SIS are not included
          Assertions.assertFalse(regularUserNoFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
@@ -1011,60 +1718,16 @@ public class CrosslistServiceImplTest {
       }
 
       @Test
-      public void buildSectionsMapRegularUserIncludeCrosslistedSectionsTest() {
-         // turn on the includeCrosslistedSections flag, same data
-         ImpersonationModel impersonationModel = new ImpersonationModel();
-         impersonationModel.setIncludeCrosslistedSections(true);
-
-         Map<CanvasTerm, List<SectionUIDisplay>> regularUserIncludeCrosslistedSectionsFlagSectionsMap =
-                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
-                         impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                         true, false);
-
-         // general check for expected size results
-         Assertions.assertNotNull(regularUserIncludeCrosslistedSectionsFlagSectionsMap);
-         Assertions.assertEquals(1, regularUserIncludeCrosslistedSectionsFlagSectionsMap.size());
-         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.containsKey(term1));
-         Assertions.assertEquals(3, regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).size());
-
-         // make sure the current course's original section is not included
-         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(originalCourseSection)));
-
-         // make sure a section from an etext mismatch did not make it in
-         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(etextCourseSection)));
-
-         // check if existing crosslisted section is in the map and is already checked
-         Assertions.assertEquals("c0-crosslistedSectionInCurrentCourseId1", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).getSectionId());
-         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).isOriginallyChecked());
-         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(0).isCurrentlyChecked());
-
-         // check if sections are thrown out from the 'contains other crosslisted section' rule
-         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseOriginalSection)));
-         // this one should be true this time
-         Assertions.assertTrue(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(anotherCrosslistedRuleCourseCrosslistedSection)));
-
-         // check if SIS section from "courses.get(3)" made it in, bump the get to get(2)
-         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourseId-SectionId1", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(2).getSectionId());
-         Assertions.assertEquals("c3-CourseWithSisAndNonSisSectionsCourse", regularUserIncludeCrosslistedSectionsFlagSectionsMap.get(term1).get(2).getSectionName());
-
-         // make sure non-SIS are not included
-         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis1)));
-         Assertions.assertFalse(regularUserIncludeCrosslistedSectionsFlagSectionsMap.values().stream().anyMatch(sectionUI -> sectionUI.contains(nonSis2)));
-      }
-
-      @Test
       public void buildSectionsMapImpersonateUserAllFlagsExceptLoadUnavailableTest() {
          // enter impersonation mode and turn every flag on except for loadUnavailable
          ImpersonationModel impersonationModel = new ImpersonationModel();
-         impersonationModel.setIncludeCrosslistedSections(true);
          impersonationModel.setUsername("me");
          impersonationModel.setIncludeNonSisSections(true);
          impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
 
          Map<CanvasTerm, List<SectionUIDisplay>> impersonateUserAllFlagOnExceptLoadUnavailableSectionsMap =
-                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                         impersonationModel.isIncludeNonSisSections(),
                          impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                          true, false);
 
@@ -1103,14 +1766,13 @@ public class CrosslistServiceImplTest {
       public void buildSectionsMapImpersonateUserAllFlagsLoadUnavailableTest() {
          // impersonation and all flags on, including loading the unavailable term
          ImpersonationModel impersonationModel = new ImpersonationModel();
-         impersonationModel.setIncludeCrosslistedSections(true);
          impersonationModel.setUsername("me");
          impersonationModel.setIncludeNonSisSections(true);
          impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
 
          Map<CanvasTerm, List<SectionUIDisplay>> impersonateUserAllFlagOnAndLoadUnavailableSectionsMap =
-                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse,
-                         impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+                 crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                         impersonationModel.isIncludeNonSisSections(),
                          impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                          true, true);
 

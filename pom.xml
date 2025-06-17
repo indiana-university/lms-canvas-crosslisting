@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.12</version>
+        <version>3.4.6</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -56,21 +56,21 @@
         <app.version>${project.version}</app.version>
         <denodo-hibernate-dialect.version>9.0.20240513</denodo-hibernate-dialect.version>
         <denodo-jdbc.version>9.1.0</denodo-jdbc.version>
-        <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
+        <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
         <hibernate6-ddl-maven-plugin.version>1.0.2</hibernate6-ddl-maven-plugin.version>
         <java.version>21</java.version>
         <jdk.source>21</jdk.source>
         <jdk.target>21</jdk.target>
         <jquery.version>3.7.1</jquery.version>
-        <jsoup.version>1.18.3</jsoup.version>
-        <lms-canvas-rivet.version>6.2.8.1_1</lms-canvas-rivet.version>
-        <lms-embedded-services.version>6.1.2</lms-embedded-services.version>
+        <jsoup.version>1.20.1</jsoup.version>
+        <lms-canvas-rivet.version>6.2.9.0</lms-canvas-rivet.version>
+        <lms-embedded-services.version>6.2.6-SNAPSHOT</lms-embedded-services.version>
         <lms-team-spring-boot-it12>6.5.0</lms-team-spring-boot-it12>
-        <spring-cloud.version>2023.0.5</spring-cloud.version>
-        <springdoc-openapi-ui.version>2.5.0</springdoc-openapi-ui.version>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <springdoc-openapi-ui.version>2.8.9</springdoc-openapi-ui.version>
         <webjars-locator.version>0.52</webjars-locator.version>
 
-        <plugins.compiler.version>3.13.0</plugins.compiler.version>
+        <plugins.compiler.version>3.14.0</plugins.compiler.version>
         <plugins.license.version>2.5.0</plugins.license.version>
         <plugins.release.version>3.1.1</plugins.release.version>
     </properties>
@@ -378,11 +378,6 @@
                     <artifactId>lms-team-spring-boot-it12</artifactId>
                     <version>${lms-team-spring-boot-it12}</version>
                 </dependency>
-                <!--                <dependency>-->
-                <!--                    <groupId>edu.iu.es.esi.audit</groupId>-->
-                <!--                    <artifactId>spring-boot-it12</artifactId>-->
-                <!--                    <version>${spring-boot-it12}</version>-->
-                <!--                </dependency>-->
             </dependencies>
             <repositories>
                 <repository>

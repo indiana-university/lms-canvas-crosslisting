@@ -64,7 +64,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
@@ -72,6 +71,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
@@ -91,47 +91,47 @@ public class CrosslistControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     @Qualifier("CrosslistCacheManager")
     private SimpleCacheManager cacheManager;
 
-    @MockBean
+    @MockitoBean
     private CrosslistService crosslistService;
 
-    @MockBean
+    @MockitoBean
     private CourseSessionService courseSessionService;
 
-    @MockBean
+    @MockitoBean
     private CourseService courseService;
 
-    @MockBean
+    @MockitoBean
     private TermService termService;
 
-    @MockBean
+    @MockitoBean
     private ToolConfig toolConfig;
 
-    @MockBean
+    @MockitoBean
     private SectionService sectionService;
 
-    @MockBean
+    @MockitoBean
     private ResourceBundleMessageSource messageSource;
 
-    @MockBean
+    @MockitoBean
     private ClientRegistrationRepository clientRegistrationRepository;
 
-    @MockBean
+    @MockitoBean
     private DefaultInstructorRoleRepository defaultInstructorRoleRepository;
 
-    @MockBean(name = ServerInfo.BEAN_NAME)
+    @MockitoBean(name = ServerInfo.BEAN_NAME)
     private ServerInfo serverInfo;
 
-    @MockBean
+    @MockitoBean
     private FeatureAccessServiceImpl featureAccessService;
 
-    @MockBean
+    @MockitoBean
     private SisServiceImpl sisService;
 
-    @MockBean
+    @MockitoBean
     private AuthorizedUserService authorizedUserService;
 
     private static String COURSE_ID = "1234";
@@ -240,5 +240,98 @@ public class CrosslistControllerTest {
 
         Element missingEtextSectionsMessageElement = document.getElementById("missing-etext-sections-message");
         Assertions.assertNull(missingEtextSectionsMessageElement);
+    }
+
+    @Test
+    public void mainAllowsInstructorInSisCourse() throws Exception {
+        CanvasTerm canvasTerm = new CanvasTerm();
+        canvasTerm.setId("1111");
+        canvasTerm.setName("5555");
+
+        Course course = new Course();
+        course.setId(COURSE_ID);
+        course.setTerm(canvasTerm);
+        course.setAccountId("9999");
+        course.setSisCourseId(SIS_COURSE_ID);
+
+        Mockito.when(courseService.getCourse(COURSE_ID)).thenReturn(course);
+        Mockito.when(sisService.isLegitSisCourse(SIS_COURSE_ID)).thenReturn(true);
+        Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
+        Mockito.when(crosslistService.getCoursesTaughtBy(USER_ID, false)).thenReturn(List.of(course));
+        Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
+        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean()))
+                .thenReturn(new java.util.HashMap<>(java.util.Map.of(canvasTerm, List.of())));
+
+        MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String htmlResult = mvcResult.getResponse().getContentAsString();
+        Assertions.assertTrue(htmlResult.contains("Cross-listing Assistant"));
+    }
+
+    @Test
+    public void mainDeniesInstructorInNonSisCourse() throws Exception {
+        CanvasTerm canvasTerm = new CanvasTerm();
+        canvasTerm.setId("1111");
+        canvasTerm.setName("5555");
+
+        Course course = new Course();
+        course.setId(COURSE_ID);
+        course.setTerm(canvasTerm);
+        course.setAccountId("9999");
+        course.setSisCourseId(SIS_COURSE_ID);
+
+        Mockito.when(courseService.getCourse(COURSE_ID)).thenReturn(course);
+        Mockito.when(sisService.isLegitSisCourse(SIS_COURSE_ID)).thenReturn(false);
+        Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
+        Mockito.when(crosslistService.getCoursesTaughtBy(USER_ID, false)).thenReturn(List.of(course));
+
+        MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String htmlResult = mvcResult.getResponse().getContentAsString();
+        Assertions.assertTrue(htmlResult.contains("Access Denied to Cross-listing Assistant"));
+    }
+
+    @Test
+    public void mainAllowsAdminInNonSisCourse() throws Exception {
+        CanvasTerm canvasTerm = new CanvasTerm();
+        canvasTerm.setId("1111");
+        canvasTerm.setName("5555");
+
+        Course course = new Course();
+        course.setId(COURSE_ID);
+        course.setTerm(canvasTerm);
+        course.setAccountId("9999");
+        course.setSisCourseId(SIS_COURSE_ID);
+
+        Mockito.when(courseService.getCourse(COURSE_ID)).thenReturn(course);
+        Mockito.when(sisService.isLegitSisCourse(SIS_COURSE_ID)).thenReturn(false);
+        Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
+        Mockito.when(crosslistService.getCoursesTaughtBy(USER_ID, false)).thenReturn(List.of(course));
+        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean()))
+                .thenReturn(new java.util.HashMap<>(java.util.Map.of(canvasTerm, List.of())));
+
+        // Simulate admin role
+        OidcAuthenticationToken adminToken = TestUtils.buildToken(USER_ID, COURSE_ID, LTIConstants.ADMIN_AUTHORITY);
+        SecurityContextHolder.getContext().setAuthentication(adminToken);
+
+        MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String htmlResult = mvcResult.getResponse().getContentAsString();
+        Assertions.assertTrue(htmlResult.contains("Cross-listing Assistant"));
     }
 }

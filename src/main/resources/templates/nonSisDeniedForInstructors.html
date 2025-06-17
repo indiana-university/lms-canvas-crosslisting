@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html lang="en-US"
+      xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Access Denied</title>
+    <link th:href="@{/app/jsrivet/rivet-icons/rivet-icon-element.css}" rel="stylesheet" type="text/css" />
+</head>
+<style>
+    body {
+        color: #333;
+        font-family: BentonSans,Helvetica Neue,Helvetica,"sans-serif";
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+    }
+
+    .errorContainer {
+        max-width: 100%;
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+    }
+
+    .errorTitle {
+       font-size: 1.625rem !important;
+        font-weight: 400;
+        margin: 0;
+    }
+
+    footer {
+        font-size: .75rem !important;
+        max-width: 100%;
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+        margin-top: 2rem !important;
+    }
+
+    .rvt-sr-only {
+        border: 0;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+</style>
+<body>
+<div>
+    <div class="errorContainer">
+        <h1 class="errorTitle">Access Denied to Cross-listing Assistant</h1>
+        <span id="errorMessage">
+            You are not authorized to cross-list in a non-SIS course. If you need help managing sections in this course,
+            contact the
+            <a href="https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0023963" target="_blank" rel="noopener noreferrer">UITS Support Center.<rvt-icon name="link-external"></rvt-icon>
+                <span class="rvt-sr-only">Opens in new window</span>
+            </a>
+        </span>
+    </div>
+</div>
+<footer th:unless="${hideFooter}">
+    <div id="footer" th:text="${@serverInfo}"></div>
+</footer>
+<script type="module" th:src="@{/app/jsrivet/rivet-icons/rivet-icons.js}"></script>
+</body>
+</html>
