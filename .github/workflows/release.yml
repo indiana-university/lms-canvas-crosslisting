@@ -18,7 +18,7 @@ jobs:
       - name: Setup git and other necessary files
         run: |
           echo -n '${{ secrets.LMS_GIT_CONFIG }}' | base64 -d > ~/.gitconfig
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
