@@ -194,13 +194,6 @@ public class CrosslistService {
             }
          }
 
-         // Using this strictly to show that a new section was added to the array, but only matters if this is a brand new map entry
-         boolean newSectionMapEntry = true;
-
-         // this will be the collection of SectionUIDisplay objects that will get added to the sectionMap this method
-         // will ultimately return
-         List<SectionUIDisplay> uiSection = new ArrayList<>();
-
          // This call is cacheable in the courseService and will save time on subsequent calls
          List<Enrollment> listOfTeacherEnrollmentsInCourse = courseService.getTeacherCourseEnrollment(course.getId());
 
@@ -208,6 +201,10 @@ public class CrosslistService {
          if (!loadUnavailable) {
             // made it through course level things, let's check sections if they're available to display
             for (Section section : listOfSections) {
+               // Keep term buckets isolated per section; otherwise a list can be reused across terms.
+               boolean newSectionMapEntry = true;
+               List<SectionUIDisplay> uiSection = new ArrayList<>();
+
                // Skip sections where the user is not enrolled as a teacher
                boolean isUserEnrolledAndTeacher = listOfTeacherEnrollmentsInCourse.stream().anyMatch(
                        enrollment -> enrollment.getUser().getLoginId().equals(networkId) &&

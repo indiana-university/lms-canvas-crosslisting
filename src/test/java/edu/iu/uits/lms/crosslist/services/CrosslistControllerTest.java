@@ -65,6 +65,7 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -88,6 +89,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -392,5 +394,96 @@ public class CrosslistControllerTest {
         Mockito.verify(teacherCourseEnrollmentCache).evictIfPresent(COURSE_ID);
         Mockito.verify(teacherCourseEnrollmentCache).evictIfPresent("old-parent-course");
         Mockito.verify(teacherCourseEnrollmentCache).evictIfPresent("decrosslisted-from-course");
+    }
+
+    @Test
+    public void mainDeduplicatesCoursesBeforeBuildSectionsMap() throws Exception {
+        CanvasTerm currentTerm = new CanvasTerm();
+        currentTerm.setId("term-current");
+        currentTerm.setName("Current Term");
+
+        CanvasTerm otherTerm1 = new CanvasTerm();
+        otherTerm1.setId("term-1");
+        otherTerm1.setName("Other Term 1");
+
+        CanvasTerm otherTerm2 = new CanvasTerm();
+        otherTerm2.setId("term-2");
+        otherTerm2.setName("Other Term 2");
+
+        Course currentCourse = new Course();
+        currentCourse.setId(COURSE_ID);
+        currentCourse.setTerm(currentTerm);
+        currentCourse.setEnrollmentTermId(currentTerm.getId());
+        currentCourse.setAccountId("9999");
+        currentCourse.setSisCourseId(SIS_COURSE_ID);
+
+        Course parentCourse1 = new Course();
+        parentCourse1.setId("parent-course-1");
+        parentCourse1.setTerm(otherTerm1);
+
+        Course parentCourse2 = new Course();
+        parentCourse2.setId("parent-course-2");
+        parentCourse2.setTerm(otherTerm2);
+
+        edu.iu.uits.lms.canvas.model.Section crosslistedSection1 = new edu.iu.uits.lms.canvas.model.Section();
+        crosslistedSection1.setNonxlist_course_id(parentCourse1.getId());
+
+        edu.iu.uits.lms.canvas.model.Section crosslistedSection2 = new edu.iu.uits.lms.canvas.model.Section();
+        crosslistedSection2.setNonxlist_course_id(parentCourse2.getId());
+
+        // Duplicate parent term reference - the root cause of the multi-term UI duplication
+        edu.iu.uits.lms.canvas.model.Section crosslistedSection3 = new edu.iu.uits.lms.canvas.model.Section();
+        crosslistedSection3.setNonxlist_course_id(parentCourse2.getId());
+
+        Course dupCourse1a = new Course();
+        dupCourse1a.setId("dedupe-1");
+        dupCourse1a.setEnrollmentTermId(otherTerm1.getId());
+
+        Course dupCourse1b = new Course();
+        dupCourse1b.setId("dedupe-1");
+        dupCourse1b.setEnrollmentTermId(otherTerm1.getId());
+
+        Course dupCourse2a = new Course();
+        dupCourse2a.setId("dedupe-2");
+        dupCourse2a.setEnrollmentTermId(otherTerm2.getId());
+
+        Course dupCourse2b = new Course();
+        dupCourse2b.setId("dedupe-2");
+        dupCourse2b.setEnrollmentTermId(otherTerm2.getId());
+
+        Mockito.when(courseService.getCourse(COURSE_ID)).thenReturn(currentCourse);
+        Mockito.when(sisService.isLegitSisCourse(SIS_COURSE_ID)).thenReturn(true);
+        Mockito.when(courseService.getCourseSections(COURSE_ID))
+                .thenReturn(List.of(crosslistedSection1, crosslistedSection2, crosslistedSection3));
+        Mockito.when(courseService.getCourse(parentCourse1.getId())).thenReturn(parentCourse1);
+        Mockito.when(courseService.getCourse(parentCourse2.getId())).thenReturn(parentCourse2);
+        Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(currentTerm, otherTerm1, otherTerm2));
+        Mockito.when(crosslistService.getCoursesTaughtBy(Mockito.isNull(), Mockito.eq(false)))
+                .thenReturn(List.of(currentCourse, dupCourse1a, dupCourse1b, dupCourse2a, dupCourse2b));
+        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(),
+                        Mockito.nullable(String.class), Mockito.anyBoolean(), Mockito.anyBoolean(),
+                        Mockito.anyBoolean(), Mockito.anyBoolean()))
+                .thenReturn(new java.util.HashMap<>(java.util.Map.of(currentTerm, List.of())));
+
+        mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<List<Course>> coursesCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(crosslistService).buildSectionsMap(
+                coursesCaptor.capture(), Mockito.anyMap(), Mockito.any(), Mockito.nullable(String.class),
+                Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+
+        List<Course> passedCourses = coursesCaptor.getValue();
+        Set<String> distinctIds = passedCourses.stream().map(Course::getId).collect(Collectors.toSet());
+
+        // No course ID should appear more than once
+        Assertions.assertEquals(distinctIds.size(), passedCourses.size(),
+                "Duplicate course IDs were passed to buildSectionsMap: " + passedCourses.stream().map(Course::getId).collect(Collectors.toList()));
+        Assertions.assertTrue(distinctIds.contains(COURSE_ID));
+        Assertions.assertTrue(distinctIds.contains("dedupe-1"));
+        Assertions.assertTrue(distinctIds.contains("dedupe-2"));
     }
 }

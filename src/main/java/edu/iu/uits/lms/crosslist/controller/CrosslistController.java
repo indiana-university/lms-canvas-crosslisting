@@ -83,6 +83,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -241,10 +243,10 @@ public class CrosslistController extends OidcTokenAwareController {
 
         List<Section> currentCourseSections = courseService.getCourseSections(currentCourse.getId());
 
-        // Use this list to filter out terms from the dropdown
-        List<String> termFilterList = new ArrayList<>();
+        // Use this set to filter out terms from the dropdown without duplicates
+        Set<String> termFilterIds = new LinkedHashSet<>();
         // add the current/active term to the filter list since it will always be valid
-        termFilterList.add(currentTerm.getId());
+        termFilterIds.add(currentTerm.getId());
 
         // filter through the rest of the sections to see if any of the cross-listed sections belong to a different term
         for (Section currentSections : currentCourseSections) {
@@ -253,9 +255,9 @@ public class CrosslistController extends OidcTokenAwareController {
                 //Course might possibly be null here, under some strange and unlikely circumstances
                 if (course != null) {
                     CanvasTerm term = course.getTerm();
-                    if (!termFilterList.contains(term) && !term.equals(currentTerm)) {
-                        // not the same term as the current one and does not exist in the list yet
-                        termFilterList.add(term.getId());
+                    if (term != null && term.getId() != null && !term.getId().equals(currentTerm.getId())) {
+                        // not the same term as the current one and does not exist in the set yet
+                        termFilterIds.add(term.getId());
                     }
                 }
             }
@@ -263,7 +265,7 @@ public class CrosslistController extends OidcTokenAwareController {
 
         // Get all courses for the user
         // Setting the variable to true does bring back some section information on a course, but it is incomplete and not helpful for what we need
-        List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+        List<Course> courses = distinctCoursesById(crosslistService.getCoursesTaughtBy(currentUserId, false));
 
         // get the list of terms in Canvas
         List<CanvasTerm> terms = termService.getEnrollmentTerms();
@@ -278,7 +280,7 @@ public class CrosslistController extends OidcTokenAwareController {
             // fill in the selectableTerms list and filter out terms that will be displayed on the screen
             for (Course course : courses) {
                 String courseTermId = course.getEnrollmentTermId();
-                if (termMap.get(courseTermId) != null && !selectableTerms.contains(termMap.get(courseTermId)) && !termFilterList.contains(courseTermId)) {
+                if (termMap.get(courseTermId) != null && !selectableTerms.contains(termMap.get(courseTermId)) && !termFilterIds.contains(courseTermId)) {
                     // if term doesn't exist in the map and isn't a term that's will be loaded because of other cross-listed sections
                     selectableTerms.add(termMap.get(courseTermId));
                 }
@@ -324,7 +326,7 @@ public class CrosslistController extends OidcTokenAwareController {
         }
 
         // filter the active list down to a smaller set
-        courses = courses.stream().filter(c -> termFilterList.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
+        courses = courses.stream().filter(c -> termFilterIds.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
 
 
         // Page title
@@ -663,7 +665,7 @@ public class CrosslistController extends OidcTokenAwareController {
 
 
             // Look up the new course/section information for the requested term
-            List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+            List<Course> courses = distinctCoursesById(crosslistService.getCoursesTaughtBy(currentUserId, false));
             courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(termId)).collect(Collectors.toList());
 
             // get sections and apply the business logic to whether show or not
@@ -732,7 +734,7 @@ public class CrosslistController extends OidcTokenAwareController {
         String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
         // Look up the new course/section information
-        List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+        List<Course> courses = distinctCoursesById(crosslistService.getCoursesTaughtBy(currentUserId, false));
 
         List<String> joinedTermsList = Arrays.asList(joinedTerms.split(","));
         courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && joinedTermsList.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
@@ -940,4 +942,20 @@ public class CrosslistController extends OidcTokenAwareController {
             }
         }
     }
+
+    /**
+     * Returns a deduplicated list of courses by course ID, preserving encounter order.
+     */
+    private List<Course> distinctCoursesById(List<Course> courses) {
+        if (courses == null) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(courses.stream()
+                .filter(course -> course != null && course.getId() != null)
+                .collect(Collectors.toMap(Course::getId, Function.identity(),
+                        (existing, replacement) -> existing, LinkedHashMap::new))
+                .values());
+    }
+
 }
