@@ -35,14 +35,19 @@ package edu.iu.uits.lms.crosslist.services;
 
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
+import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
+import edu.iu.uits.lms.canvas.utils.CacheConstants;
 import edu.iu.uits.lms.common.server.ServerInfo;
 import edu.iu.uits.lms.common.session.CourseSessionService;
+import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.config.SecurityConfig;
 import edu.iu.uits.lms.crosslist.config.ToolConfig;
 import edu.iu.uits.lms.crosslist.controller.CrosslistController;
+import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
+import edu.iu.uits.lms.crosslist.model.SectionWrapper;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
@@ -64,6 +69,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
@@ -76,7 +83,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -91,9 +102,16 @@ public class CrosslistControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    @Autowired
+    private CrosslistController crosslistController;
+
     @MockitoBean
     @Qualifier("CrosslistCacheManager")
     private SimpleCacheManager cacheManager;
+
+    @MockitoBean
+    @Qualifier("CanvasServicesCacheManager")
+    private CacheManager canvasServicesCacheManager;
 
     @MockitoBean
     private CrosslistService crosslistService;
@@ -333,5 +351,46 @@ public class CrosslistControllerTest {
 
         String htmlResult = mvcResult.getResponse().getContentAsString();
         Assertions.assertTrue(htmlResult.contains("Cross-listing Assistant"));
+    }
+
+    @Test
+    public void evictCourseIdAndSectionsFromCacheEvictsTeacherEnrollmentForImpactedCourses() throws Exception {
+        Cache courseSectionsCache = Mockito.mock(Cache.class);
+        Cache coursesTaughtByCache = Mockito.mock(Cache.class);
+        Cache teacherCourseEnrollmentCache = Mockito.mock(Cache.class);
+
+        Mockito.when(cacheManager.getCache(CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)).thenReturn(courseSectionsCache);
+        Mockito.when(cacheManager.getCache(CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME)).thenReturn(coursesTaughtByCache);
+        Mockito.when(canvasServicesCacheManager.getCache(CacheConstants.TEACHER_COURSE_ENROLLMENT_CACHE_NAME)).thenReturn(teacherCourseEnrollmentCache);
+
+        SectionUIDisplay addUi = new SectionUIDisplay();
+        addUi.setSectionId("section-add");
+        SectionUIDisplay removeUi = new SectionUIDisplay();
+        removeUi.setSectionId("section-remove");
+
+        SectionWrapper sectionWrapper = new SectionWrapper();
+        sectionWrapper.setAddList(new ArrayList<>(List.of(addUi)));
+        sectionWrapper.setRemoveList(new ArrayList<>(List.of(removeUi)));
+        sectionWrapper.setFinalList(new ArrayList<>());
+
+        Section addSection = new Section();
+        addSection.setNonxlist_course_id("old-parent-course");
+        Mockito.when(sectionService.getSection("section-add")).thenReturn(addSection);
+
+        Section removeSection = new Section();
+        removeSection.setCourse_id("decrosslisted-from-course");
+        Mockito.when(sectionService.getSection("section-remove")).thenReturn(removeSection);
+
+        Set<String> courses2Evict = new HashSet<>();
+        courses2Evict.add(COURSE_ID);
+
+        Method method = CrosslistController.class.getDeclaredMethod(
+                "evictCourseIdAndSectionsFromCache", Set.class, SectionWrapper.class, String.class);
+        method.setAccessible(true);
+        method.invoke(crosslistController, courses2Evict, sectionWrapper, USER_ID);
+
+        Mockito.verify(teacherCourseEnrollmentCache).evictIfPresent(COURSE_ID);
+        Mockito.verify(teacherCourseEnrollmentCache).evictIfPresent("old-parent-course");
+        Mockito.verify(teacherCourseEnrollmentCache).evictIfPresent("decrosslisted-from-course");
     }
 }

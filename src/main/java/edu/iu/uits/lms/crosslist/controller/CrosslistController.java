@@ -41,6 +41,7 @@ import edu.iu.uits.lms.canvas.model.User;
 import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
+import edu.iu.uits.lms.canvas.utils.CacheConstants;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
@@ -100,6 +101,10 @@ public class CrosslistController extends OidcTokenAwareController {
     @Autowired
     @Qualifier("CrosslistCacheManager")
     private CacheManager cacheManager;
+
+    @Autowired(required = false)
+    @Qualifier("CanvasServicesCacheManager")
+    private CacheManager canvasServicesCacheManager;
 
     @Autowired
     private CourseService courseService = null;
@@ -822,13 +827,14 @@ public class CrosslistController extends OidcTokenAwareController {
 
             // Evict all courseIds from the cache
             for (String courseId2Evict : courseIds) {
-                courseSectionsCache.evict(courseId2Evict);
+                courseSectionsCache.evictIfPresent(courseId2Evict);
             }
+        }
 
-            // if there're items in here, clear the coursesTaughtBy cache to get updated data
-            if (!sectionWrapper.getRemoveList().isEmpty()) {
-                evictCoursesTaughtByCache(currentUserId);
-            }
+        // if there're items in here, clear the coursesTaughtBy cache to get updated data
+        if (!sectionWrapper.getRemoveList().isEmpty() || !sectionWrapper.getAddList().isEmpty()) {
+            evictCoursesTaughtByCache(currentUserId);
+            evictTeacherCourseEnrollmentsCache(courseIds);
         }
     }
 
@@ -838,8 +844,27 @@ public class CrosslistController extends OidcTokenAwareController {
      */
     private void evictCoursesTaughtByCache(String currentUserId) {
         Cache coursesTaughtByCache = cacheManager.getCache(CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME);
-        // this false currently works since that's exclusively true in CrosslistController
-        coursesTaughtByCache.evict(currentUserId + "-" + false);
+        if (coursesTaughtByCache != null) {
+            coursesTaughtByCache.evictIfPresent(CrosslistService.getCoursesTaughtByCacheKey(currentUserId, false));
+            coursesTaughtByCache.evictIfPresent(CrosslistService.getCoursesTaughtByCacheKey(currentUserId, true));
+        }
+    }
+
+    /**
+     * Evicts teacher enrollment cache entries for courses touched by crosslist/decrosslist.
+     * This keeps section-level teacher checks from using stale enrollment data after submit.
+     */
+    private void evictTeacherCourseEnrollmentsCache(@NonNull Set<String> courseIds) {
+        if (canvasServicesCacheManager == null) {
+            return;
+        }
+
+        Cache teacherCourseEnrollmentCache = canvasServicesCacheManager.getCache(CacheConstants.TEACHER_COURSE_ENROLLMENT_CACHE_NAME);
+        if (teacherCourseEnrollmentCache != null) {
+            for (String courseId : courseIds) {
+                teacherCourseEnrollmentCache.evictIfPresent(courseId);
+            }
+        }
     }
 
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)

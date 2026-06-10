@@ -78,6 +78,10 @@ public class CrosslistService {
 
    public final static String UNAVAILABLE_SECTION_TERM_STRING = "UNAVAILABLE_SECTION";
 
+   public static String getCoursesTaughtByCacheKey(String IUNetworkId, boolean excludeBlueprint) {
+      return IUNetworkId + '-' + excludeBlueprint;
+   }
+
    @Autowired
    private CourseService courseService = null;
 
@@ -307,8 +311,9 @@ public class CrosslistService {
       return sectionsMap;
    }
 
-   // Don't change this cache key unless you also change how evict works in the CrosslistController
-   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
+   // Keep this cache key in sync with CrosslistService.getCoursesTaughtByCacheKey(), which controller eviction also uses.
+   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME,
+         key = "T(edu.iu.uits.lms.crosslist.service.CrosslistService).getCoursesTaughtByCacheKey(#IUNetworkId, #excludeBlueprint)")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
       log.debug("cache miss for {} - getCoursesTaughtBy({}, {})", CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, IUNetworkId, excludeBlueprint);
       return courseService.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
