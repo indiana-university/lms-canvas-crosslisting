@@ -121,6 +121,8 @@ $(document).ready(function(){
         var sectionList = createJSON($('.sectionsList li'));
         var jsonSectionList = JSON.stringify(sectionList);
 
+        lockSectionCheckboxInteraction(true);
+
         var collapsedTermsList = getCollapsedTermsString();
 
         // load the new term data
@@ -164,6 +166,7 @@ $(document).ready(function(){
         if (settings.url !== unavailableSectionsUrl) {
            checkboxEventRegistration();
            modalButtonToggle();
+           lockSectionCheckboxInteraction(false);
            $("#loading").hide();
            $("#addTerm").attr("disabled", false);
            $("#addTerm").attr("aria-disabled", false);
@@ -195,6 +198,17 @@ function handleLoading(actionButton) {
     }
 
     $(".rvt-button").attr("disabled", "true");
+}
+
+function lockSectionCheckboxInteraction(shouldLock) {
+    var checkboxes = $('.sectionsList :checkbox');
+    checkboxes.prop('disabled', shouldLock);
+
+    if (shouldLock) {
+        checkboxes.attr('aria-disabled', true);
+    } else {
+        checkboxes.removeAttr('aria-disabled');
+    }
 }
 
 /**
