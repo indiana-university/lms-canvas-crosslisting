@@ -99,6 +99,18 @@ $(document).ready(function(){
         return true;
     });
 
+    /* Impersonation modal submit */
+    $('#impersonation-form').on('submit', function() {
+        handleLoading($('#modal-submit'));
+        return true;
+    });
+
+    /* Exit impersonation submit */
+    $('#exit-impersonation-form').on('submit', function() {
+        handleLoading($('#exit-impersonation-button'));
+        return true;
+    });
+
     // this will prevent forms from submitting twice
     $('form').preventDoubleSubmission();
 

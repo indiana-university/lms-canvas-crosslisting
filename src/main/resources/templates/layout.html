@@ -58,9 +58,15 @@
     <span class="rvt-badge rvt-badge--warning rvt-m-right-sm">
         <span class="rvt-text-regular">Impersonating: </span><span th:text="${impersonationModel.username}">bobbytables</span>
     </span>
-    <form th:action="@{|/app/${courseId}/impersonate|}" method="post">
-        <button class="rvt-button rvt-button--secondary rvt-m-right-sm buttonColorOverride"
-                name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_END_IMPERSONATE}">Exit Impersonation Mode</button>
+    <form id="exit-impersonation-form" th:action="@{|/app/${courseId}/impersonate|}" method="post">
+        <input type="hidden" name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_END_IMPERSONATE}" />
+        <button id="exit-impersonation-button" type="submit" class="rvt-button rvt-button--secondary rvt-m-right-sm buttonColorOverride">
+            <span class="rvt-button__content">Exit Impersonation Mode</span>
+            <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+            <span aria-live="polite">
+                <span class="loading-text rvt-sr-only rvt-display-none">Exiting impersonation mode</span>
+            </span>
+        </button>
     </form>
 </div>
 
