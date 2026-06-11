@@ -951,6 +951,9 @@ public class CrosslistController extends OidcTokenAwareController {
             return new ArrayList<>();
         }
 
+        // Deduplicate by Canvas course ID while preserving first-seen order.
+        // We intentionally do not use stream().distinct() because Course equality here is object-based,
+        // and duplicate API results can be different instances with the same logical course ID.
         return new ArrayList<>(courses.stream()
                 .filter(course -> course != null && course.getId() != null)
                 .collect(Collectors.toMap(Course::getId, Function.identity(),
