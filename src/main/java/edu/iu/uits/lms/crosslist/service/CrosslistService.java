@@ -4,7 +4,7 @@ package edu.iu.uits.lms.crosslist.service;
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -35,9 +35,11 @@ package edu.iu.uits.lms.crosslist.service;
 
 import edu.iu.uits.lms.canvas.config.CanvasConfiguration;
 import edu.iu.uits.lms.canvas.helpers.CanvasDateFormatUtil;
+import edu.iu.uits.lms.canvas.helpers.EnrollmentHelper;
 import edu.iu.uits.lms.canvas.model.Account;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
+import edu.iu.uits.lms.canvas.model.Enrollment;
 import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.services.AccountService;
 import edu.iu.uits.lms.canvas.services.CourseService;
@@ -74,7 +76,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CrosslistService {
 
-   public final static String ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING = "ALIEN_SECTION_BLOCKED";
+   public final static String UNAVAILABLE_SECTION_TERM_STRING = "UNAVAILABLE_SECTION";
+
+   public static String getCoursesTaughtByCacheKey(String IUNetworkId, boolean excludeBlueprint) {
+      return IUNetworkId + '-' + excludeBlueprint;
+   }
 
    @Autowired
    private CourseService courseService = null;
@@ -103,225 +109,214 @@ public class CrosslistService {
    @Autowired
    private CrosslistService self = null;
 
+   // this method is assuming proper authentication has happened
    public Map<CanvasTerm, List<SectionUIDisplay>> buildSectionsMap(List<Course> courses,
                                                                    Map<String,CanvasTerm> termMap,
                                                                    Course currentCourse,
+                                                                   String networkId,
                                                                    boolean includeNonSisSections,
-                                                                   boolean includeSectionsCrosslistedElsewhere,
                                                                    boolean impersonationMode,
-                                                                   boolean useCachedSections) {
+                                                                   boolean useCachedSections,
+                                                                   boolean loadUnavailable) {
       // This map will contain the CanvasTerm for the key and a List<SectionUIDisplay> for the value
       // The TreeMap with comparator will add new entries to the map in a sorted order
       Map<CanvasTerm,List<SectionUIDisplay>> sectionsMap = new TreeMap<>();
 
-      // One should only get possible section results if it is an SIS course that the tool was launched from.
-      // If the launched course is manually created, one should only get possible sections IF
-      // one is in impersonation mode.
-      if (impersonationMode || sisService.isLegitSisCourse(currentCourse.getSisCourseId())) {
-         // Get all the course codes for all the courses we know about
-         Map<String, String> courseMap = courses.stream().collect(Collectors.toMap(Course::getId, Course::getCourseCode));
+      // only need to get this once for the Unavailable Sections
+      CanvasTerm unavailableCanvasTerm = getUnavailableCanvasTerm();
 
-         // This List contains all courses and whether each section is in its natural course or is from another (alien)
-         List<CourseSisNaturalAndAlien> sisNaturalAndAlienCourseList = new ArrayList<>();
+      for (Course course : courses) {
+         // Regardless of any flags or admin status, if etext/ISBN values don't match exactly between the courses,
+         // none of the course's sections are eligible for display. Do this upfront to save time by skipping course processing
+         if (!canCoursesBeCrosslistedBasedOnEtexts(currentCourse.getSisCourseId(), course.getSisCourseId())) {
+            log.debug("SKIP: etext mismatch between courses: {}", course.getSisCourseId());
+            continue;
+         }
 
-         // Loop through this at a course level, because sections don't contain term information, else it'd be another lookup
-         for (Course course : courses) {
-            CourseSisNaturalAndAlien courseSisNaturalAndAlien = new CourseSisNaturalAndAlien(course.getId(), course.getSisCourseId());
-            sisNaturalAndAlienCourseList.add(courseSisNaturalAndAlien);
+         List<Section> listOfSectionsCache = null;
 
-            // get the sections to the course
-            // TODO this makes page performance slow, especially with a lot of courses/sections
-            List<Section> listOfSections = null;
+         // if the flag is on, use the cache to save some time
+         if (useCachedSections) {
+            listOfSectionsCache = self.getCourseSections(course.getId());
+         } else {
+            listOfSectionsCache = this.getCourseSections(course.getId());
+         }
 
-            if (useCachedSections) {
-               listOfSections = self.getCourseSections(course.getId());
-            } else {
-               listOfSections = this.getCourseSections(course.getId());
+         // since we potentially remove sections in this method, assign the cache to a new variable that won't stay
+         // cached and cause problems on subsequent calls to this method
+         List<Section> listOfSections = new ArrayList<>(listOfSectionsCache);
+
+         boolean courseHasMultipleSections = listOfSections != null && listOfSections.size() > 1;
+
+         List<SectionUIDisplay> unavailableSectionList = new ArrayList<>();
+
+         // A section can not be cross-listed into the current course unless its original parent contains 0 cross-listed
+         // sections. Also, make sure this course isn't the same as the current course
+         if (courseHasMultipleSections && !course.getId().equals(currentCourse.getId())) {
+            boolean anyCrosslistedSections = listOfSections.stream().anyMatch(section -> section.getNonxlist_course_id() != null);
+            if (anyCrosslistedSections) {
+               List<SectionUIDisplay> unavailableUiSection = new ArrayList<>();
+               List<Section> removeSectionList = new ArrayList<>();
+               // likely skipping this course overall, but capture the sections for the Unavailable Sections via includeSisSectionsInParentWithCrosslistSections and loadUnavailable flags
+               for (Section section : listOfSections) {
+                  if (section.getNonxlist_course_id() == null) {
+                     if (loadUnavailable) {
+                        // this stuff is only necessary if we're displaying unavailable
+                        boolean isNewUnavailableSection = true;
+                        // Look up if this term is in the sectionsMap
+                        if (sectionsMap.containsKey(unavailableCanvasTerm)) {
+                           // This term is in our map, so use it
+                           unavailableUiSection = sectionsMap.get(unavailableCanvasTerm);
+                           isNewUnavailableSection = false;
+                        }
+
+                        SectionUIDisplay sectionUIDisplayForCount = new SectionUIDisplay(termMap.get(course.getEnrollmentTermId()).getId(),
+                                section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode()), false, false, false);
+                        unavailableUiSection.add(sectionUIDisplayForCount);
+
+                        if (isNewUnavailableSection) {
+                           unavailableSectionList.add(sectionUIDisplayForCount);
+                           sectionsMap.put(unavailableCanvasTerm, unavailableSectionList);
+                        }
+                        log.debug("ADD: added into the Unavailable Section: {}", section.getSis_section_id());
+                     } else {
+                        log.debug("SKIP: section thrown out from the 'contains other crosslisted section' rule, but included in Unavailable Section if flag is on: {}", section.getSis_section_id());
+                     }
+                     // remove this section since we don't want it to potentially display anywhere else later
+                     removeSectionList.add(section);
+                  } else {
+                     log.debug("SKIP: section thrown out from the 'contains other crosslisted section' rule, but NOT included in Unavailable Section: {}", section.getSis_section_id());
+                  }
+               }
+
+               // remove the unavailable sections so they are not potentially included as a section eligible for crosslisting
+               listOfSections.removeAll(removeSectionList);
             }
+         }
 
-            //Check to see if there are multiple sections, cause we might want to ignore the one that matches the original parent course
-            boolean courseHasMultipleSections = listOfSections != null && listOfSections.size() > 1;
+         // This call is cacheable in the courseService and will save time on subsequent calls
+         List<Enrollment> listOfTeacherEnrollmentsInCourse = courseService.getTeacherCourseEnrollment(course.getId());
 
-            // loop through the sections, although there will likely only be one per course
+         // if the loadUnavailable flag is true, we don't care about any of this
+         if (!loadUnavailable) {
+            // made it through course level things, let's check sections if they're available to display
             for (Section section : listOfSections) {
-               SectionUIDisplay sectionUIDisplayForCount = new SectionUIDisplay(termMap.get(course.getEnrollmentTermId()).getId(),
-                       section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode(), impersonationMode), false, false, false);
+               // Keep term buckets isolated per section; otherwise a list can be reused across terms.
+               boolean newSectionMapEntry = true;
+               List<SectionUIDisplay> uiSection = new ArrayList<>();
 
-               if (section.getSis_section_id() == null) {
-                  courseSisNaturalAndAlien.addAdHocSection(sectionUIDisplayForCount);
-               } else {
-                  if (section.getSis_section_id().equals(course.getSisCourseId())) {
-                     courseSisNaturalAndAlien.addNaturalSisSection(sectionUIDisplayForCount);
-                  } else {
-                     courseSisNaturalAndAlien.addAlienSisSection(sectionUIDisplayForCount);
+               // Skip sections where the user is not enrolled as a teacher
+               boolean isUserEnrolledAndTeacher = listOfTeacherEnrollmentsInCourse.stream().anyMatch(
+                       enrollment -> enrollment.getUser().getLoginId().equals(networkId) &&
+                               enrollment.getType().equals(EnrollmentHelper.TYPE_TEACHER) &&
+                               enrollment.getCourseSectionId().equals(section.getId())
+               );
+
+               if (!isUserEnrolledAndTeacher) {
+                  log.debug("SKIP: section thrown out from the 'not enrolled or teacher' rule: {}", section.getId());
+                  continue;
+               }
+
+               // term collecting stuff
+               String termIdForCourseOrSection = course.getEnrollmentTermId();
+               if (section.getNonxlist_course_id() != null) {
+                  Course courseForTerm = courseService.getCourse(section.getNonxlist_course_id());
+                  // Course might possibly be null here, under some strange and unlikely circumstances
+                  if (courseForTerm != null) {
+                     termIdForCourseOrSection = courseForTerm.getEnrollmentTermId();
                   }
                }
 
-               // Filter out sections crosslisted with other courses and ad hoc sections
-               boolean showNonSisSections = includeNonSisSections && (section.getSis_section_id() == null);
-               boolean showEverythingButCoursesNativeSection = section.getSis_section_id() != null && !section.getSis_section_id().equals(currentCourse.getSisCourseId());
+               // Look up if this term is in the sectionsMap
+               if (sectionsMap.containsKey(termMap.get(termIdForCourseOrSection))) {
+                  // This term is in our map, so use it
+                  uiSection = sectionsMap.get(termMap.get(termIdForCourseOrSection));
+                  newSectionMapEntry = false;
+               }
 
-               if (showNonSisSections || showEverythingButCoursesNativeSection) {
+               // let's do some more checks!
+               boolean addedSection = false;
 
-                  List<SectionUIDisplay> uiSection = new ArrayList<>();
-                  boolean newSectionMapEntry = true;
-
-                  // Use the course's enrollment termId, unless the section is crosslisted.
-                  // If the section is cross-listed, then look up the original parent course's termId
-                  // This keeps sections in their appropriate term when the page displays
-                  String termIdForCourseOrSection = course.getEnrollmentTermId();
-                  if (section.getNonxlist_course_id() != null) {
-                     Course courseForTerm = courseService.getCourse(section.getNonxlist_course_id());
-                     //Course might possibly be null here, under some strange and unlikely circumstances
-                     if (courseForTerm != null) {
-                        termIdForCourseOrSection = courseForTerm.getEnrollmentTermId();
-                     }
-                  }
-
-                  // Look up if this term is in the sectionsMap
-                  if (sectionsMap.containsKey(termMap.get(termIdForCourseOrSection))) {
-                     // This term is in our map, so use it
-                     uiSection = sectionsMap.get(termMap.get(termIdForCourseOrSection));
-                     newSectionMapEntry = false;
-                  }
-
-                  // Using this strictly to show that a new section was added to the array, but only matters if this
-                  // is a brand new map entry
-                  boolean addedSection = false;
-
-                  String courseCode = course.getCourseCode();
-                  if (section.getNonxlist_course_id() != null) {
-                     courseMap.get(section.getNonxlist_course_id());
-                     if (courseMap.containsKey(section.getCourse_id())) {
-                        courseCode = courseMap.get(section.getCourse_id());
-                     } else {
-                        Course originalCourse = courseService.getCourse(section.getCourse_id());
-                        courseMap.put(section.getCourse_id(), originalCourse.getCourseCode());
-                        courseCode = originalCourse.getCourseCode();
-                     }
-                  }
-
-                  if (section.getSis_section_id() == null) {
-                     //Non-sis courses
-                     if (section.getCourse_id().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlist_course_id() == null) {
-                        log.debug(section.getName() + ": non-sis, not crosslisted, under current course - SKIP");
-                     } else if (includeSectionsCrosslistedElsewhere && !section.getCourse_id().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlist_course_id() != null) {
-                        log.debug(section.getName() + ": non-sis, crosslisted elsewhere");
-                        uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, true));
-                        addedSection = true;
-                     } else if (section.getCourse_id().equalsIgnoreCase(currentCourse.getId()) && section.getNonxlist_course_id() != null) {
-                        log.debug(section.getName() + ": non-sis, already crosslisted to current course");
-                        uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), section.getName(), true, true, false));
-                        addedSection = true;
-                     } else if (section.getNonxlist_course_id() == null) {
-                        log.debug(section.getName() + ": non-sis, not crosslisted");
-                        uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, false));
-                        addedSection = true;
-                     } else {
-                        log.debug(section.getName() + ": non-sis, SKIP");
-                     }
-                  } else {
-                     //SIS Courses
-                     if (section.getNonxlist_course_id() == null &&
-                             !(courseHasMultipleSections && section.getSis_section_id().equals(section.getSis_course_id()))) {
-                        //Not crosslisted, so should be included, unless it is the default section for this course and there are multiple sections
-                        log.debug(section.getName() + ": sis, not crosslisted");
-                        uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, false));
-                        addedSection = true;
-                     } else if (section.getNonxlist_course_id() != null && section.getCourse_id().equals(currentCourse.getId())) {
-                        log.debug(section.getName() + ": sis, crosslisted to me");
-                        //Already crosslisted to this course
-                        uiSection.add(new SectionUIDisplay(termIdForCourseOrSection, section.getId(), section.getName(), true, true, false));
-                        addedSection = true;
-                     } else if (includeSectionsCrosslistedElsewhere && section.getNonxlist_course_id() != null) {
-                        log.debug(section.getName() + ": sis, crosslisted elsewhere");
-                        // Section crosslisted to a DIFFERENT course
-                        uiSection.add(new SectionUIDisplay(termIdForCourseOrSection, section.getId(), buildSectionDisplayName(section.getName(), courseCode, impersonationMode), false, false, true));
-                        addedSection = true;
-                     } else {
-                        log.debug(section.getName() + ": sis, SKIP");
-//                     log.debug("How did we get here?");
-//                     log.debug("\tSis course id: " + section.getSis_course_id());
-//                     log.debug("\tSis section id: " + section.getSis_section_id());
-//                     log.debug("\tXlisted to: " + section.getNonxlist_course_id());
-                     }
-                  }
-
-                  // if this is a brand new map entry AND something was actually added, then add the data to the map
-                  if (newSectionMapEntry && addedSection) {
-                     sectionsMap.put(termMap.get(termIdForCourseOrSection), uiSection);
+               // if this is the current course's original section, skip it
+               // 2 styles of determining original section, depending if the current course is SIS or not
+               boolean isCurrentCourseLegitSis = sisService.isLegitSisCourse(currentCourse.getSisCourseId());
+               if (isCurrentCourseLegitSis) {
+                  // use this for legit SIS, as it's better criteria
+                  if (currentCourse.getSisCourseId().equals(section.getSis_section_id()) && section.getNonxlist_course_id() == null) {
+                     log.debug("SKIP: section is the current course's original section: {}", section.getSis_section_id());
+                     continue;
                   }
                } else {
-                  log.debug(section.getName() + ": SKIP");
-//               log.debug("Another else");
-//               log.debug("\tSis Course Id: " + section.getSis_course_id());
-//               log.debug("\tSis section id: " + section.getSis_section_id());
+                  // non-SIS courses should use this criteria since sisCourseId will likely be null
+                  if (currentCourse.getId().equals(section.getCourse_id()) && section.getNonxlist_course_id() == null) {
+                     log.debug("SKIP: section is the current course's original section: {}", section.getId());
+                     continue;
+                  }
+               }
+
+               if (currentCourse.getId().equals(section.getCourse_id())) {
+                  // if the section is already in the current course, add it for display (and checked) regardless of other criteria
+                  uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), section.getName(), true, true, false));
+                  addedSection = true;
+                  log.debug("ADD and CHECKED: added because already in current course: {}", section.getSis_section_id());
+               } else if (includeNonSisSections && impersonationMode) {
+                  // not trusting the includeNonSisSections flag on its own. Confirm with impersonationMode being true, too
+                  if (section.getNonxlist_course_id() == null) {
+                     // not crosslisted elsewhere, add it
+                     uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode()), false, false, false));
+                     addedSection = true;
+                     log.debug("ADD: not crosslisted. non-SIS block. SIS ID: {} SIS Course ID: {} Course ID: {} Section ID: {}", section.getSis_section_id(), section.getSis_course_id(), section.getCourse_id(), section.getId());
+                  } else {
+                     // crosslisted elsewhere
+                     uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode()), false, false, true));
+                     addedSection = true;
+                     log.debug("ADD: crosslisted elsewhere. non-SIS block. SIS ID: {} SIS Course ID: {} Course ID: {} Section ID: {}", section.getSis_section_id(), section.getSis_course_id(), section.getCourse_id(), section.getId());
+                  }
+               } else {
+                  // assuming regular user here or impersonation mode, so needs to pass the SIS validations. Even though
+                  // the query assumes a course lookup, the section in this case for proper SIS provisioning should still work fine
+                  if (sisService.isLegitSisCourse(section.getSis_section_id())) {
+                     // legit SIS course
+                     if (section.getNonxlist_course_id() == null) {
+                        // section is not crosslisted, so let's add it
+                        uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode()), false, false, false));
+                        addedSection = true;
+                        log.debug("ADD: not crosslisted anywhere and is SIS. SIS ID: {}", section.getSis_section_id());
+                     } else {
+                        // section IS crosslisted, but since this flag is on and confirmed it's SIS, add it
+                        uiSection.add(new SectionUIDisplay(termMap.get(termIdForCourseOrSection).getId(), section.getId(), buildSectionDisplayName(section.getName(), course.getCourseCode()), false, false, true));
+                        addedSection = true;
+                        log.debug("ADD: crosslisted elsewhere and is SIS. SIS ID: {}", section.getSis_section_id());
+                     }
+                  } else {
+                     log.debug("SKIP: Not legit sis section: {}", section.getId());
+                  }
+               }
+
+               // if this is a brand new map entry AND something was actually added, then add the data to the map
+               if (newSectionMapEntry && addedSection) {
+                  sectionsMap.put(termMap.get(termIdForCourseOrSection), uiSection);
                }
             }
          }
-
-         // See if any sections were excluded from being crosslisted because the only reason was that they had an
-         // alien section in addition to their normal course section. If so, add them to the blockedList
-         // so we can display them as unavilable.
-         // ALSO....If Adhoc was the only reason a natural section wasn't added as available, and we are
-         // includeNonSisSections then add the natural selection as available
-         List<SectionUIDisplay> alienSectionBlockedList = new ArrayList<>();
-         for (CourseSisNaturalAndAlien courseSisNaturalAndAlien : sisNaturalAndAlienCourseList) {
-            if (courseSisNaturalAndAlien.hasAlienSection()) {
-               log.debug("*** CourseId " + courseSisNaturalAndAlien.courseId + " has sis sections that can't be crosslisted because of alien sections:");
-
-               for (SectionUIDisplay sectionUIDisplay : courseSisNaturalAndAlien.getNaturalSisSectionUiDisplays()) {
-                  log.debug("   ** sectionId = " + sectionUIDisplay.getSectionId() + ", " + sectionUIDisplay.getSectionName());
-
-                  alienSectionBlockedList.add(sectionUIDisplay);
-               }
-            } else {
-               if (includeNonSisSections && includeSectionsCrosslistedElsewhere && courseSisNaturalAndAlien.isOnlyNaturalWithAdhocs()) {
-                  // should only be one natural
-                  SectionUIDisplay naturalSection = courseSisNaturalAndAlien.naturalSisSectionUiDisplays.get(0);
-
-                  CanvasTerm canvasTerm = termMap.get(naturalSection.getTermId());
-
-                  if (canvasTerm != null) {
-                     List<SectionUIDisplay> availableList = sectionsMap.get(canvasTerm);
-
-                     if (availableList == null) {
-                        availableList = new ArrayList<>();
-                        sectionsMap.put(canvasTerm, availableList);
-                     }
-
-                     availableList.add(naturalSection);
-                  }
-               }
-            }
-         }
-
-         // if any sections are eligible to be crosslisted if one removes the alien section blocker, add them to
-         // the sectionMap w/ a fake term (that is later used in the template on UI render)
-         if (!alienSectionBlockedList.isEmpty()) {
-            CanvasTerm alienSectionBlockedFakeCanvasTerm = getAlienBlockedCanvasTerm();
-            sectionsMap.put(alienSectionBlockedFakeCanvasTerm, alienSectionBlockedList);
-         }
-
-         // Sort the individual sections in each list
-         Comparator<SectionUIDisplay> nameComparator = Comparator.comparing(SectionUIDisplay::getSectionName, Comparator.nullsFirst(Comparator.naturalOrder()));
-         sectionsMap.values().forEach(sectionUIDisplays -> sectionUIDisplays.sort(nameComparator));
       }
+
+      // Sort the individual sections in each list
+      Comparator<SectionUIDisplay> nameComparator = Comparator.comparing(SectionUIDisplay::getSectionName, Comparator.nullsFirst(Comparator.naturalOrder()));
+      sectionsMap.values().forEach(sectionUIDisplays -> sectionUIDisplays.sort(nameComparator));
 
       return sectionsMap;
    }
 
-   // Don't change this cache key unless you also change how evict works in the CrosslistController
-   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, key = "#IUNetworkId + '-' + #excludeBlueprint")
+   // Keep this cache key in sync with CrosslistService.getCoursesTaughtByCacheKey(), which controller eviction also uses.
+   @Cacheable(value = CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME,
+         key = "T(edu.iu.uits.lms.crosslist.service.CrosslistService).getCoursesTaughtByCacheKey(#IUNetworkId, #excludeBlueprint)")
    public List<Course> getCoursesTaughtBy(String IUNetworkId, boolean excludeBlueprint) {
       log.debug("cache miss for {} - getCoursesTaughtBy({}, {})", CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME, IUNetworkId, excludeBlueprint);
       return courseService.getCoursesTaughtBy(IUNetworkId, excludeBlueprint, false, false);
    }
 
-   public String buildSectionDisplayName(String sectionName, String courseCode, boolean impersonationMode) {
-      if (!impersonationMode) {
-         return sectionName;
-      }
+   public String buildSectionDisplayName(String sectionName, String courseCode) {
       return MessageFormat.format("{0} ({1})", sectionName, courseCode);
    }
 
@@ -340,20 +335,20 @@ public class CrosslistService {
    }
 
    /**
-    * Gets dummy term for terms crosslisted into a course that aren't their natural course
+    * Gets dummy term for sections unable to be crosslisted because there are other sections crosslisted into their course
     * @return The CanvasTerm
     */
-   public static CanvasTerm getAlienBlockedCanvasTerm() {
-      CanvasTerm alienSectionBlockedFakeCanvasTerm = new CanvasTerm();
-      alienSectionBlockedFakeCanvasTerm.setId(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
-      alienSectionBlockedFakeCanvasTerm.setName(ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING);
+   public static CanvasTerm getUnavailableCanvasTerm() {
+      CanvasTerm unavailableSectionCanvasTerm = new CanvasTerm();
+      unavailableSectionCanvasTerm.setId(UNAVAILABLE_SECTION_TERM_STRING);
+      unavailableSectionCanvasTerm.setName(UNAVAILABLE_SECTION_TERM_STRING);
 
       Date date = Date.from(LocalDate.of(3000, 01, 01)
               .atStartOfDay(ZoneId.systemDefault()).toInstant());
       SimpleDateFormat canvasDateFormat = new SimpleDateFormat(CanvasDateFormatUtil.CANVAS_DATE_FORMAT);
-      alienSectionBlockedFakeCanvasTerm.setStartAt(canvasDateFormat.format(date));
+      unavailableSectionCanvasTerm.setStartAt(canvasDateFormat.format(date));
 
-      return alienSectionBlockedFakeCanvasTerm;
+      return unavailableSectionCanvasTerm;
    }
 
    @Cacheable(value = CrosslistConstants.COURSE_SECTIONS_CACHE_NAME)
@@ -439,49 +434,5 @@ public class CrosslistService {
       findParentResult.setSectionList(sectionsList);
 
       return findParentResult;
-   }
-
-   @Data
-   private class CourseSisNaturalAndAlien {
-      String courseId;
-      String sisId;
-      List<SectionUIDisplay> naturalSisSectionUiDisplays;
-      List<SectionUIDisplay> adHocSectionUiDisplays;
-      List<SectionUIDisplay> alienSisSectionUiDisplays;
-
-      public CourseSisNaturalAndAlien(String courseId, String sisId) {
-         this.courseId = courseId;
-         this.sisId = sisId;
-         this.naturalSisSectionUiDisplays = new ArrayList<>();
-         this.adHocSectionUiDisplays = new ArrayList<>();
-         this.alienSisSectionUiDisplays = new ArrayList<>();
-      }
-
-      public void addNaturalSisSection(SectionUIDisplay sectionUIDisplay) {
-         naturalSisSectionUiDisplays.add(sectionUIDisplay);
-      }
-
-      public void addAdHocSection(SectionUIDisplay sectionUIDisplay) {
-         adHocSectionUiDisplays.add(sectionUIDisplay);
-      }
-
-      public void addAlienSisSection(SectionUIDisplay sectionUIDisplay) {
-         alienSisSectionUiDisplays.add(sectionUIDisplay);
-      }
-
-      public boolean hasAlienSection() {
-         boolean hasAlienSection = false;
-
-         if (naturalSisSectionUiDisplays.size() > 0 && alienSisSectionUiDisplays.size() > 0) {
-            hasAlienSection = true;
-         }
-
-         return hasAlienSection;
-      }
-
-      public boolean isOnlyNaturalWithAdhocs() {
-         return (naturalSisSectionUiDisplays.size() == 1 && alienSisSectionUiDisplays.size() == 0 &&
-                 adHocSectionUiDisplays.size() > 0);
-      }
    }
 }

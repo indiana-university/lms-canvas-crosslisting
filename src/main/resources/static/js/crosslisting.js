@@ -2,7 +2,7 @@
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -99,6 +99,18 @@ $(document).ready(function(){
         return true;
     });
 
+    /* Impersonation modal submit */
+    $('#impersonation-form').on('submit', function() {
+        handleLoading($('#modal-submit'));
+        return true;
+    });
+
+    /* Exit impersonation submit */
+    $('#exit-impersonation-form').on('submit', function() {
+        handleLoading($('#exit-impersonation-button'));
+        return true;
+    });
+
     // this will prevent forms from submitting twice
     $('form').preventDoubleSubmission();
 
@@ -108,6 +120,8 @@ $(document).ready(function(){
         var termId = obj.val();
         var sectionList = createJSON($('.sectionsList li'));
         var jsonSectionList = JSON.stringify(sectionList);
+
+        lockSectionCheckboxInteraction(true);
 
         var collapsedTermsList = getCollapsedTermsString();
 
@@ -152,6 +166,7 @@ $(document).ready(function(){
         if (settings.url !== unavailableSectionsUrl) {
            checkboxEventRegistration();
            modalButtonToggle();
+           lockSectionCheckboxInteraction(false);
            $("#loading").hide();
            $("#addTerm").attr("disabled", false);
            $("#addTerm").attr("aria-disabled", false);
@@ -183,6 +198,17 @@ function handleLoading(actionButton) {
     }
 
     $(".rvt-button").attr("disabled", "true");
+}
+
+function lockSectionCheckboxInteraction(shouldLock) {
+    var checkboxes = $('.sectionsList :checkbox');
+    checkboxes.prop('disabled', shouldLock);
+
+    if (shouldLock) {
+        checkboxes.attr('aria-disabled', true);
+    } else {
+        checkboxes.removeAttr('aria-disabled');
+    }
 }
 
 /**

@@ -4,7 +4,7 @@ package edu.iu.uits.lms.crosslist.model;
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -40,7 +40,6 @@ import java.io.Serializable;
 @Data
 public class ImpersonationModel implements Serializable {
    private String username;
-   private boolean includeCrosslistedSections;
    private boolean includeNonSisSections;
    private boolean includeSisSectionsInParentWithCrosslistSections;
    private boolean selfMode;

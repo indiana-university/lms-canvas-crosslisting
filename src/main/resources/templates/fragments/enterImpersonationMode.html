@@ -3,7 +3,7 @@
   #%L
   lms-lti-crosslist
   %%
-  Copyright (C) 2015 - 2022 Indiana University
+  Copyright (C) 2015 - 2025 Indiana University
   %%
   Redistribution and use in source and binary forms, with or without modification,
   are permitted provided that the following conditions are met:
@@ -61,7 +61,7 @@
             <header class="rvt-dialog__header">
                 <h1 class="rvt-dialog__title" id="impersonateModalTitle">Impersonate User</h1>
             </header>
-            <form th:object="${impersonationModel}" th:action="@{|/app/${courseId}/impersonate|}" method="post">
+            <form id="impersonation-form" th:object="${impersonationModel}" th:action="@{|/app/${courseId}/impersonate|}" method="post">
                 <div class="rvt-dialog__body">
                     <label class="rvt-label rvt-ts-16" for="impersonateDropdown">Impersonate:</label>
                     <select id="impersonateDropdown" class="rvt-select rvt-width-sm rvt-m-bottom-sm" th:field="*{username}">
@@ -71,13 +71,6 @@
                     <fieldset class="rvt-fieldset rvt-m-top-sm">
                         <legend class="rvt-ts-14 rvt-text-bold">Display options:</legend>
                         <ul class="rvt-list-plain">
-                            <li>
-                                <div class="rvt-checkbox">
-                                    <input type="checkbox" id="alreadyCrosslisted" name="includeCrosslistedSections" value="true"
-                                           th:checked="${impersonationModel.includeCrosslistedSections}">
-                                    <label for="alreadyCrosslisted">Include already cross-listed sections</label>
-                                </div>
-                            </li>
                             <li>
                                 <div class="rvt-checkbox">
                                     <input type="checkbox" id="nonSis" name="includeNonSisSections" value="true"
@@ -96,11 +89,18 @@
                         </ul>
                     </fieldset>
                 </div>
+                <input type="hidden" name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_IMPERSONATE}" />
                 <div class="rvt-dialog__controls">
                     <button id="modal-cancel" type="button" class="rvt-button rvt-button--secondary"
                             data-rvt-dialog-close="dialog-impersonate" role="button">Cancel</button>
-                    <button id="modal-submit" class="rvt-button" disabled="disabled" aria-disabled="true"
-                            name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_IMPERSONATE}">Submit</button>
+                    <button id="modal-submit" class="rvt-button" type="submit" disabled="disabled" aria-disabled="true"
+                            name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_IMPERSONATE}">
+                        <span class="rvt-button__content">Submit</span>
+                        <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+                        <span aria-live="polite">
+                            <span class="loading-text rvt-sr-only rvt-display-none">Starting impersonation</span>
+                        </span>
+                    </button>
                 </div>
             </form>
 

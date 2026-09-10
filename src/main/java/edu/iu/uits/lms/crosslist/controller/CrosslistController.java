@@ -4,7 +4,7 @@ package edu.iu.uits.lms.crosslist.controller;
  * #%L
  * lms-lti-crosslist
  * %%
- * Copyright (C) 2015 - 2022 Indiana University
+ * Copyright (C) 2015 - 2025 Indiana University
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -41,6 +41,7 @@ import edu.iu.uits.lms.canvas.model.User;
 import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.canvas.services.SectionService;
 import edu.iu.uits.lms.canvas.services.TermService;
+import edu.iu.uits.lms.canvas.utils.CacheConstants;
 import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.CrosslistConstants;
 import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
@@ -82,6 +83,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -100,6 +103,10 @@ public class CrosslistController extends OidcTokenAwareController {
     @Autowired
     @Qualifier("CrosslistCacheManager")
     private CacheManager cacheManager;
+
+    @Autowired(required = false)
+    @Qualifier("CanvasServicesCacheManager")
+    private CacheManager canvasServicesCacheManager;
 
     @Autowired
     private CourseService courseService = null;
@@ -206,9 +213,21 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @RequestMapping("/{courseId}/main")
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
-    public String main(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
+    public String main(@PathVariable("courseId") String courseId, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
+
+        Course currentCourse = getValidatedCourse(token, session);
+        boolean isAdmin = request.isUserInRole(LTIConstants.ADMIN_AUTHORITY);
+        boolean isCurrentCourseLegitSis = sisService.isLegitSisCourse(currentCourse.getSisCourseId());
+
+        // if this course is a non-SIS course and the user is not an admin, deny access to the tool
+        if (!isCurrentCourseLegitSis && !isAdmin) {
+            log.debug("Non-SIS course access denied for user: {}", oidcTokenUtils.getUserLoginId());
+            return "nonSisDeniedForInstructors";
+        }
+
+        log.debug("Course access accepted for user: {} , admin status: {}", oidcTokenUtils.getUserLoginId(), isAdmin);
 
         ImpersonationModel impersonationModel = courseSessionService.getAttributeFromSession(session, courseId,
               CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, ImpersonationModel.class);
@@ -220,16 +239,14 @@ public class CrosslistController extends OidcTokenAwareController {
 
         String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
-        Course currentCourse = getValidatedCourse(token, session);
-
         CanvasTerm currentTerm = currentCourse.getTerm();
 
         List<Section> currentCourseSections = courseService.getCourseSections(currentCourse.getId());
 
-        // Use this list to filter out terms from the dropdown
-        List<String> termFilterList = new ArrayList<>();
+        // Use this set to filter out terms from the dropdown without duplicates
+        Set<String> termFilterIds = new LinkedHashSet<>();
         // add the current/active term to the filter list since it will always be valid
-        termFilterList.add(currentTerm.getId());
+        termFilterIds.add(currentTerm.getId());
 
         // filter through the rest of the sections to see if any of the cross-listed sections belong to a different term
         for (Section currentSections : currentCourseSections) {
@@ -238,9 +255,9 @@ public class CrosslistController extends OidcTokenAwareController {
                 //Course might possibly be null here, under some strange and unlikely circumstances
                 if (course != null) {
                     CanvasTerm term = course.getTerm();
-                    if (!termFilterList.contains(term) && !term.equals(currentTerm)) {
-                        // not the same term as the current one and does not exist in the list yet
-                        termFilterList.add(term.getId());
+                    if (term != null && term.getId() != null && !term.getId().equals(currentTerm.getId())) {
+                        // not the same term as the current one and does not exist in the set yet
+                        termFilterIds.add(term.getId());
                     }
                 }
             }
@@ -248,7 +265,7 @@ public class CrosslistController extends OidcTokenAwareController {
 
         // Get all courses for the user
         // Setting the variable to true does bring back some section information on a course, but it is incomplete and not helpful for what we need
-        List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+        List<Course> courses = distinctCoursesById(crosslistService.getCoursesTaughtBy(currentUserId, false));
 
         // get the list of terms in Canvas
         List<CanvasTerm> terms = termService.getEnrollmentTerms();
@@ -263,7 +280,7 @@ public class CrosslistController extends OidcTokenAwareController {
             // fill in the selectableTerms list and filter out terms that will be displayed on the screen
             for (Course course : courses) {
                 String courseTermId = course.getEnrollmentTermId();
-                if (termMap.get(courseTermId) != null && !selectableTerms.contains(termMap.get(courseTermId)) && !termFilterList.contains(courseTermId)) {
+                if (termMap.get(courseTermId) != null && !selectableTerms.contains(termMap.get(courseTermId)) && !termFilterIds.contains(courseTermId)) {
                     // if term doesn't exist in the map and isn't a term that's will be loaded because of other cross-listed sections
                     selectableTerms.add(termMap.get(courseTermId));
                 }
@@ -309,7 +326,7 @@ public class CrosslistController extends OidcTokenAwareController {
         }
 
         // filter the active list down to a smaller set
-        courses = courses.stream().filter(c -> termFilterList.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
+        courses = courses.stream().filter(c -> termFilterIds.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
 
 
         // Page title
@@ -318,14 +335,14 @@ public class CrosslistController extends OidcTokenAwareController {
         }
 
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
-              crosslistService.buildSectionsMap(courses, termMap, currentCourse,
-                    impersonationModel.isIncludeNonSisSections(), impersonationModel.isIncludeCrosslistedSections(),
+              crosslistService.buildSectionsMap(courses, termMap, currentCourse, currentUserId,
+                    impersonationModel.isIncludeNonSisSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                      true);
+                      true, false);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
-            if (canvasTermKey.getName().equals(crosslistService.ALIEN_SECTION_BLOCKED_FAKE_CANVAS_TERM_STRING)) {
-                model.addAttribute("hasAlienBlocked", true);
+            if (canvasTermKey.getName().equals(crosslistService.UNAVAILABLE_SECTION_TERM_STRING)) {
+                model.addAttribute("hasUnavailableSection", true);
                 break;
             }
         }
@@ -354,8 +371,8 @@ public class CrosslistController extends OidcTokenAwareController {
         Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
         // add fake canvas term for unavailable list in the UI
-        CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
-        termMap.put(alienSectionBlockedFakeCanvasTerm.getId(), alienSectionBlockedFakeCanvasTerm);
+        CanvasTerm unavailableCanvasTerm = crosslistService.getUnavailableCanvasTerm();
+        termMap.put(unavailableCanvasTerm.getId(), unavailableCanvasTerm);
 
         // Rebuild the map. This is less complex compared to the main()
         for (SectionUIDisplay sectionUI : sectionList) {
@@ -439,9 +456,9 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @RequestMapping(value = {"/{courseId}/confirm", "/{courseId}/continue"}, method = RequestMethod.POST, params="action=" + CrosslistConstants.ACTION_CANCEL)
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
-    public String doCancel(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
+    public String doCancel(@PathVariable("courseId") String courseId, Model model, HttpSession session, HttpServletRequest request) {
         log.debug("doCancel");
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @RequestMapping(value = "/{courseId}/confirm", method = RequestMethod.POST, params="action=" + CrosslistConstants.ACTION_EDIT)
@@ -477,7 +494,7 @@ public class CrosslistController extends OidcTokenAwareController {
 
     @RequestMapping(value = "/{courseId}/confirm", method = RequestMethod.POST, params="action=" + CrosslistConstants.ACTION_SUBMIT)
     @Secured({LTIConstants.ADMIN_AUTHORITY, LTIConstants.INSTRUCTOR_AUTHORITY})
-    public String doSubmitConfirmation(@PathVariable("courseId") String courseId, Model model, HttpSession session) {
+    public String doSubmitConfirmation(@PathVariable("courseId") String courseId, Model model, HttpSession session, HttpServletRequest request) {
         log.debug("doSubmit");
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token);
@@ -567,7 +584,7 @@ public class CrosslistController extends OidcTokenAwareController {
             evictCourseIdAndSectionsFromCache(courses2Evict, sectionWrapper, currentUserId);
         }
 
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     /**
@@ -622,8 +639,8 @@ public class CrosslistController extends OidcTokenAwareController {
             Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
             // add fake canvas term for unavailable list in the UI
-            CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
-            termMap.put(alienSectionBlockedFakeCanvasTerm.getId(), alienSectionBlockedFakeCanvasTerm);
+            CanvasTerm unavailableCanvasTerm = crosslistService.getUnavailableCanvasTerm();
+            termMap.put(unavailableCanvasTerm.getId(), unavailableCanvasTerm);
 
             // rebuild the json feed into the Map
             for (SectionUIDisplay sectionUI : sectionList) {
@@ -648,7 +665,7 @@ public class CrosslistController extends OidcTokenAwareController {
 
 
             // Look up the new course/section information for the requested term
-            List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+            List<Course> courses = distinctCoursesById(crosslistService.getCoursesTaughtBy(currentUserId, false));
             courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && c.getEnrollmentTermId().equals(termId)).collect(Collectors.toList());
 
             // get sections and apply the business logic to whether show or not
@@ -656,10 +673,11 @@ public class CrosslistController extends OidcTokenAwareController {
                     courses,
                     termMap,
                     currentCourse,
+                    currentUserId,
                     impersonationModel.isIncludeNonSisSections(),
-                    impersonationModel.isIncludeCrosslistedSections(),
                     impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
-                    true
+                    true,
+                    false
             );
 
             // get the CanvasTerm object for use later for the map
@@ -716,7 +734,7 @@ public class CrosslistController extends OidcTokenAwareController {
         String currentUserId = impersonationModel.getUsername() == null ? oidcTokenUtils.getUserLoginId() : impersonationModel.getUsername();
 
         // Look up the new course/section information
-        List<Course> courses = crosslistService.getCoursesTaughtBy(currentUserId, false);
+        List<Course> courses = distinctCoursesById(crosslistService.getCoursesTaughtBy(currentUserId, false));
 
         List<String> joinedTermsList = Arrays.asList(joinedTerms.split(","));
         courses = courses.stream().filter(c -> c.getEnrollmentTermId() != null && joinedTermsList.contains(c.getEnrollmentTermId())).collect(Collectors.toList());
@@ -728,24 +746,25 @@ public class CrosslistController extends OidcTokenAwareController {
         Map<String,CanvasTerm> termMap = terms.stream().collect(Collectors.toMap(CanvasTerm::getId,Function.identity()));
 
         // add fake canvas term for unavailable list in the UI
-        CanvasTerm alienSectionBlockedFakeCanvasTerm = crosslistService.getAlienBlockedCanvasTerm();
+        CanvasTerm unavailableCanvasTerm = crosslistService.getUnavailableCanvasTerm();
 
         Map<CanvasTerm, List<SectionUIDisplay>> sections = crosslistService.buildSectionsMap(
                 courses,
                 termMap,
                 currentCourse,
+                currentUserId,
                 impersonationModel.isIncludeNonSisSections(),
-                impersonationModel.isIncludeCrosslistedSections(),
                 impersonationModel.getUsername() != null,
+                true,
                 true
         );
 
-        if (sections.containsKey(alienSectionBlockedFakeCanvasTerm)) {
+        if (sections.containsKey(unavailableCanvasTerm)) {
             Map<CanvasTerm, List<SectionUIDisplay>> unavailableSectionMap = new HashMap<>();
-            unavailableSectionMap.put(alienSectionBlockedFakeCanvasTerm, sections.get(alienSectionBlockedFakeCanvasTerm));
+            unavailableSectionMap.put(unavailableCanvasTerm, sections.get(unavailableCanvasTerm));
 
             model.addAttribute("sectionsMap", unavailableSectionMap);
-            model.addAttribute("hasAlienBlocked", true);
+            model.addAttribute("hasUnavailableSection", true);
         }
 
         return "fragments/termData :: termDataUnavailable";
@@ -810,13 +829,14 @@ public class CrosslistController extends OidcTokenAwareController {
 
             // Evict all courseIds from the cache
             for (String courseId2Evict : courseIds) {
-                courseSectionsCache.evict(courseId2Evict);
+                courseSectionsCache.evictIfPresent(courseId2Evict);
             }
+        }
 
-            // if there're items in here, clear the coursesTaughtBy cache to get updated data
-            if (!sectionWrapper.getRemoveList().isEmpty()) {
-                evictCoursesTaughtByCache(currentUserId);
-            }
+        // if there're items in here, clear the coursesTaughtBy cache to get updated data
+        if (!sectionWrapper.getRemoveList().isEmpty() || !sectionWrapper.getAddList().isEmpty()) {
+            evictCoursesTaughtByCache(currentUserId);
+            evictTeacherCourseEnrollmentsCache(courseIds);
         }
     }
 
@@ -826,60 +846,77 @@ public class CrosslistController extends OidcTokenAwareController {
      */
     private void evictCoursesTaughtByCache(String currentUserId) {
         Cache coursesTaughtByCache = cacheManager.getCache(CrosslistConstants.COURSES_TAUGHT_BY_CACHE_NAME);
-        // this false currently works since that's exclusively true in CrosslistController
-        coursesTaughtByCache.evict(currentUserId + "-" + false);
+        if (coursesTaughtByCache != null) {
+            coursesTaughtByCache.evictIfPresent(CrosslistService.getCoursesTaughtByCacheKey(currentUserId, false));
+            coursesTaughtByCache.evictIfPresent(CrosslistService.getCoursesTaughtByCacheKey(currentUserId, true));
+        }
+    }
+
+    /**
+     * Evicts teacher enrollment cache entries for courses touched by crosslist/decrosslist.
+     * This keeps section-level teacher checks from using stale enrollment data after submit.
+     */
+    private void evictTeacherCourseEnrollmentsCache(@NonNull Set<String> courseIds) {
+        if (canvasServicesCacheManager == null) {
+            return;
+        }
+
+        Cache teacherCourseEnrollmentCache = canvasServicesCacheManager.getCache(CacheConstants.TEACHER_COURSE_ENROLLMENT_CACHE_NAME);
+        if (teacherCourseEnrollmentCache != null) {
+            for (String courseId : courseIds) {
+                teacherCourseEnrollmentCache.evictIfPresent(courseId);
+            }
+        }
     }
 
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
     @Secured({LTIConstants.ADMIN_AUTHORITY})
-    public String beginImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String beginImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @PostMapping(value = "/{courseId}/impersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
     @Secured({LTIConstants.ADMIN_AUTHORITY})
-    public String endImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String endImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
         courseSessionService.removeAttributeFromSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_IMPERSONATE)
     @Secured({LTIConstants.BASE_USER_AUTHORITY})
-    public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String beginSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
 
-        impersonationModel.setIncludeCrosslistedSections(true);
         impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
         impersonationModel.setSelfMode(true);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     @PostMapping(value = "/{courseId}/selfimpersonate", params="action=" + CrosslistConstants.ACTION_END_IMPERSONATE)
     @Secured({LTIConstants.BASE_USER_AUTHORITY})
-    public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session) {
+    public String endSelfImpersonation(@PathVariable("courseId") String courseId, @ModelAttribute ImpersonationModel impersonationModel, Model model, HttpSession session, HttpServletRequest request) {
         OidcAuthenticationToken token = getValidatedToken(courseId, courseSessionService);
 
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
 
-        impersonationModel.setIncludeCrosslistedSections(false);
         impersonationModel.setIncludeNonSisSections(false);
         impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(false);
         impersonationModel.setSelfMode(false);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
-        return main(courseId, model, session);
+        return main(courseId, model, session, request);
     }
 
     private List<SectionUIDisplay> removeSectionUiDisplayBySectionName(@NonNull List<SectionUIDisplay> oldList, @NonNull String toRemoveSectionName) {
@@ -905,4 +942,23 @@ public class CrosslistController extends OidcTokenAwareController {
             }
         }
     }
+
+    /**
+     * Returns a deduplicated list of courses by course ID, preserving encounter order.
+     */
+    private List<Course> distinctCoursesById(List<Course> courses) {
+        if (courses == null) {
+            return new ArrayList<>();
+        }
+
+        // Deduplicate by Canvas course ID while preserving first-seen order.
+        // We intentionally do not use stream().distinct() because Course equality here is object-based,
+        // and duplicate API results can be different instances with the same logical course ID.
+        return new ArrayList<>(courses.stream()
+                .filter(course -> course != null && course.getId() != null)
+                .collect(Collectors.toMap(Course::getId, Function.identity(),
+                        (existing, replacement) -> existing, LinkedHashMap::new))
+                .values());
+    }
+
 }

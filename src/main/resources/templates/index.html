@@ -3,7 +3,7 @@
   #%L
   lms-lti-crosslist
   %%
-  Copyright (C) 2015 - 2022 Indiana University
+  Copyright (C) 2015 - 2025 Indiana University
   %%
   Redistribution and use in source and binary forms, with or without modification,
   are permitted provided that the following conditions are met:
@@ -61,7 +61,8 @@
         <h2 class="rvt-ts-26" th:text="${courseTitle}">SP16-BL-MUS-A112-15890 - A112 (Online):15890</h2>
             <p id="instructions" class="rvt-ts-18">
                 Check the sections you wish to add (cross-list) and uncheck the sections you wish to remove (de-cross-list).
-                Only officially provisioned sections are available for cross-listing. For assistance, contact the
+                Only officially provisioned sections are available for cross-listing. The section's current parent course
+                is in parentheses. For assistance, contact the
                 <a href="https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0023963" target="_blank" rel="noopener noreferrer">UITS Support Center.<rvt-icon name="link-external"></rvt-icon>
                     <span class="rvt-sr-only">Opens in new window</span></a>
             </p>
@@ -80,7 +81,6 @@
                                         <li th:id="'summary_' + ${section.sectionId}" th:each="section : ${mapInstance.value}" th:if="${section.currentlyChecked}"
                                             th:attr="data-sectionId=${section.sectionId},data-sectionName=${section.sectionName},data-termId=${activeTerm.id}">
                                             <span th:replace="~{fragments/sectionNameDetails :: sectionName}"></span>
-                                            <span th:replace="~{fragments/sectionNameDetails :: sectionAlreadyCrosslisted}"></span>
                                         </li>
                                     </th:block>
                                 </ul>
@@ -89,18 +89,6 @@
                             <div class="rvt-cols-8-md bp_checkboxes">
                                 <h2 class="rvt-ts-26">Available Sections</h2>
                                 <div class="rvt-sr-only" aria-live="polite"><span id="sr-annc"></span></div>
-                                <div th:if="${impersonationModel == null || impersonationModel.username == null}" class="rvt-flex rvt-m-bottom-sm">
-                                    <span class="rvt-m-right-sm" id="include-crosslisted">
-                                        Show already cross-listed sections
-                                    </span>
-                                    <button type="button" id="crosslisted-switch" class="rvt-switch rvt-switch--small" data-rvt-switch="crosslisted-switch" role="switch"
-                                            th:attr="data-rvt-switch-on=${impersonationModel != null && impersonationModel.includeCrosslistedSections} ? 'true'"
-                                            aria-labelledby="include-crosslisted" aria-describedby="switch-warning">
-                                        <span class="rvt-switch__on">On</span>
-                                        <span class="rvt-switch__off">Off</span>
-                                    </button>
-                                    <div hidden id="switch-warning">Changing this option will reload the Crosslisting Assistant. Any term selections that were not saved will be reset.</div>
-                                </div>
                                 <div id="dataDiv">
                                     <div th:insert="~{fragments/termData :: termData}"></div>
                                 </div>
@@ -134,7 +122,7 @@
                     <button id="reset-button" class="rvt-button rvt-button--secondary" type="button" >Reset</button>
 
                     <button id="continue-button" class="rvt-button" type="submit" th:disabled="${editMode == null || !editMode}">
-                        <span class="rvt-button__content">Continue</span>
+                        <span class="rvt-button__content">Preview</span>
                         <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
                         <span aria-live="polite">
                             <span class="loading-text rvt-sr-only rvt-display-none">Loading summary of changes</span>
@@ -152,25 +140,7 @@
     </div>
 </div>
 <th:block layout:fragment="script">
-    <script>
-        $(document).ready(function() {
-            document.addEventListener('rvtSwitchToggledOn', event => {
-                if (event.srcElement.getAttribute("id") == 'crosslisted-switch') {
-                    $('#sr-annc').text("Reloading Crosslisting Assistant");
-                    $('#show-crosslisted-in-other-sections-action').attr('value', 'impersonate');
-                    $('#show-crosslisted-in-other-sections-form').submit();
-                }
-            }, false);
 
-            document.addEventListener('rvtSwitchToggledOff', event => {
-                if (event.srcElement.getAttribute("id") == 'crosslisted-switch') {
-                    $('#sr-annc').text("Reloading Crosslisting Assistant");
-                    $('#show-crosslisted-in-other-sections-action').attr('value', 'end_impersonate');
-                    $('#show-crosslisted-in-other-sections-form').submit();
-                }
-            }, false);
-        });
-    </script>
 </th:block>
 </body>
 </html>
