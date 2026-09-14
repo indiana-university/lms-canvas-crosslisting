@@ -336,8 +336,6 @@ public class CrosslistController extends OidcTokenAwareController {
 
         Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
               crosslistService.buildSectionsMap(courses, termMap, currentCourse, currentUserId,
-                    impersonationModel.isIncludeNonSisSections(),
-                    impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                       true, false);
 
         for (CanvasTerm canvasTermKey : sectionsMap.keySet()) {
@@ -674,8 +672,6 @@ public class CrosslistController extends OidcTokenAwareController {
                     termMap,
                     currentCourse,
                     currentUserId,
-                    impersonationModel.isIncludeNonSisSections(),
-                    impersonationModel.getUsername() != null || impersonationModel.isSelfMode(),
                     true,
                     false
             );
@@ -753,8 +749,6 @@ public class CrosslistController extends OidcTokenAwareController {
                 termMap,
                 currentCourse,
                 currentUserId,
-                impersonationModel.isIncludeNonSisSections(),
-                impersonationModel.getUsername() != null,
                 true,
                 true
         );
@@ -893,9 +887,6 @@ public class CrosslistController extends OidcTokenAwareController {
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
-
-        impersonationModel.setIncludeNonSisSections(false);
-        impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(true);
         impersonationModel.setSelfMode(true);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);
@@ -910,9 +901,6 @@ public class CrosslistController extends OidcTokenAwareController {
         // Since this method isn't locked down to admins make sure a person can't impersonate anyone else. If username is null,
         // in main Controller will set user to actual user
         impersonationModel.setUsername(null);
-
-        impersonationModel.setIncludeNonSisSections(false);
-        impersonationModel.setIncludeSisSectionsInParentWithCrosslistSections(false);
         impersonationModel.setSelfMode(false);
 
         courseSessionService.addAttributeToSession(session, courseId, CrosslistAuthenticationToken.IMPERSONATION_DATA_KEY, impersonationModel);

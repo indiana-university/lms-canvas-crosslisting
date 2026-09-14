@@ -279,7 +279,7 @@ public class CrosslistControllerTest {
         Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
         Mockito.when(crosslistService.getCoursesTaughtBy(USER_ID, false)).thenReturn(List.of(course));
         Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
-        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean()))
+        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean()))
                 .thenReturn(new java.util.HashMap<>(java.util.Map.of(canvasTerm, List.of())));
 
         MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
@@ -337,7 +337,7 @@ public class CrosslistControllerTest {
         Mockito.when(sisService.isLegitSisCourse(SIS_COURSE_ID)).thenReturn(false);
         Mockito.when(termService.getEnrollmentTerms()).thenReturn(List.of(canvasTerm));
         Mockito.when(crosslistService.getCoursesTaughtBy(USER_ID, false)).thenReturn(List.of(course));
-        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean()))
+        Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyBoolean()))
                 .thenReturn(new java.util.HashMap<>(java.util.Map.of(canvasTerm, List.of())));
 
         // Simulate admin role
@@ -461,7 +461,7 @@ public class CrosslistControllerTest {
         Mockito.when(crosslistService.getCoursesTaughtBy(Mockito.isNull(), Mockito.eq(false)))
                 .thenReturn(List.of(currentCourse, dupCourse1a, dupCourse1b, dupCourse2a, dupCourse2b));
         Mockito.when(crosslistService.buildSectionsMap(Mockito.anyList(), Mockito.anyMap(), Mockito.any(),
-                        Mockito.nullable(String.class), Mockito.anyBoolean(), Mockito.anyBoolean(),
+                        Mockito.nullable(String.class),
                         Mockito.anyBoolean(), Mockito.anyBoolean()))
                 .thenReturn(new java.util.HashMap<>(java.util.Map.of(currentTerm, List.of())));
 
@@ -474,7 +474,7 @@ public class CrosslistControllerTest {
         ArgumentCaptor<List<Course>> coursesCaptor = ArgumentCaptor.forClass(List.class);
         Mockito.verify(crosslistService).buildSectionsMap(
                 coursesCaptor.capture(), Mockito.anyMap(), Mockito.any(), Mockito.nullable(String.class),
-                Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+                Mockito.anyBoolean(), Mockito.anyBoolean());
 
         List<Course> passedCourses = coursesCaptor.getValue();
         Set<String> distinctIds = passedCourses.stream().map(Course::getId).collect(Collectors.toSet());

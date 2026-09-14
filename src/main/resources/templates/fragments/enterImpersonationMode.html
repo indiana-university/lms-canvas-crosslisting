@@ -68,26 +68,6 @@
                         <option value="">Select user...</option>
                         <option th:each="instructor : ${instructors}" th:value="${instructor.loginId}" th:text="${instructor.loginId}">instructor</option>
                     </select>
-                    <fieldset class="rvt-fieldset rvt-m-top-sm">
-                        <legend class="rvt-ts-14 rvt-text-bold">Display options:</legend>
-                        <ul class="rvt-list-plain">
-                            <li>
-                                <div class="rvt-checkbox">
-                                    <input type="checkbox" id="nonSis" name="includeNonSisSections" value="true"
-                                           th:checked="${impersonationModel.includeNonSisSections}">
-                                    <label for="nonSis">Include non-SIS sections</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="rvt-checkbox">
-                                    <input type="checkbox" id="sisSectionsInParentWithCrosslistSections"
-                                           name="includeSisSectionsInParentWithCrosslistSections" value="true"
-                                           th:checked="${impersonationModel.includeSisSectionsInParentWithCrosslistSections}">
-                                    <label for="sisSectionsInParentWithCrosslistSections">Include SIS sections in parent courses containing cross-listed sections</label>
-                                </div>
-                            </li>
-                        </ul>
-                    </fieldset>
                 </div>
                 <input type="hidden" name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_IMPERSONATE}" />
                 <div class="rvt-dialog__controls">
