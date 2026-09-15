@@ -202,12 +202,6 @@ public class CrosslistController extends OidcTokenAwareController {
 
         SisCourse sisCurrentCourse = sisService.getSisCourseBySiteId(currentCourse.getSisCourseId());
 
-        // display etext ordered warning
-        if (sisCurrentCourse != null && sisCurrentCourse.getIuCourseLoadStatus() != null
-                && sisCurrentCourse.getIuCourseLoadStatus().toUpperCase().equals("Y")) {
-            model.addAttribute("etextMessage",  messageSource.getMessage("etext.message", null, Locale.getDefault()));
-        }
-
         return "index";
     }
 
