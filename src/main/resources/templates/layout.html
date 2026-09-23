@@ -3,7 +3,7 @@
   #%L
   lms-lti-crosslist
   %%
-  Copyright (C) 2015 - 2022 Indiana University
+  Copyright (C) 2015 - 2025 Indiana University
   %%
   Redistribution and use in source and binary forms, with or without modification,
   are permitted provided that the following conditions are met:
@@ -58,17 +58,21 @@
     <span class="rvt-badge rvt-badge--warning rvt-m-right-sm">
         <span class="rvt-text-regular">Impersonating: </span><span th:text="${impersonationModel.username}">bobbytables</span>
     </span>
-    <form th:action="@{|/app/${courseId}/impersonate|}" method="post">
-        <button class="rvt-button rvt-button--secondary rvt-m-right-sm buttonColorOverride"
-                name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_END_IMPERSONATE}">Exit Impersonation Mode</button>
+    <form id="exit-impersonation-form" th:action="@{|/app/${courseId}/impersonate|}" method="post">
+        <input type="hidden" name="action" th:value="${T(edu.iu.uits.lms.crosslist.CrosslistConstants).ACTION_END_IMPERSONATE}" />
+        <button id="exit-impersonation-button" type="submit" class="rvt-button rvt-button--secondary rvt-m-right-sm buttonColorOverride">
+            <span class="rvt-button__content">Exit Impersonation Mode</span>
+            <span class="rvt-loader rvt-loader--xs rvt-display-none"></span>
+            <span aria-live="polite">
+                <span class="loading-text rvt-sr-only rvt-display-none">Exiting impersonation mode</span>
+            </span>
+        </button>
     </form>
 </div>
 
 <div layout:fragment="content" class="rvt-container-xl" aria-label="Cross-listing Assistant" role="main">Page content goes here</div>
 
-<footer th:unless="${hideFooter}" class="rvt-ts-12 rvt-container-xl rvt-m-top-lg">
-    <div th:text="${@serverInfo}"></div>
-</footer>
+<div th:replace="~{commonFragments/layouts :: footer(${hideFooter}, ${@serverInfo.elements})}" ></div>
 
 <script type="text/javascript" th:src="@{/app/jsrivet/rivet-core/rivet.min.js}"></script>
 <script type="module" th:src="@{/app/jsrivet/rivet-icons/rivet-icons.js}"></script>
