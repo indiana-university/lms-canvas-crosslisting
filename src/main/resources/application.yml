@@ -1,8 +1,6 @@
 spring:
   application:
     name: lms-lti-crosslist
-  session:
-    store-type: none
   config.import: optional:${app.fullFilePath}/${app.overridesFileName}, optional:${app.fullFilePath}/security.properties, classpath:canvas.properties, optional:classpath:git.properties, optional:classpath:denodo.properties, classpath:lti-registrations.properties
   data:
     rest:
@@ -11,16 +9,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-        temp:
-          use_jdbc_metadata_defaults: false
-      jadira:
-        usertype:
-          autoRegisterUserTypes: true
   datasource:
     url: ${lms.db.url}
     username: ${lms.db.user}
@@ -36,15 +24,13 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${oauth.tokenprovider.url}/.well-known/jwks.json
+  web.error.whitelabel.enabled: false
 lms-lti-crosslist:
   version: @app.version@
   env: ${app.env}
   adminRoles: http://purl.imsglobal.org/vocab/lis/v2/institution/person#Administrator
 
 server:
-  error:
-    whitelabel:
-      enabled: false
   servlet:
     session:
       timeout: 30m
@@ -65,8 +51,7 @@ management:
 spring:
   config.activate.on-profile: redis-session
   session:
-    store-type: redis
-    redis.namespace: lms-lti-crosslist-@app.version@:session
+    data.redis.namespace: lms-lti-crosslist-@app.version@:session
 management.health.redis.enabled: true
 
 ---

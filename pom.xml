@@ -9,11 +9,11 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.6</version>
+        <version>4.0.8</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <version>6.1.1-SNAPSHOT</version>
+    <version>7.0.0-SNAPSHOT</version>
     <description>The Cross-listing Assistant in Canvas at Indiana University is a utility for combining enrollments from multiple course sections into a single primary course site, which reduces the administrative overhead of managing a separate version of the course for each section.</description>
     <url>https://github.com/indiana-university/lms-canvas-crosslisting</url>
     <inceptionYear>2015</inceptionYear>
@@ -54,25 +54,24 @@
 
     <properties>
         <app.version>${project.version}</app.version>
-        <denodo-hibernate-dialect.version>9.0.20240513</denodo-hibernate-dialect.version>
-        <denodo-jdbc.version>9.1.0</denodo-jdbc.version>
-        <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
-        <hibernate6-ddl-maven-plugin.version>1.0.2</hibernate6-ddl-maven-plugin.version>
-        <java.version>21</java.version>
-        <jdk.source>21</jdk.source>
-        <jdk.target>21</jdk.target>
-        <jquery.version>3.7.1</jquery.version>
-        <jsoup.version>1.21.2</jsoup.version>
-        <lms-canvas-rivet.version>6.2.9.1_1</lms-canvas-rivet.version>
-        <lms-embedded-services.version>6.3.1</lms-embedded-services.version>
-        <lms-team-spring-boot-it12>6.5.2_2</lms-team-spring-boot-it12>
-        <spring-cloud.version>2025.0.0</spring-cloud.version>
-        <springdoc-openapi-ui.version>2.8.13</springdoc-openapi-ui.version>
-        <webjars-locator.version>0.52</webjars-locator.version>
+        <denodo-hibernate-dialect.version>9.0.20251031</denodo-hibernate-dialect.version>
+        <denodo-jdbc.version>9.4.1</denodo-jdbc.version>
+        <git-commit-id-maven-plugin.version>10.0.1</git-commit-id-maven-plugin.version>
+        <hibernate-jpa-schemagen.version>7.2.2</hibernate-jpa-schemagen.version>
+        <java.version>25</java.version>
+        <jdk.source>25</jdk.source>
+        <jdk.target>25</jdk.target>
+        <jquery.version>4.0.0</jquery.version>
+        <jsoup.version>1.23.2</jsoup.version>
+        <lms-canvas-rivet.version>7.2.9.1_0</lms-canvas-rivet.version>
+        <lms-embedded-services.version>7.0.6</lms-embedded-services.version>
+        <lms-team-spring-boot-it12>7.6.0_0</lms-team-spring-boot-it12>
+        <spring-cloud.version>2025.1.3</spring-cloud.version>
+        <springdoc-openapi-ui.version>3.0.3</springdoc-openapi-ui.version>
 
-        <plugins.compiler.version>3.14.1</plugins.compiler.version>
-        <plugins.license.version>2.7.0</plugins.license.version>
-        <plugins.release.version>3.1.1</plugins.release.version>
+        <plugins.compiler.version>3.16.0</plugins.compiler.version>
+        <plugins.license.version>2.7.1</plugins.license.version>
+        <plugins.release.version>3.3.1</plugins.release.version>
     </properties>
 
     <dependencyManagement>
@@ -118,8 +117,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-data-redis</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-session-data-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.iu.uits.lms</groupId>
@@ -163,11 +162,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -184,7 +183,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -215,8 +214,7 @@
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
-            <artifactId>webjars-locator</artifactId>
-            <version>${webjars-locator.version}</version>
+            <artifactId>webjars-locator-lite</artifactId>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
@@ -227,6 +225,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-properties-migrator</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -272,28 +275,51 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>de.jpdigital</groupId>
-                <artifactId>hibernate65-ddl-maven-plugin</artifactId>
-                <version>${hibernate6-ddl-maven-plugin.version}</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>copy-schemagen-jars</id>
+                        <phase>process-resources</phase>
                         <goals>
-                            <goal>gen-ddl</goal>
+                            <goal>copy</goal>
                         </goals>
-                        <phase>process-classes</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/schemagen-jars</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>edu.iu.uits.lms</groupId>
+                                    <artifactId>lms-canvas-iu-custom-services</artifactId>
+                                    <destFileName>lms-canvas-iu-custom-services.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>edu.iu.uits.lms</groupId>
+                                    <artifactId>lms-canvas-lti-framework</artifactId>
+                                    <destFileName>lms-canvas-lti-framework.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <dialects>
-                        <param>h2</param>
-                        <param>postgresql</param>
-                    </dialects>
-                    <packages>
-                        <param>edu.iu.uits.lms.crosslist.model</param>
-                        <param>edu.iu.uits.lms.iuonly</param>
-                        <param>edu.iu.uits.lms.lti</param>
-                    </packages>
-                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.dellroad</groupId>
+                <artifactId>hibernate-jpa-schemagen-maven-plugin</artifactId>
+                <version>${hibernate-jpa-schemagen.version}</version>
+                <executions>
+                    <execution>
+                        <id>gen-ddl-postgresql</id>
+                        <goals>
+                            <goal>export-jpa-schema</goal>
+                        </goals>
+                        <configuration>
+                            <jpaUnit>postgresql</jpaUnit>
+                            <outputFile>${project.build.directory}/generated-resources/postgresql.sql</outputFile>
+                            <verifyFile>NONE</verifyFile>
+                            <removePersistenceXml>true</removePersistenceXml>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -301,6 +327,12 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -347,6 +379,48 @@
     </build>
 
     <profiles>
+        <profile>
+            <!--
+                The following configurations need to be set in your Maven settings.xml file before invoking this profile:
+                    docker.publish.username The username to authenticate with the registry
+                    docker.publish.password The password to authenticate with the registry
+            -->
+            <id>build-image</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>build-image-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <docker>
+                                <publishRegistry>
+                                    <username>${docker.publish.username}</username>
+                                    <password>${docker.publish.password}</password>
+                                    <url>https://registry.docker.iu.edu</url>
+                                </publishRegistry>
+                            </docker>
+                            <publish>true</publish>
+                            <image>
+                                <env>
+                                    <HTTP_PROXY>${http.proxy}</HTTP_PROXY>
+                                    <HTTPS_PROXY>${https.proxy}</HTTPS_PROXY>
+                                    <NO_PROXY>${http.nonProxyHosts}</NO_PROXY>
+                                    <TZ>America/Indiana/Indianapolis</TZ>
+                                </env>
+                            </image>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>denodo</id>
             <dependencies>

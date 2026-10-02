@@ -69,14 +69,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -93,6 +92,7 @@ import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -158,11 +158,12 @@ public class CrosslistControllerTest {
     private static String SIS_COURSE_ID = "1234_SIS";
     private static String USER_ID = "user1";
 
+    private OidcAuthenticationToken token;
+
 
     @BeforeEach
     public void setup() {
-        OidcAuthenticationToken token = TestUtils.buildToken(USER_ID, COURSE_ID, LTIConstants.INSTRUCTOR_AUTHORITY);
-        SecurityContextHolder.getContext().setAuthentication(token);
+        token = TestUtils.buildToken(USER_ID, COURSE_ID, LTIConstants.INSTRUCTOR_AUTHORITY);
 
         CanvasTerm canvasTerm = new CanvasTerm();
         canvasTerm.setId("1111");
@@ -203,6 +204,7 @@ public class CrosslistControllerTest {
                 .thenReturn(false);
 
         MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/continue", COURSE_ID))
+                        .with(authentication(token))
                         .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -248,6 +250,7 @@ public class CrosslistControllerTest {
                 .thenReturn(true);
 
         MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/continue", COURSE_ID))
+                        .with(authentication(token))
                         .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -283,6 +286,7 @@ public class CrosslistControllerTest {
                 .thenReturn(new java.util.HashMap<>(java.util.Map.of(canvasTerm, List.of())));
 
         MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .with(authentication(token))
                         .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -311,6 +315,7 @@ public class CrosslistControllerTest {
         Mockito.when(crosslistService.getCoursesTaughtBy(USER_ID, false)).thenReturn(List.of(course));
 
         MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .with(authentication(token))
                         .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -342,9 +347,9 @@ public class CrosslistControllerTest {
 
         // Simulate admin role
         OidcAuthenticationToken adminToken = TestUtils.buildToken(USER_ID, COURSE_ID, LTIConstants.ADMIN_AUTHORITY);
-        SecurityContextHolder.getContext().setAuthentication(adminToken);
 
         MvcResult mvcResult = mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .with(authentication(adminToken))
                         .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -466,6 +471,7 @@ public class CrosslistControllerTest {
                 .thenReturn(new java.util.HashMap<>(java.util.Map.of(currentTerm, List.of())));
 
         mvc.perform(post(String.format("/app/%s/main", COURSE_ID))
+                        .with(authentication(token))
                         .header(HttpHeaders.USER_AGENT, TestUtils.defaultUseragent())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))

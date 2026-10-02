@@ -42,7 +42,7 @@ import edu.iu.uits.lms.crosslist.model.FindParentResult;
 import edu.iu.uits.lms.crosslist.model.SubmissionStatus;
 import edu.iu.uits.lms.crosslist.repository.DecrosslistAuditRepository;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
-import edu.iu.uits.lms.iuonly.model.acl.AuthorizedUser;
+import edu.iu.uits.lms.iuonly.model.tps.AuthUser;
 import edu.iu.uits.lms.iuonly.services.AuthorizedUserService;
 import edu.iu.uits.lms.lti.LTIConstants;
 import edu.iu.uits.lms.lti.controller.OidcTokenAwareController;
@@ -64,7 +64,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static edu.iu.uits.lms.crosslist.CrosslistConstants.AUTH_USER_TOOL_PERMISSION;
 
 @Controller
 @Slf4j
@@ -148,7 +147,7 @@ public class DecrosslistController extends OidcTokenAwareController {
         // get current username for logging purposes
         String username = oidcTokenUtils.getUserLoginId();
         // get official user info from database table for the audit log
-        AuthorizedUser userInfo = authorizedUserService.findByActiveUsernameAndToolPermission(username, AUTH_USER_TOOL_PERMISSION);
+        AuthUser userInfo = authorizedUserService.findByUsername(username);
 
         boolean hasSuccesses = false;
         boolean hasErrors = false;

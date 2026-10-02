@@ -11,16 +11,6 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v7
-    - name: Set up JDK 21
-      uses: actions/setup-java@v6
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package license:check-file-header --file pom.xml
+    uses: indiana-university/lms-githubaction-library/.github/workflows/maven.yml@v1
+    with:
+      java_version: 25

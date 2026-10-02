@@ -13,17 +13,8 @@ on:
   workflow_dispatch:
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup git and other necessary files
-        run: |
-          echo -n '${{ secrets.LMS_GIT_CONFIG }}' | base64 -d > ~/.gitconfig
-      - uses: actions/checkout@v7
-      - name: Set up JDK
-        uses: actions/setup-java@v6
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-      - name: Release prepare/perform
-        run: mvn clean release:prepare release:perform -B
+    uses: indiana-university/lms-githubaction-library/.github/workflows/release.yml@v1
+    with:
+      java_version: 25
+    secrets:
+      LMS_GIT_CONFIG: ${{ secrets.LMS_GIT_CONFIG }}
