@@ -47,7 +47,7 @@ $(document).ready(function(){
     modalButtonToggle();
 
     // Canvas has a message listener to resize the iframe
-    parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+    resizeCanvasFrame();
 
     /* Reset Button */
     $('#reset-button').on('click', function(){
@@ -141,7 +141,7 @@ $(document).ready(function(){
 
         // Call Canvas's message listener to resize the iframe since the loading icon
         // pushes the content down
-        parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+        resizeCanvasFrame();
 
         $("#addTerm").attr("disabled", true);
         $("#addTerm").attr("aria-disabled", true);
@@ -172,7 +172,7 @@ $(document).ready(function(){
            $("#addTerm").attr("aria-disabled", false);
 
            // Canvas has a message listener to resize the iframe
-           parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+           resizeCanvasFrame();
         }
 
         // move focus to the newly added term
@@ -347,6 +347,16 @@ function modalButtonToggle() {
     });
 }
 
+/**
+ * Ask Canvas to resize the tool's iframe to fit the content.
+ * Rivet sets html to height:100%, so $(document).height() never reports less than the iframe's current height and the
+ * iframe could only ever grow (e.g. after impersonating a user with lots of sections). That left fixed-position
+ * dialogs, which are placed relative to the iframe's height, too low on the page. Measure the body content instead.
+ */
+function resizeCanvasFrame() {
+    parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: document.body.scrollHeight}), '*');
+}
+
 function loadUnavailableSections() {
     var loadDiv = $('#unavailable-sections-load');
     var urlBase = loadDiv.data('urlbase');
@@ -374,7 +384,7 @@ function loadUnavailableSections() {
 
     // Call Canvas's message listener to resize the iframe since the loading icon
     // pushes the content down
-    parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: $(document).height()}), '*');
+    resizeCanvasFrame();
 
     // load the new unavailable sections
     loadDiv.load(urlBase, {joinedTerms: joinedTerms},
