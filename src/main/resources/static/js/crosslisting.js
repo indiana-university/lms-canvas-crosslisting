@@ -349,9 +349,8 @@ function modalButtonToggle() {
 
 /**
  * Ask Canvas to resize the tool's iframe to fit the content.
- * Rivet sets html to height:100%, so $(document).height() never reports less than the iframe's current height and the
- * iframe could only ever grow (e.g. after impersonating a user with lots of sections). That left fixed-position
- * dialogs, which are placed relative to the iframe's height, too low on the page. Measure the body content instead.
+ * Note: Rivet sets both html and body to height:100%, so document.body.scrollHeight never reports less than the
+ * iframe's current height. The iframe can grow to fit new content but will not shrink when there is less of it.
  */
 function resizeCanvasFrame() {
     parent.postMessage(JSON.stringify({subject: 'lti.frameResize', height: document.body.scrollHeight}), '*');

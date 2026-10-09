@@ -77,6 +77,13 @@
     border-bottom: 0.125rem solid #dddddd;
 }
 
+/* override rivet's vertical centering (top: 40%) - the dialog is fixed relative to the iframe, which can be much taller
+   than the visible Canvas window, so anchor it near the top where the Impersonate User button lives */
+#dialog-impersonate {
+    top: 4rem;
+    transform: none;
+}
+
 #addTerms {
     font-weight: inherit;
     font-size: inherit;
