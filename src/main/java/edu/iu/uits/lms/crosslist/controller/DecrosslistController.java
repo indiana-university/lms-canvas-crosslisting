@@ -104,24 +104,8 @@ public class DecrosslistController extends OidcTokenAwareController {
         String sisIdSearch = findParentModel.getSisIdSearch().trim();
         findParentResult = crosslistService.processSisLookup(sisIdSearch);
 
-        List<Section> unavailableToDecrosslistSectionsList = new ArrayList<>();
-        List<Section> availableToDecrosslistSectionsList = new ArrayList<>();
-
         if (findParentResult != null) {
-            List<Section> fullSectionList = findParentResult.getSectionList();
-
-            if (fullSectionList != null) {
-                for (Section section : fullSectionList) {
-                    if (section.getSis_section_id() == null || section.getNonxlist_course_id() == null) {
-                        unavailableToDecrosslistSectionsList.add(section);
-                    } else {
-                        availableToDecrosslistSectionsList.add(section);
-                    }
-                }
-            }
-
-            model.addAttribute("unavailableToDecrosslistSectionsList", unavailableToDecrosslistSectionsList);
-            model.addAttribute("availableToDecrosslistSectionsList", availableToDecrosslistSectionsList);
+            model.addAttribute("availableToDecrosslistSectionsList", getDecrosslistableSections(findParentResult));
 
             model.addAttribute("findParentResult", findParentResult);
 
@@ -209,24 +193,25 @@ public class DecrosslistController extends OidcTokenAwareController {
             // add canvasCourseId to be used in audit log purposes later
             model.addAttribute("canvasCourseId", findParentResult.getCanvasCourseId());
 
-            List<Section> fullSectionList = findParentResult.getSectionList();
-            List<Section> unavailableToDecrosslistSectionsList = new ArrayList<>();
-            List<Section> availableToDecrosslistSectionsList = new ArrayList<>();
-
-            if (fullSectionList != null) {
-                for (Section section : fullSectionList) {
-                    if (section.getSis_section_id() == null || section.getNonxlist_course_id() == null) {
-                        unavailableToDecrosslistSectionsList.add(section);
-                    } else {
-                        availableToDecrosslistSectionsList.add(section);
-                    }
-                }
-            }
-
-            model.addAttribute("unavailableToDecrosslistSectionsList", unavailableToDecrosslistSectionsList);
-            model.addAttribute("availableToDecrosslistSectionsList", availableToDecrosslistSectionsList);
+            model.addAttribute("availableToDecrosslistSectionsList", getDecrosslistableSections(findParentResult));
         }
 
         return "findParentCourse";
+    }
+
+    /**
+     * Only sections that were crosslisted in from another course can be de-crosslisted. Sections created in this
+     * course (including its original section) have nowhere to go back to, so they are not listed at all.
+     */
+    private List<Section> getDecrosslistableSections(FindParentResult findParentResult) {
+        List<Section> fullSectionList = findParentResult.getSectionList();
+
+        if (fullSectionList == null) {
+            return new ArrayList<>();
+        }
+
+        return fullSectionList.stream()
+                .filter(section -> section.getNonxlist_course_id() != null)
+                .toList();
     }
 }

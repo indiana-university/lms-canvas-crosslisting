@@ -122,10 +122,19 @@ public class CrosslistService {
       // only need to get this once for the Unavailable Sections
       CanvasTerm unavailableCanvasTerm = getUnavailableCanvasTerm();
 
+      // Lookups about the current course don't change from course to course (or section to section), so only do them
+      // once per call. They are lazy so that a call that never needs them doesn't make the queries at all.
+      SisCourse currentSisCourse = null;
+      Boolean isCurrentCourseLegitSis = null;
+
       for (Course course : courses) {
+         if (currentSisCourse == null) {
+            currentSisCourse = lookupSisCourseForEtexts(currentCourse.getSisCourseId());
+         }
+
          // Regardless of any flags or admin status, if etext/ISBN values don't match exactly between the courses,
          // none of the course's sections are eligible for display. Do this upfront to save time by skipping course processing
-         if (!canCoursesBeCrosslistedBasedOnEtexts(currentCourse.getSisCourseId(), course.getSisCourseId())) {
+         if (!canCoursesBeCrosslistedBasedOnEtexts(currentSisCourse, lookupSisCourseForEtexts(course.getSisCourseId()))) {
             log.debug("SKIP: etext mismatch between courses: {}", course.getSisCourseId());
             continue;
          }
@@ -191,11 +200,11 @@ public class CrosslistService {
             }
          }
 
-         // This call is cacheable in the courseService and will save time on subsequent calls
-         List<Enrollment> listOfTeacherEnrollmentsInCourse = courseService.getTeacherCourseEnrollment(course.getId());
-
          // if the loadUnavailable flag is true, we don't care about any of this
          if (!loadUnavailable) {
+            // This call is cacheable in the courseService and will save time on subsequent calls
+            List<Enrollment> listOfTeacherEnrollmentsInCourse = courseService.getTeacherCourseEnrollment(course.getId());
+
             // made it through course level things, let's check sections if they're available to display
             for (Section section : listOfSections) {
                // Keep term buckets isolated per section; otherwise a list can be reused across terms.
@@ -234,21 +243,18 @@ public class CrosslistService {
                // let's do some more checks!
                boolean addedSection = false;
 
-               // if this is the current course's original section, skip it
-               // 2 styles of determining original section, depending if the current course is SIS or not
-               boolean isCurrentCourseLegitSis = sisService.isLegitSisCourse(currentCourse.getSisCourseId());
-               if (isCurrentCourseLegitSis) {
-                  // use this for legit SIS, as it's better criteria
-                  if (currentCourse.getSisCourseId().equals(section.getSis_section_id()) && section.getNonxlist_course_id() == null) {
-                     log.debug("SKIP: section is the current course's original section: {}", section.getSis_section_id());
-                     continue;
-                  }
-               } else {
-                  // non-SIS courses should use this criteria since sisCourseId will likely be null
-                  if (currentCourse.getId().equals(section.getCourse_id()) && section.getNonxlist_course_id() == null) {
-                     log.debug("SKIP: section is the current course's original section: {}", section.getId());
-                     continue;
-                  }
+               if (isCurrentCourseLegitSis == null) {
+                  isCurrentCourseLegitSis = sisService.isLegitSisCourse(currentCourse.getSisCourseId());
+               }
+
+               // if this section was created in the current course (the original section, or any other section added
+               // directly to it), skip it. It was never crosslisted in, so there is nothing to de-crosslist it back to.
+               // For legit SIS courses, also match the original section by SIS id, as it's better criteria
+               if (section.getNonxlist_course_id() == null &&
+                     (currentCourse.getId().equals(section.getCourse_id()) ||
+                      (isCurrentCourseLegitSis && currentCourse.getSisCourseId().equals(section.getSis_section_id())))) {
+                  log.debug("SKIP: section is native to the current course: {}", section.getId());
+                  continue;
                }
 
                if (currentCourse.getId().equals(section.getCourse_id())) {
@@ -361,12 +367,19 @@ public class CrosslistService {
    }
 
    public boolean canCoursesBeCrosslistedBasedOnEtexts(String sourceSisCourseSiteId, String destinationSisCourseSiteId) {
-      SisCourse sourceSisCourse = sisService.getSisCourseBySiteId(sourceSisCourseSiteId);
-      sourceSisCourse = sourceSisCourse == null ? new SisCourse() : sourceSisCourse;
+      return canCoursesBeCrosslistedBasedOnEtexts(lookupSisCourseForEtexts(sourceSisCourseSiteId),
+            lookupSisCourseForEtexts(destinationSisCourseSiteId));
+   }
 
-      SisCourse destinationSisCourse = sisService.getSisCourseBySiteId(destinationSisCourseSiteId);
-      destinationSisCourse = destinationSisCourse == null ? new SisCourse() : destinationSisCourse;
+   /**
+    * Look up the SisCourse for the etext comparison, substituting an empty SisCourse when there is no record
+    */
+   private SisCourse lookupSisCourseForEtexts(String sisCourseSiteId) {
+      SisCourse sisCourse = sisService.getSisCourseBySiteId(sisCourseSiteId);
+      return sisCourse == null ? new SisCourse() : sisCourse;
+   }
 
+   private boolean canCoursesBeCrosslistedBasedOnEtexts(SisCourse sourceSisCourse, SisCourse destinationSisCourse) {
       if (sourceSisCourse.getEtextIsbns() == null && destinationSisCourse.getEtextIsbns() != null) {
          return false;
       }

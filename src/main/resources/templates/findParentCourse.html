@@ -108,21 +108,10 @@
                     <div class="rvt-m-top-sm">
                         <span>
                             Select sections to remove, then activate the 'De-cross-list selected sections' button to
-                            remove those sections from the course. Unavailable sections are those that do not have an
-                            SIS ID, or it is the course's original section.
+                            remove those sections from the course. Only sections that were cross-listed into this
+                            course from another course are listed.
                         </span>
                     </div>
-                </div>
-                <div class="rvt-m-top-sm">
-                    <fieldset class="rvt-fieldset">
-                        <legend class="rvt-legend rvt-text-bold rvt-ts-16">Unavailable sections</legend>
-                        <p th:if="${unavailableToDecrosslistSectionsList == null or unavailableToDecrosslistSectionsList.empty}">None listed</p>
-                        <ul th:unless="${unavailableToDecrosslistSectionsList == null or unavailableToDecrosslistSectionsList.empty}" class="rvt-list-plain">
-                            <li th:id="'row_' + ${section.Id}" th:each="section : ${unavailableToDecrosslistSectionsList}">
-                                <span th:text="${section.name}">Section Name</span>
-                            </li>
-                        </ul>
-                    </fieldset>
                 </div>
                 <div class="rvt-m-top-sm">
                     <fieldset id="available-sections" class="rvt-fieldset" aria-required="true">
@@ -130,7 +119,7 @@
                             <span class="rvt-sr-only">Select at least one course to de-cross-list</span>
                         </legend>
 
-                        <p th:if="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}" class="-rvt-m-top-xs">No sections available</p>
+                        <p th:if="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}" class="-rvt-m-top-xs">No cross-listed sections to remove</p>
 
                         <th:block th:unless="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}">
                             <button type="button" id="select-all-button" class="rvt-button rvt-button--small rvt-button--secondary rvt-m-bottom-sm">Select all</button>
