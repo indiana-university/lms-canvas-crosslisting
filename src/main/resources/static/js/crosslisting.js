@@ -30,9 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-var summaryNone = "<li id='summaryNone'>None</li>";
-var summary = $('.summaryList').clone(true);
-var checkedValue;
+const summaryNone = "<li id='summaryNone'>None</li>";
+let checkedValue;
 
 $(document).ready(function(){
     // this section sometimes processes before it actually exists
@@ -46,17 +45,21 @@ $(document).ready(function(){
     checkboxEventRegistration();
     modalButtonToggle();
 
-    // Canvas has a message listener to resize the iframe
-    resizeCanvasFrame();
+    // Canvas has a message listener to resize the iframe. Re-send the height whenever the page content changes size
+    // (ajax-loaded sections, toggled terms, loaders, late-loading fonts, etc.)
+    const resizeObserver = new ResizeObserver(() => resizeCanvasFrame());
+    $('body').children().each(function() {
+        resizeObserver.observe(this);
+    });
 
     /* Reset Button */
     $('#reset-button').on('click', function(){
 
         //Reset section area
         $('.sectionsList li').each(function() {
-            var li = $(this);
-            var currCheckbox = li.find('input[type=checkbox]');
-            var isChecked = currCheckbox.is(":checked");
+            let li = $(this);
+            let currCheckbox = li.find('input[type=checkbox]');
+            let isChecked = currCheckbox.is(":checked");
             li.removeClass("currently_checked");
             if (li.hasClass('originally_checked')) {
                 li.addClass("currently_checked");
@@ -72,7 +75,7 @@ $(document).ready(function(){
         });
 
         //Disable submit button
-        var submitButton = $('#continue-button');
+        let submitButton = $('#continue-button');
         submitButton.attr("disabled", true);
         submitButton.attr("aria-disabled", true);
 
@@ -83,13 +86,13 @@ $(document).ready(function(){
 
     /* Continue Button, submits the form */
     $('#main').on('submit', function(event) {
-        var submitButton = $('button:focus');
+        let submitButton = $('button:focus');
 
         handleLoading(submitButton);
 
-        var sectionList = createJSON($('.sectionsList li'));
+        let sectionList = createJSON($('.sectionsList li'));
 
-        var form = event.target;
+        let form = event.target;
 
         $('<input />').attr('type', 'hidden')
                 .attr('name', "sectionList")
@@ -115,20 +118,20 @@ $(document).ready(function(){
     $('form').preventDoubleSubmission();
 
     $('#addTerm').on('change', function() {
-        var obj = $(this);
-        var urlBase = obj.data('urlbase');
-        var termId = obj.val();
-        var sectionList = createJSON($('.sectionsList li'));
-        var jsonSectionList = JSON.stringify(sectionList);
+        let obj = $(this);
+        let urlBase = obj.data('urlbase');
+        let termId = obj.val();
+        let sectionList = createJSON($('.sectionsList li'));
+        let jsonSectionList = JSON.stringify(sectionList);
 
         lockSectionCheckboxInteraction(true);
 
-        var collapsedTermsList = getCollapsedTermsString();
+        let collapsedTermsList = getCollapsedTermsString();
 
         // load the new term data
         $("#dataDiv").load(urlBase + termId, {sectionList: jsonSectionList, collapsedTerms: collapsedTermsList},
         function(response, status, xhr) {
-            if (xhr.status == 403) {
+            if (xhr.status === 403) {
                 window.location.replace("error");
             }
 
@@ -139,20 +142,16 @@ $(document).ready(function(){
         $("#addTerm option[value=" + termId + "]").remove();
         $("#loading").show();
 
-        // Call Canvas's message listener to resize the iframe since the loading icon
-        // pushes the content down
-        resizeCanvasFrame();
-
-        $("#addTerm").attr("disabled", true);
-        $("#addTerm").attr("aria-disabled", true);
+        $("#addTerm").attr("disabled", true)
+            .attr("aria-disabled", true);
     });
 
     $('#cancel-button,#edit-button,#submit-button').on('click', function(){
-        var actionButton = $(this);
+        let actionButton = $(this);
 
         // when we disable buttons, their values are not submitted. So we need to set the hidden input
         // to the value of the button clicked
-        var submitValue = actionButton.val();
+        let submitValue = actionButton.val();
         $('#submitValue').val(submitValue);
 
         handleLoading(actionButton);
@@ -161,22 +160,19 @@ $(document).ready(function(){
     });
 
     $(document).ajaxComplete(function(event, xhr, settings) {
-        var unavailableSectionsUrl = $('#unavailable-sections-load').data('urlbase');
+        let unavailableSectionsUrl = $('#unavailable-sections-load').data('urlbase');
 
         if (settings.url !== unavailableSectionsUrl) {
            checkboxEventRegistration();
            modalButtonToggle();
            lockSectionCheckboxInteraction(false);
            $("#loading").hide();
-           $("#addTerm").attr("disabled", false);
-           $("#addTerm").attr("aria-disabled", false);
-
-           // Canvas has a message listener to resize the iframe
-           resizeCanvasFrame();
+           $("#addTerm").attr("disabled", false)
+               .attr("aria-disabled", false);
         }
 
         // move focus to the newly added term
-        var focusElement = $(".newTerm").first();
+        let focusElement = $(".newTerm").first();
         if (focusElement) {
             focusElement.focus();
         }
@@ -187,12 +183,12 @@ function handleLoading(actionButton) {
     actionButton.attr({'aria-busy': 'true'});
     actionButton.addClass("rvt-button--loading");
 
-    var spinner = actionButton.find(".rvt-loader").first();
+    let spinner = actionButton.find(".rvt-loader").first();
     if (spinner) {
         spinner.removeClass("rvt-display-none");
     }
 
-    var SRText = actionButton.find(".loading-text");
+    let SRText = actionButton.find(".loading-text");
     if (SRText) {
         SRText.removeClass("rvt-display-none");
     }
@@ -201,7 +197,7 @@ function handleLoading(actionButton) {
 }
 
 function lockSectionCheckboxInteraction(shouldLock) {
-    var checkboxes = $('.sectionsList :checkbox');
+    let checkboxes = $('.sectionsList :checkbox');
     checkboxes.prop('disabled', shouldLock);
 
     if (shouldLock) {
@@ -215,15 +211,15 @@ function lockSectionCheckboxInteraction(shouldLock) {
  *
  **/
 function createJSON(obj) {
-    jsonObj = [];
+    let jsonObj = [];
     $(obj).each(function() {
         //Should be a bunch of li elements
-        var li = $(this);
-        var id = li.data("sectionid");
-        var name = li.data("sectionname");
-        var term = li.data("termid");
+        let li = $(this);
+        let id = li.data("sectionid");
+        let name = li.data("sectionname");
+        let term = li.data("termid");
 
-        var item = {}
+        let item = {}
         item ["termId"] = term;
         item ["sectionId"] = id;
         item ["sectionName"] = name;
@@ -237,13 +233,13 @@ function createJSON(obj) {
     return jsonObj;
 }
 
-function getCollapsedTermsString(obj) {
-    collapsedTerms = [];
+function getCollapsedTermsString() {
+    let collapsedTerms = [];
 
-    var obj = $('div.collapse:not(.in)')
+    let obj = $('div.collapse:not(.in)')
     $(obj).each(function() {
         //Should be the collapsed divs. The id of the div is the term id.
-        var term_id = $(this).attr("id");
+        let term_id = $(this).attr("id");
         collapsedTerms.push(term_id);
     });
 
@@ -251,7 +247,7 @@ function getCollapsedTermsString(obj) {
 }
 
 function getCheckboxValues() {
-    var checkboxValues = $.map($('input:checkbox:checked'), function(e, i) {
+    let checkboxValues = $.map($('input:checkbox:checked'), function(e, i) {
         return e.value;
     });
     return checkboxValues;
@@ -260,7 +256,7 @@ function getCheckboxValues() {
 // jQuery plugin to prevent double submission of forms
 jQuery.fn.preventDoubleSubmission = function() {
     $(this).on('submit',function(e){
-        var $form = $(this);
+        let $form = $(this);
 
         if ($form.data('submitted') === true) {
             // Previously submitted - don't submit again
@@ -268,7 +264,7 @@ jQuery.fn.preventDoubleSubmission = function() {
         } else {
             // Mark it so that the next submit can be ignored
             $form.data('submitted', true);
-            var buttons = $('button[type="submit"]');
+            let buttons = $('button[type="submit"]');
             $(buttons).each(function() {
                 $(this).css('opacity', '0.6');
             });
@@ -284,11 +280,11 @@ function checkboxEventRegistration() {
         // make sure the "reset" msg is cleared out since there is a new change
         $('#resetMsg').text('');
 
-        var currentBox = $(this);
-        var li = currentBox.parent().parent();
+        let currentBox = $(this);
+        let li = currentBox.parent().parent();
 
         if (currentBox.is(":checked")) {
-            var newLi = $("<li>", {
+            let newLi = $("<li>", {
                     id: 'summary_' + currentBox.attr('id'),
                     class: 'sectionHighlight',
                     text: currentBox.val()
@@ -305,15 +301,15 @@ function checkboxEventRegistration() {
             li.addClass("currently_checked");
         } else {
             $('.summaryList #summary_'+currentBox.attr('id')).remove();
-            if ($('.summaryList li').length == 0) {
+            if ($('.summaryList li').length === 0) {
                 $('.summaryList').append(summaryNone);
             }
 
             li.removeClass("currently_checked");
         }
 
-        var updatedCheckedValue = getCheckboxValues();
-        var submitButton = $('#continue-button');
+        let updatedCheckedValue = getCheckboxValues();
+        let submitButton = $('#continue-button');
         if ($(checkedValue).not(updatedCheckedValue).length === 0 && $(updatedCheckedValue).not(checkedValue).length === 0)
         {
             submitButton.attr("disabled", true);
@@ -336,7 +332,7 @@ $(window).on('unload', function(){
 
 function modalButtonToggle() {
     $('#impersonateDropdown').change('click', function(event) {
-        var modalSubmit = $('#modal-submit');
+        let modalSubmit = $('#modal-submit');
         if (!$('#impersonateDropdown').val()) {
             modalSubmit.attr("disabled", true);
             modalSubmit.attr("aria-disabled", true);
@@ -357,21 +353,21 @@ function resizeCanvasFrame() {
 }
 
 function loadUnavailableSections() {
-    var loadDiv = $('#unavailable-sections-load');
-    var urlBase = loadDiv.data('urlbase');
+    let loadDiv = $('#unavailable-sections-load');
+    let urlBase = loadDiv.data('urlbase');
 
-    var token = $('#_csrf').attr('content');
-    var header = $('#_csrf_header').attr('content');
+    let token = $('#_csrf').attr('content');
+    let header = $('#_csrf_header').attr('content');
     $(document).ajaxSend(function(e,xhr,options) {
        xhr.setRequestHeader(header, token);
     });
 
     loadDiv.empty();
 
-    var displayedTerms = [];
+    let displayedTerms = [];
 
-    var activeTerm = $('#active-term');
-    var olderTerms = $('button.toggleoverride');
+    let activeTerm = $('#active-term');
+    let olderTerms = $('button.toggleoverride');
 
     displayedTerms.push(activeTerm.data('active-term-id'));
 
@@ -379,16 +375,12 @@ function loadUnavailableSections() {
                         displayedTerms.push($(this).attr('aria-controls'));
     });
 
-   var joinedTerms = displayedTerms.join();
-
-    // Call Canvas's message listener to resize the iframe since the loading icon
-    // pushes the content down
-    resizeCanvasFrame();
+    let joinedTerms = displayedTerms.join();
 
     // load the new unavailable sections
     loadDiv.load(urlBase, {joinedTerms: joinedTerms},
         function(response, status, xhr) {
-            if (xhr.status == 403) {
+            if (xhr.status === 403) {
                 window.location.replace("error");
             }
         });

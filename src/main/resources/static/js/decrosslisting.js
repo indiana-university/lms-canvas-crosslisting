@@ -92,17 +92,18 @@ function submitSisIdForm(button) {
 }
 
 function validateCheckboxForm(button) {
-    // Get all the selected checkboxes, except the "select-all" one up in the table header
-    let checkboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").filter(':checked').length;
+    // Get all the checkboxes, except the "select-all" one up in the table header
+    const allCheckboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all");
+    const checkedCount = allCheckboxes.filter(':checked').length;
 
-    if (checkboxes > 0) {
+    if (checkedCount > 0) {
         buttonLoading(button);
         document.getElementById('decrosslist-form').submit();
     } else {
-        let checkboxValidationMessage = document.getElementById('checkbox-validation-message');
+        const checkboxValidationMessage = document.getElementById('checkbox-validation-message');
         checkboxValidationMessage.classList.remove('rvt-display-none');
 
-        let firstCheckbox = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").first();
+        const firstCheckbox = allCheckboxes.first();
         firstCheckbox.attr('aria-invalid', true);
         firstCheckbox.attr('aria-describedby', 'checkbox-validation-message');
         firstCheckbox.focus();
