@@ -54,10 +54,10 @@
         </button>
     </div>
 
-    <h1 id="tool-title" tabindex="-1" class="rvt-p-top-sm rvt-ts-36">De-cross-listing sections</h1>
+    <h1 id="tool-title" class="rvt-p-top-sm rvt-ts-36">De-cross-listing sections</h1>
 
     <div class="rvt-p-tb-sm">
-        <span>This tool will only return exact matches.</span>
+        <span id="sisid-search-hint">This tool will only return exact matches.</span>
     </div>
 
     <form th:object="${findParentModel}" id="sisIdForm" action="findParentCourse.html"
@@ -66,7 +66,7 @@
             <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS Section ID</label>
             <div class="rvt-input-group">
                 <input class="rvt-text-input rvt-input-group__input" type="text" id="sisid-search"
-                       th:attr="aria-describedby=${errorMsg} ? 'sisid-error-text sisid-search-description' : 'sisid-search-description', aria-invalid=${errorMsg} ? 'true'"
+                       th:attr="aria-describedby=${errorMsg} ? 'sisid-error-text sisid-search-hint sisid-search-description' : 'sisid-search-hint sisid-search-description', aria-invalid=${errorMsg} ? 'true'"
                        th:field="*{sisIdSearch}" aria-required="true" />
                 <div class="rvt-input-group__append">
                     <button id="find-button" type="submit" class="rvt-button" onclick="event.preventDefault(); submitSisIdForm(this);">

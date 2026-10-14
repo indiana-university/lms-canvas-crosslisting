@@ -34,11 +34,10 @@
 jQuery(document).ready(function() {
     // Move focus to the most relevant thing on the page so screen readers announce it after each page load.
     // The status alert is rendered with the page, so its role="alert" alone won't reliably be announced.
-    let invalidSearch = document.querySelector('#sisid-search[aria-invalid="true"]');
+    // Otherwise (first load, or a failed search) focus the search input so the user can start typing.
     let focusTarget = document.getElementById('alert')
-        || invalidSearch
         || document.getElementById('results-message')
-        || document.getElementById('tool-title');
+        || document.getElementById('sisid-search');
 
     if (focusTarget != null) {
         focusTarget.focus();
@@ -84,7 +83,7 @@ function submitSisIdForm(button) {
         validationMessage.classList.remove('rvt-display-none');
 
         searchInput.setAttribute('aria-invalid', true);
-        searchInput.setAttribute('aria-describedby', 'sisid-error-text sisid-search-description');
+        searchInput.setAttribute('aria-describedby', 'sisid-error-text sisid-search-hint sisid-search-description');
         searchInput.focus();
 
         return false;
