@@ -43,9 +43,9 @@
 <body>
 <div layout:fragment="content">
     <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-top-md" th:classappend="${submissionStatus.statusClass}"
-         role="alert" data-rvt-alert="submissionStatus">
-        <div class="rvt-alert__title" th:text="${submissionStatus.statusTitle}">Success</div>
-        <p class="rvt-alert__message" th:text="${submissionStatus.statusMessage}">status message goes here</p>
+         role="alert" tabindex="-1" aria-labelledby="alert-title" aria-describedby="alert-message" data-rvt-alert="submissionStatus">
+        <div id="alert-title" class="rvt-alert__title" th:text="${submissionStatus.statusTitle}">Success</div>
+        <p id="alert-message" class="rvt-alert__message" th:text="${submissionStatus.statusMessage}">status message goes here</p>
         <button th:unless="${submissionStatus.statusClass == T(edu.iu.uits.lms.crosslist.CrosslistConstants).STATUS_FAILED}" type="button" class="rvt-alert__dismiss" data-rvt-alert-close>
             <span class="rvt-sr-only">Close</span>
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -54,7 +54,7 @@
         </button>
     </div>
 
-    <h1 id="tool-title" class="rvt-p-top-sm rvt-ts-36">De-cross-listing sections</h1>
+    <h1 id="tool-title" tabindex="-1" class="rvt-p-top-sm rvt-ts-36">De-cross-listing sections</h1>
 
     <div class="rvt-p-tb-sm">
         <span>This tool will only return exact matches.</span>
@@ -94,8 +94,13 @@
         <form th:object="${findParentModel}" id="decrosslist-form" th:action="@{|/app/decrosslist-sections|}" method="post">
             <div class="rvt-flex rvt-items-center">
                 <rvt-icon th:name="${findParentResult.statusIconName}" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
-                <h2 id="results-message" tabindex="-1" th:text="|Parent course found: ${findParentResult.displaySisCourseId}|" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
+                <h2 id="results-message" tabindex="-1" aria-describedby="results-count" th:text="|Parent course found: ${findParentResult.displaySisCourseId}|" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
             </div>
+            <p id="results-count" class="rvt-m-top-xs"
+               th:with="count=${availableToDecrosslistSectionsList == null ? 0 : availableToDecrosslistSectionsList.size()}"
+               th:text="${count == 1} ? '1 section can be de-cross-listed.' : |${count == 0 ? 'No' : count} sections can be de-cross-listed.|">
+                2 sections can be de-cross-listed.
+            </p>
             <div>
                 <div class="rvt-p-top-sm">
                     <div>

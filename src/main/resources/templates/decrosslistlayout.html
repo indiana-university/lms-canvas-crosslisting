@@ -52,9 +52,9 @@
 
 <div layout:fragment="content" class="rvt-container-xl" aria-label="De-cross-listing sections" role="main">Page content goes here</div>
 
-<footer th:unless="${hideFooter}" class="rvt-ts-12 rvt-container-xl rvt-m-top-lg">
-    <div th:text="${@serverInfo}"></div>
-</footer>
+<th:block th:with="siElements=${@serverInfo.elements}">
+    <div th:replace="~{commonFragments/layouts :: footer(${hideFooter}, ${siElements})}"></div>
+</th:block>
 
 <script type="text/javascript" th:src="@{/app/jsrivet/rivet-core/rivet.min.js}"></script>
 <script type="module" th:src="@{/app/jsrivet/rivet-icons/rivet-icons.js}"></script>

@@ -93,9 +93,9 @@
         </span>
     </div>
 </div>
-<footer th:unless="${hideFooter}">
-    <div id="footer" th:text="${@serverInfo}"></div>
-</footer>
+<th:block th:with="siElements=${@serverInfo.elements}">
+    <div th:replace="~{commonFragments/layouts :: footer(${hideFooter}, ${siElements})}"></div>
+</th:block>
 <script type="module" th:src="@{/app/jsrivet/rivet-icons/rivet-icons.js}"></script>
 </body>
 </html>

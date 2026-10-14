@@ -32,10 +32,16 @@
  */
 
 jQuery(document).ready(function() {
-    let resultsMessage = document.getElementById('results-message');
+    // Move focus to the most relevant thing on the page so screen readers announce it after each page load.
+    // The status alert is rendered with the page, so its role="alert" alone won't reliably be announced.
+    let invalidSearch = document.querySelector('#sisid-search[aria-invalid="true"]');
+    let focusTarget = document.getElementById('alert')
+        || invalidSearch
+        || document.getElementById('results-message')
+        || document.getElementById('tool-title');
 
-    if (resultsMessage != null) {
-        resultsMessage.focus();
+    if (focusTarget != null) {
+        focusTarget.focus();
     }
 
     $("#select-all-button").click(function() {
@@ -49,9 +55,6 @@ jQuery(document).ready(function() {
     });
 
     checkboxCounter();
-
-    // This will move focus to the invalid search if it fails the server-side validation
-    $('#sisid-search[aria-invalid="true"]').focus();
 });
 
 function checkboxCounter() {
