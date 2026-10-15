@@ -40,59 +40,57 @@ import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Enrollment;
 import edu.iu.uits.lms.canvas.model.Section;
 import edu.iu.uits.lms.canvas.model.User;
+import edu.iu.uits.lms.canvas.services.AccountService;
 import edu.iu.uits.lms.canvas.services.CourseService;
 import edu.iu.uits.lms.canvas.services.SectionService;
+import edu.iu.uits.lms.common.session.CourseSessionService;
 import edu.iu.uits.lms.crosslist.model.ImpersonationModel;
 import edu.iu.uits.lms.crosslist.model.SectionUIDisplay;
 import edu.iu.uits.lms.crosslist.service.CrosslistService;
 import edu.iu.uits.lms.iuonly.model.SisCourse;
+import edu.iu.uits.lms.iuonly.services.FeatureAccessServiceImpl;
 import edu.iu.uits.lms.iuonly.services.SisServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SpringBootTest(classes = CrosslistService.class)
 @Slf4j
 public class CrosslistServiceImplTest {
    @Autowired
-   @InjectMocks
-   private CrosslistService crosslistService = null;
+   private CrosslistService crosslistService;
 
-   @Autowired
-   @Mock
-   private CanvasConfiguration canvasConfiguration = null;
+   @MockitoBean
+   private CanvasConfiguration canvasConfiguration;
 
-   @Autowired
-   @Mock
-   private CourseService courseService = null;
+   @MockitoBean
+   private CourseService courseService;
 
-   @Autowired
-   @Mock
-   private SectionService sectionService = null;
+   @MockitoBean
+   private CourseSessionService courseSessionService;
 
-   @Autowired
-   @Mock
-   private SisServiceImpl sisService = null;
+   @MockitoBean
+   private FeatureAccessServiceImpl featureAccessService;
 
-   @Autowired
-   @Mock
-   private CrosslistService self;
+   @MockitoBean
+   private AccountService accountService;
 
-   @BeforeEach
-   public void setUp() throws Exception {
-      MockitoAnnotations.initMocks(this);
-   }
+   @MockitoBean
+   private SectionService sectionService;
+
+   @MockitoBean
+   private SisServiceImpl sisService;
 
    @Test
    public void currentCourseHasAnEtextButCandidateCourseDoesNotHaveEtext() {
@@ -254,7 +252,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -283,7 +281,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -295,7 +293,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -383,7 +381,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -412,7 +410,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -424,7 +422,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -510,7 +508,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -539,7 +537,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -551,7 +549,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -629,7 +627,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -665,7 +663,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -683,7 +681,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -695,7 +693,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(3).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(3).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -795,7 +793,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentNonSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentNonSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -823,7 +821,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // legit SIS section, should be skipped since the current course is non-SIS
                  add(new Section() {{
@@ -841,7 +839,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
               new ArrayList<>() {{
                  // non-SIS section, should be included
                  add(new Section() {{
@@ -931,7 +929,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -969,7 +967,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -1030,7 +1028,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // natural section
                  add(new Section() {{
@@ -1054,7 +1052,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -1163,7 +1161,7 @@ public class CrosslistServiceImplTest {
          setEnrollmentTermId(term1.getId());
       }};
 
-      Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -1199,7 +1197,7 @@ public class CrosslistServiceImplTest {
          }});
       }};
 
-      Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -1222,7 +1220,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -1240,7 +1238,7 @@ public class CrosslistServiceImplTest {
                  }});
               }});
 
-      Mockito.when(self.getCourseSections(courses.get(3).getId())).thenReturn(
+      Mockito.when(courseService.getCourseSections(courses.get(3).getId())).thenReturn(
               new ArrayList<>() {{
                  // original section
                  add(new Section() {{
@@ -1359,6 +1357,95 @@ public class CrosslistServiceImplTest {
       Assertions.assertFalse(sectionsMap.get(term1).stream().anyMatch(s -> s.getSectionId().contains("NonSis")));
    }
 
+   @Test
+   public void sectionsNativeToCurrentCourseAreExcludedButCrosslistedInSectionsAreChecked() {
+      String username = "testUser1";
+
+      CanvasTerm term1 = new CanvasTerm() {{
+         setId("TermId1");
+         setName("TermName1");
+      }};
+
+      Map<String, CanvasTerm> termMap = new HashMap<>() {{
+         put(term1.getId(), term1);
+      }};
+
+      Course currentSisCourse = new Course() {{
+         setName("CurrentSisCourse");
+         setId("CurrentSisCourseId");
+         setCourseCode("CurrentSisCourseCode");
+         setSisCourseId("CurrentSisCourseSisId");
+         setEnrollmentTermId(term1.getId());
+      }};
+
+      List<Course> courses = List.of(currentSisCourse);
+
+      List<Section> sections = new ArrayList<>() {{
+         // original section
+         add(new Section() {{
+            setName("OriginalSection");
+            setId("OriginalSectionId");
+            setCourse_id(currentSisCourse.getId());
+            setSis_course_id(currentSisCourse.getSisCourseId());
+            setSis_section_id(currentSisCourse.getSisCourseId());
+         }});
+         // non-SIS section created directly in the current course
+         add(new Section() {{
+            setName("NativeAdHocSection");
+            setId("NativeAdHocSectionId");
+            setCourse_id(currentSisCourse.getId());
+            setSis_course_id(currentSisCourse.getSisCourseId());
+         }});
+         // non-SIS section crosslisted in from another course
+         add(new Section() {{
+            setName("CrosslistedAdHocSection");
+            setId("CrosslistedAdHocSectionId");
+            setCourse_id(currentSisCourse.getId());
+            setNonxlist_course_id("OtherCourseId1");
+            setSis_course_id(currentSisCourse.getSisCourseId());
+         }});
+         // SIS section crosslisted in from another course
+         add(new Section() {{
+            setName("CrosslistedSisSection");
+            setId("CrosslistedSisSectionId");
+            setCourse_id(currentSisCourse.getId());
+            setNonxlist_course_id("OtherCourseId2");
+            setSis_course_id(currentSisCourse.getSisCourseId());
+            setSis_section_id("OtherSisSectionId");
+         }});
+      }};
+
+      Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(sections);
+
+      List<Enrollment> enrollments = new ArrayList<>();
+      for (Section section : sections) {
+         enrollments.add(new Enrollment() {{
+            setType(EnrollmentHelper.TYPE_TEACHER);
+            setCourseId(currentSisCourse.getId());
+            setCourseSectionId(section.getId());
+            setUser(new User() {{
+               setLoginId(username);
+            }});
+         }});
+      }
+
+      Mockito.when(courseService.getTeacherCourseEnrollment(currentSisCourse.getId())).thenReturn(enrollments);
+      Mockito.when(courseService.getCourse("OtherCourseId1")).thenReturn(new Course() {{ setEnrollmentTermId(term1.getId()); }});
+      Mockito.when(courseService.getCourse("OtherCourseId2")).thenReturn(new Course() {{ setEnrollmentTermId(term1.getId()); }});
+      Mockito.when(sisService.isLegitSisCourse(currentSisCourse.getSisCourseId())).thenReturn(true);
+
+      Map<CanvasTerm, List<SectionUIDisplay>> sectionsMap =
+              crosslistService.buildSectionsMap(courses, termMap, currentSisCourse, username,
+                      true, false);
+
+      Assertions.assertNotNull(sectionsMap);
+      Assertions.assertEquals(1, sectionsMap.size());
+      List<SectionUIDisplay> displayed = sectionsMap.get(term1);
+      Assertions.assertEquals(List.of("CrosslistedAdHocSectionId", "CrosslistedSisSectionId"),
+              displayed.stream().map(SectionUIDisplay::getSectionId).toList());
+      Assertions.assertTrue(displayed.stream().allMatch(SectionUIDisplay::isOriginallyChecked));
+   }
+
    @Nested
    class BuildSectionsMapNest {
       // set common variables buildSectionsMap needs
@@ -1403,7 +1490,7 @@ public class CrosslistServiceImplTest {
             setIuSiteId(currentSisCourse.getSisCourseId());
          }};
 
-         Mockito.when(self.getCourseSections(currentSisCourse.getId())).thenReturn(
+         Mockito.when(courseService.getCourseSections(currentSisCourse.getId())).thenReturn(
                  new ArrayList<>() {{
                     // original section
                     add(new Section() {{
@@ -1453,7 +1540,7 @@ public class CrosslistServiceImplTest {
             setEtextIsbns("etextIsbn1");
          }};
 
-         Mockito.when(self.getCourseSections(courses.get(1).getId())).thenReturn(
+         Mockito.when(courseService.getCourseSections(courses.get(1).getId())).thenReturn(
                  new ArrayList<>() {{
                     // original section
                     add(new Section() {{
@@ -1465,7 +1552,7 @@ public class CrosslistServiceImplTest {
                     }});
                  }});
 
-         Mockito.when(self.getCourseSections(courses.get(2).getId())).thenReturn(
+         Mockito.when(courseService.getCourseSections(courses.get(2).getId())).thenReturn(
                  new ArrayList<>() {{
                     // original section
                     add(new Section() {{
@@ -1486,7 +1573,7 @@ public class CrosslistServiceImplTest {
                     }});
                  }});
 
-         Mockito.when(self.getCourseSections(courses.get(3).getId())).thenReturn(
+         Mockito.when(courseService.getCourseSections(courses.get(3).getId())).thenReturn(
                  new ArrayList<>() {{
                     // original section
                     add(new Section() {{

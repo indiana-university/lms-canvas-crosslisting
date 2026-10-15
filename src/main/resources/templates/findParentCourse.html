@@ -43,9 +43,9 @@
 <body>
 <div layout:fragment="content">
     <div id="alert" th:if="${submissionStatus}" class="rvt-alert rvt-m-top-md" th:classappend="${submissionStatus.statusClass}"
-         role="alert" data-rvt-alert="submissionStatus">
-        <div class="rvt-alert__title" th:text="${submissionStatus.statusTitle}">Success</div>
-        <p class="rvt-alert__message" th:text="${submissionStatus.statusMessage}">status message goes here</p>
+         role="alert" tabindex="-1" aria-labelledby="alert-title" aria-describedby="alert-message" data-rvt-alert="submissionStatus">
+        <div id="alert-title" class="rvt-alert__title" th:text="${submissionStatus.statusTitle}">Success</div>
+        <p id="alert-message" class="rvt-alert__message" th:text="${submissionStatus.statusMessage}">status message goes here</p>
         <button th:unless="${submissionStatus.statusClass == T(edu.iu.uits.lms.crosslist.CrosslistConstants).STATUS_FAILED}" type="button" class="rvt-alert__dismiss" data-rvt-alert-close>
             <span class="rvt-sr-only">Close</span>
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -57,7 +57,7 @@
     <h1 id="tool-title" class="rvt-p-top-sm rvt-ts-36">De-cross-listing sections</h1>
 
     <div class="rvt-p-tb-sm">
-        <span>This tool will only return exact matches.</span>
+        <span id="sisid-search-hint">This tool will only return exact matches.</span>
     </div>
 
     <form th:object="${findParentModel}" id="sisIdForm" action="findParentCourse.html"
@@ -66,7 +66,7 @@
             <label for="sisid-search" class="rvt-label rvt-ts-16 rvt-text-bold">SIS Section ID</label>
             <div class="rvt-input-group">
                 <input class="rvt-text-input rvt-input-group__input" type="text" id="sisid-search"
-                       th:attr="aria-describedby=${errorMsg} ? 'sisid-error-text sisid-search-description' : 'sisid-search-description', aria-invalid=${errorMsg} ? 'true'"
+                       th:attr="aria-describedby=${errorMsg} ? 'sisid-error-text sisid-search-hint sisid-search-description' : 'sisid-search-hint sisid-search-description', aria-invalid=${errorMsg} ? 'true'"
                        th:field="*{sisIdSearch}" aria-required="true" />
                 <div class="rvt-input-group__append">
                     <button id="find-button" type="submit" class="rvt-button" onclick="event.preventDefault(); submitSisIdForm(this);">
@@ -94,8 +94,13 @@
         <form th:object="${findParentModel}" id="decrosslist-form" th:action="@{|/app/decrosslist-sections|}" method="post">
             <div class="rvt-flex rvt-items-center">
                 <rvt-icon th:name="${findParentResult.statusIconName}" class="rvt-border-radius-circle rvt-p-all-xs" th:classappend="${findParentResult.statusIconCssClasses}"></rvt-icon>
-                <h2 id="results-message" tabindex="-1" th:text="|Parent course found: ${findParentResult.displaySisCourseId}|" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
+                <h2 id="results-message" tabindex="-1" aria-describedby="results-count" th:text="|Parent course found: ${findParentResult.displaySisCourseId}|" class="rvt-ts-18 rvt-text-bold rvt-p-left-xs">Parent course found</h2>
             </div>
+            <p id="results-count" class="rvt-m-top-xs"
+               th:with="count=${availableToDecrosslistSectionsList == null ? 0 : availableToDecrosslistSectionsList.size()}"
+               th:text="${count == 1} ? '1 section can be de-cross-listed.' : |${count == 0 ? 'No' : count} sections can be de-cross-listed.|">
+                2 sections can be de-cross-listed.
+            </p>
             <div>
                 <div class="rvt-p-top-sm">
                     <div>
@@ -108,21 +113,10 @@
                     <div class="rvt-m-top-sm">
                         <span>
                             Select sections to remove, then activate the 'De-cross-list selected sections' button to
-                            remove those sections from the course. Unavailable sections are those that do not have an
-                            SIS ID, or it is the course's original section.
+                            remove those sections from the course. Only sections that were cross-listed into this
+                            course from another course are listed.
                         </span>
                     </div>
-                </div>
-                <div class="rvt-m-top-sm">
-                    <fieldset class="rvt-fieldset">
-                        <legend class="rvt-legend rvt-text-bold rvt-ts-16">Unavailable sections</legend>
-                        <p th:if="${unavailableToDecrosslistSectionsList == null or unavailableToDecrosslistSectionsList.empty}">None listed</p>
-                        <ul th:unless="${unavailableToDecrosslistSectionsList == null or unavailableToDecrosslistSectionsList.empty}" class="rvt-list-plain">
-                            <li th:id="'row_' + ${section.Id}" th:each="section : ${unavailableToDecrosslistSectionsList}">
-                                <span th:text="${section.name}">Section Name</span>
-                            </li>
-                        </ul>
-                    </fieldset>
                 </div>
                 <div class="rvt-m-top-sm">
                     <fieldset id="available-sections" class="rvt-fieldset" aria-required="true">
@@ -130,7 +124,7 @@
                             <span class="rvt-sr-only">Select at least one course to de-cross-list</span>
                         </legend>
 
-                        <p th:if="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}" class="-rvt-m-top-xs">No sections available</p>
+                        <p th:if="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}" class="-rvt-m-top-xs">No cross-listed sections to remove</p>
 
                         <th:block th:unless="${availableToDecrosslistSectionsList == null or availableToDecrosslistSectionsList.empty}">
                             <button type="button" id="select-all-button" class="rvt-button rvt-button--small rvt-button--secondary rvt-m-bottom-sm">Select all</button>

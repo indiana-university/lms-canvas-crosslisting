@@ -32,10 +32,15 @@
  */
 
 jQuery(document).ready(function() {
-    let resultsMessage = document.getElementById('results-message');
+    // Move focus to the most relevant thing on the page so screen readers announce it after each page load.
+    // The status alert is rendered with the page, so its role="alert" alone won't reliably be announced.
+    // Otherwise (first load, or a failed search) focus the search input so the user can start typing.
+    let focusTarget = document.getElementById('alert')
+        || document.getElementById('results-message')
+        || document.getElementById('sisid-search');
 
-    if (resultsMessage != null) {
-        resultsMessage.focus();
+    if (focusTarget != null) {
+        focusTarget.focus();
     }
 
     $("#select-all-button").click(function() {
@@ -49,9 +54,6 @@ jQuery(document).ready(function() {
     });
 
     checkboxCounter();
-
-    // This will move focus to the invalid search if it fails the server-side validation
-    $('#sisid-search[aria-invalid="true"]').focus();
 });
 
 function checkboxCounter() {
@@ -81,7 +83,7 @@ function submitSisIdForm(button) {
         validationMessage.classList.remove('rvt-display-none');
 
         searchInput.setAttribute('aria-invalid', true);
-        searchInput.setAttribute('aria-describedby', 'sisid-error-text sisid-search-description');
+        searchInput.setAttribute('aria-describedby', 'sisid-error-text sisid-search-hint sisid-search-description');
         searchInput.focus();
 
         return false;
@@ -92,17 +94,18 @@ function submitSisIdForm(button) {
 }
 
 function validateCheckboxForm(button) {
-    // Get all the selected checkboxes, except the "select-all" one up in the table header
-    let checkboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").filter(':checked').length;
+    // Get all the checkboxes, except the "select-all" one up in the table header
+    const allCheckboxes = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all");
+    const checkedCount = allCheckboxes.filter(':checked').length;
 
-    if (checkboxes > 0) {
+    if (checkedCount > 0) {
         buttonLoading(button);
         document.getElementById('decrosslist-form').submit();
     } else {
-        let checkboxValidationMessage = document.getElementById('checkbox-validation-message');
+        const checkboxValidationMessage = document.getElementById('checkbox-validation-message');
         checkboxValidationMessage.classList.remove('rvt-display-none');
 
-        let firstCheckbox = $('#decrosslist-form input[type="checkbox"]').not("#checkbox-select-all").first();
+        const firstCheckbox = allCheckboxes.first();
         firstCheckbox.attr('aria-invalid', true);
         firstCheckbox.attr('aria-describedby', 'checkbox-validation-message');
         firstCheckbox.focus();

@@ -13,7 +13,7 @@ Add env vars or system properties as desired.
 | `LTI_CLIENTREGISTRATION_DEFAULTCLIENT` | `lti.clientregistration.defaultClient` | canvas                    | Specify the launching configuration to expect (canvas/saltire)                                                 |
 
 ## Setup Database
-After compiling, see `target/generated-resources/sql/ddl/auto/postgresql9.sql` for appropriate ddl.
+After compiling, see `target/generated-resources/postgresql.sql` for appropriate ddl.
 Insert a record into the `LTI_13_AUTHZ` table with your tool's registration_id (`lms_lti_crosslisting`), along with the client_id
 and secret from Canvas's Developer Key.  An `env` designator is also required here, and allows a database to support
 multiple environments simultaneously (dev and reg, for example).
@@ -150,7 +150,7 @@ help with de-cross-listing.  This is restricted to administrator users only. Con
 with the exceptions listed below.
 
 ## Setup Database
-After compiling, see `target/generated-resources/sql/ddl/auto/postgresql9.sql` for appropriate ddl.
+After compiling, see `target/generated-resources/postgresql.sql` for appropriate ddl.
 Insert a record into the `LTI_13_AUTHZ` table with your tool's registration_id (`lms_lti_decrosslisting`), along with the client_id
 and secret from Canvas's Developer Key.  An `env` designator is also required here, and allows a database to support
 multiple environments simultaneously (dev and reg, for example).

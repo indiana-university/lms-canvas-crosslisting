@@ -33,7 +33,6 @@ package edu.iu.uits.lms.crosslist.controller;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.iu.uits.lms.canvas.model.CanvasTerm;
 import edu.iu.uits.lms.canvas.model.Course;
 import edu.iu.uits.lms.canvas.model.Section;
@@ -74,9 +73,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -349,7 +349,7 @@ public class CrosslistController extends OidcTokenAwareController {
         List<SectionUIDisplay> sectionList = null;
         try {
             sectionList = Arrays.asList(objectMapper.readValue(sectionListJson, SectionUIDisplay[].class));
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.error("unable to parse json into object", e);
         }
 
@@ -613,7 +613,7 @@ public class CrosslistController extends OidcTokenAwareController {
             List<SectionUIDisplay> sectionList = null;
             try {
                 sectionList = Arrays.asList(objectMapper.readValue(sectionListJson, SectionUIDisplay[].class));
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 log.error("unable to parse json into object", e);
             }
 
