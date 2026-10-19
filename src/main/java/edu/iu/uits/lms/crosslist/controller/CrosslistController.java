@@ -289,7 +289,7 @@ public class CrosslistController extends OidcTokenAwareController {
             Runnable termLoadRunnable = () ->
             {
                 // preload cache for all future terms
-                final long threadId = Thread.currentThread().getId();
+                final long threadId = Thread.currentThread().threadId();
 
                 final int MAX_BACKGROUND_LOADS = 1;
                 int count = 0;
