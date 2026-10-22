@@ -35,53 +35,19 @@
 <html lang="en-US"
       xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Access Denied</title>
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <!-- The below link references commonFragments which lives in common-configuration and comes along on the classpath  -->
+    <link th:replace="~{commonFragments/favicon :: favicon}" />
+    <link th:href="@{/app/jsrivet/rivet-core/rivet.min.css}" rel="stylesheet" type="text/css" />
     <link th:href="@{/app/jsrivet/rivet-icons/rivet-icon-element.css}" rel="stylesheet" type="text/css" />
+    <link th:href="@{/app/css/crosslisting.css}" rel="stylesheet" type="text/css" />
 </head>
-<style>
-    body {
-        color: #333;
-        font-family: BentonSans,Helvetica Neue,Helvetica,"sans-serif";
-        margin: 0;
-        padding: 0;
-        line-height: 1.5;
-    }
-
-    .errorContainer {
-        max-width: 100%;
-        padding-right: 1.5rem;
-        padding-left: 1.5rem;
-    }
-
-    .errorTitle {
-       font-size: 1.625rem !important;
-        font-weight: 400;
-        margin: 0;
-    }
-
-    footer {
-        font-size: .75rem !important;
-        max-width: 100%;
-        padding-right: 1.5rem;
-        padding-left: 1.5rem;
-        margin-top: 2rem !important;
-    }
-
-    .rvt-sr-only {
-        border: 0;
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-        background-color: #fff !important;
-        color: #000 !important;
-    }
-</style>
 <body>
-<div>
+<div role="main">
     <div class="errorContainer">
         <h1 class="errorTitle">Access Denied to Cross-listing Assistant</h1>
         <span id="errorMessage">
@@ -96,6 +62,14 @@
 <th:block th:with="siElements=${@serverInfo.elements}">
     <div th:replace="~{commonFragments/layouts :: footer(${hideFooter}, ${siElements})}"></div>
 </th:block>
+
+<script type="text/javascript" th:src="@{/app/jsrivet/rivet-core/rivet.min.js}"></script>
 <script type="module" th:src="@{/app/jsrivet/rivet-icons/rivet-icons.js}"></script>
+<script type="text/javascript" th:src="@{/app/webjars/jquery/jquery.min.js}"></script>
+
+<script>
+    Rivet.init();
+</script>
+
 </body>
 </html>

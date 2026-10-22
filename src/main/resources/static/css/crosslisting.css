@@ -114,3 +114,15 @@
 #results-message:focus {
     outline: none;
 }
+
+.errorContainer {
+    max-width: 100%;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.errorTitle {
+    font-size: 1.625rem !important;
+    font-weight: 400;
+    margin: 0;
+}
