@@ -393,6 +393,12 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>generate-build-info</id>
+                                <goals>
+                                    <goal>build-info</goal>
+                                </goals>
+                            </execution>
+                            <execution>
                                 <phase>install</phase>
                                 <goals>
                                     <goal>build-image-no-fork</goal>
